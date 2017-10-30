@@ -1,7 +1,7 @@
 ---
 title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements for Security Protocols
-docname: draft-sullivan-tls-random-improvemnents-latest
+docname: draft-sullivan-tls-randomness-improvements-latest
 date:
 category: info
 
