@@ -65,8 +65,8 @@ Randomness is a crucial ingredient for TLS and related transport security protoc
 Weak or predictable cryptographically-strong pseudorandom number generators (CSPRNGs)
 can be abused or exploited for malicious purposes. See the Dual EC random number
 backdoor for a relevant example of this problem. This document describes a way for
-servers to mix their long-term private key into the entropy pool from which random
-values are derived. This may help mitigate problems that stem from broken CSPRNGs.
+security protocol participants to mix their long-term private key into the entropy pool from 
+which random values are derived. This may help mitigate problems that stem from broken CSPRNGs.
 
 --- middle
 
@@ -81,17 +81,17 @@ In such cases where RNGs are poorly implemented or insecure, an adversary may be
 able to predict its output and recover secret Diffie-Hellman key shares that protect
 the connection.
 
-This document proposes an improvement to server-side randomness generation
+This document proposes an improvement to randomness generation in security protocols
 inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw entropy
-where needed, e.g., in ephemeral key shares, the server's long-term private key
+where needed, e.g., in generating ephemeral key shares, a party's long-term private key
 is mixed into the entropy pool. In the NAXOS key exchange protocol, raw entropy
 output x is replaced by H(x, sk), where sk is the sender's private key.
-Unfortunately, as TLS server implementations tend to isolate private keys in HSMs,
+Unfortunately, as private keys are often isolated in HSMs,
 direct access to compute H(x, sk) is impossible. An alternate but functionally
 equivalent construction is needed.
 
-The approach described herein replaces a hash with the keyed hash, or PRF, of a signature,
-wherein the key is the raw entropy output.
+The approach described herein replaces the NAXOS hash with the keyed hash, or PRF, 
+wherein the key is derived from raw entropy output and a private key signature.
 
 # Randomness Wrapper
 
@@ -149,5 +149,6 @@ This document makes no request to IANA.
 # Security Considerations
 
 A security analysis was performed by two authors of this document. Generally speaking,
-security depends on keeping the private key secret.
+security depends on keeping the private key secret. If this secret is compromised, the
+scheme reduces to the scenario wherein the PRF random wrapper was not applied in the first place.
 
