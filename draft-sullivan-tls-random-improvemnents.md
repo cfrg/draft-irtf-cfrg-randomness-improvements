@@ -1,7 +1,7 @@
 ---
-title: Server-Side Randomness Improvements
-abbrev: Server-Side Randomness Improvements
-docname: draft-sullivan-tls-server-random-latest
+title: Randomness Improvements for Security Protocols
+abbrev: Randomness Improvements for Security Protocols
+docname: draft-sullivan-tls-random-improvemnents-latest
 date:
 category: info
 
@@ -97,7 +97,7 @@ Let PRF(k, m) be a cryptographic pseudorandom function, e.g., HMAC {{RFC2104}}, 
 takes as input a key k of length L and message m and produces an output of length M. In practice,
 L and M are usually 256 bits. Let Sig(sk, m) be a function that computes a signature of message m given
 private key sk. Let G be an algorithm that generates random numbers from raw entropy, i.e., the
-output of a CSPRNG. Let tag be a fixed string. Lastly, let KDF be a key derivation
+output of a CSPRNG. Let tag be a fixed, context-dependent string. Lastly, let KDF be a key derivation
 function, e.g., HKDF-Extract {{RFC5869}}, that extracts a key of length L
 suitable for cryptographic use.
 
@@ -115,6 +115,10 @@ Thus, the security of this construction depends on secrecy of Sig(sk, tag) and
 G(x). If both are leaked, then the security reduces to the scenario wherein this
 wrapping construction is not applied.
 
+In systems where signature computations are not cheap, these values may be precomputed
+in anticipation of future randomness requests. This is possible since the construction
+depends solely upon the CSPRNG output and private key. 
+
 # Application to TLS
 
 The PRF randomness wrapper can be applied to any protocol wherein a party has
@@ -127,14 +131,14 @@ with:
 HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
 ~~~
 
+Moreover, we fix tag as "TLS 1.3 Additional Entropy".
+
 # IANA Considerations
 
 This document makes no request to IANA.
 
 # Security Considerations
 
-TODO
+A security analysis was performed by two authors of this document. Generally speaking,
+security depends on keeping the private key secret.
 
-# Acknowledgments
-
-TODO
