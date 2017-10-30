@@ -140,7 +140,8 @@ with:
 HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
 ~~~
 
-Moreover, we fix tag as "TLS 1.3 Additional Entropy".
+Moreover, we fix tag as "TLS 1.3 Additional Entropy" for TLS 1.3. Older variants
+use similarly constructed strings.
 
 # IANA Considerations
 
