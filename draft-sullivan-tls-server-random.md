@@ -21,6 +21,14 @@ author:
         country: England
         email: cas.cremers@cs.ox.ac.uk
     -
+        ins: L. Garratt
+        name: Luke Garratt
+        org: University of Oxford
+        street: Wolfson Building, Parks Road
+        city: Oxford
+        country: England
+        email: luke.garratt@wolfson.ox.ac.uk
+    -
         ins: N. Sullivan
         name: Nick Sullivan
         org: Cloudflare
@@ -70,7 +78,7 @@ ephemeral key shares, and ClientHello and ServerHello random values. RNG failure
 such as the Debian bug described in {{DebianBug}} can lead to insecure TLS connections.
 RNGs may also be intentionally weakened to cause harm {{DualEC}}.
 In such cases where RNGs are poorly implemented or insecure, an adversary may be
-able to predict its output and recover secret Diffie Hellman key shares that protect
+able to predict its output and recover secret Diffie-Hellman key shares that protect
 the connection.
 
 This document proposes an improvement to server-side randomness generation
@@ -94,8 +102,9 @@ the CSPRNG output with a construction that artificially injects randomness into
 a value that may be lacking entropy.
 
 Let PRF(k, m) be a cryptographic pseudorandom function, e.g., HMAC {{RFC2104}}, that
-takes as input a key k of length L and message m and produces an output of length M. In practice,
-L and M are usually 256 bits. Let Sig(sk, m) be a function that computes a signature of message m given
+takes as input a key k of length L and message m and produces an output of length M. 
+For example, when using HMAC with SHA256, L and M are 256 bits.
+Let Sig(sk, m) be a function that computes a signature of message m given
 private key sk. Let G be an algorithm that generates random numbers from raw entropy, i.e., the
 output of a CSPRNG. Let tag be a fixed string. Lastly, let KDF be a key derivation
 function, e.g., HKDF-Extract {{RFC5869}}, that extracts a key of length L
