@@ -1,7 +1,7 @@
 ---
 title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements 
-docname: draft-sullivan-randomness-improvements-latest
+docname: draft-sullivan-cfrg-randomness-improvements-latest
 date:
 category: info
 
@@ -36,6 +36,14 @@ author:
         city: San Francisco
         country: United States of America
         email: nick@cloudflare.com
+    -
+        ins: C. Wood
+        name: Christopher A. Wood
+        org: Apple
+        street: 1 Infinite Loop
+        city: Cupertino
+        country: United States of America
+        email: cawood@apple.com
 
 normative:
     RFC2104:
