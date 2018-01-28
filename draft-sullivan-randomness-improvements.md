@@ -113,7 +113,7 @@ is available and CSPRNG randomness guarantees are dubious.
 
 Let x be the raw entropy output of a CSPRNG. When properly instantiated, x should be
 indistinguishable from a random string of length |x|. However, as previously discussed,
-this is always true. To mitigate this problem, we propose an approach for wrapping
+this is not always true. To mitigate this problem, we propose an approach for wrapping
 the CSPRNG output with a construction that artificially injects randomness into
 a value that may be lacking entropy.
 
