@@ -155,7 +155,7 @@ In systems where signature computations are not cheap, these values may be preco
 in anticipation of future randomness requests. This is possible since the construction
 depends solely upon the CSPRNG output and private key. 
 
-Sig(sk, tag) MUST NOT be exposed used or exposed beyond its role in this computation. Moreover,
+Sig(sk, tag) MUST NOT be used or exposed beyond its role in this computation. Moreover,
 Sig SHOULD be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 
 # Tag Generation {#sec:tag-gen}
@@ -184,8 +184,8 @@ with:
 HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
 ~~~
 
-Moreover, we fix tag as "TLS 1.3 Additional Entropy" for TLS 1.3. Older variants
-use similarly constructed strings.
+Moreover, we fix the tag protocol-specific information as "TLS 1.3 Additional Entropy" for
+TLS 1.3. Older variants use similarly constructed strings.
 
 # IANA Considerations
 
@@ -195,5 +195,24 @@ This document makes no request to IANA.
 
 A security analysis was performed by two authors of this document. Generally speaking,
 security depends on keeping the private key secret. If this secret is compromised, the
-scheme reduces to the scenario wherein the PRF random wrapper was not applied in the first place.
+scheme reduces to the scenario wherein the PRF random wrapper was not applied in the first
+place.
+
+The reason we require the signature scheme to be deterministic is to prevent the following
+scenario whereby a client has a strong long-term key but weak entropy, and rightly wants
+to use this construction to improve random number generation: an attacker that knows the
+signature can exploit the weak entropy used in a probabilistic signature scheme to derive
+the long-term key used to create the signature; thus, if entropy is weak and the signature
+is exposed, this construction would reveal the long-term key in the situation where no
+other signatures are used in the protocol (if they are, then they are exposed anyway).§
+
+The main reason one might expect the signature to be exposed is via a side-channel attack.
+It is therefore prudent when implementing this construction to take into consideration the
+extra long-term key operation if equipment is used in a hostile environment when such
+considerations are necessary. 
+
+Under these conditions, applying this construction should never yield worse security
+guarantees than not applying it. We believe there is always merit in analysing protocols
+specifically. However, this construction is generic so the analyses of many protocols will
+still hold even if this proposed construction is incorporated. 
 
