@@ -198,14 +198,6 @@ security depends on keeping the private key secret. If this secret is compromise
 scheme reduces to the scenario wherein the PRF random wrapper was not applied in the first
 place.
 
-The reason we require the signature scheme to be deterministic is to prevent the following
-scenario whereby a client has a strong long-term key but weak entropy, and rightly wants
-to use this construction to improve random number generation: an attacker that knows the
-signature can exploit the weak entropy used in a probabilistic signature scheme to derive
-the long-term key used to create the signature; thus, if entropy is weak and the signature
-is exposed, this construction would reveal the long-term key in the situation where no
-other signatures are used in the protocol (if they are, then they are exposed anyway).§
-
 The main reason one might expect the signature to be exposed is via a side-channel attack.
 It is therefore prudent when implementing this construction to take into consideration the
 extra long-term key operation if equipment is used in a hostile environment when such
