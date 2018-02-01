@@ -155,10 +155,8 @@ In systems where signature computations are not cheap, these values may be preco
 in anticipation of future randomness requests. This is possible since the construction
 depends solely upon the CSPRNG output and private key. 
 
-Sig should be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
-In cases where randomized signature algorithms are used, such as RSA-PSS or non-deterministic 
-ECDSA {{X9.62}}, the output should be used to (re-)seed the CSPRNG, after which the construction
-should no longer be used. This helps minimize key reuse when not needed.
+Sig(sk, tag) MUST NOT be exposed used or exposed beyond its role in this computation. Moreover,
+Sig SHOULD be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 
 # Tag Generation {#sec:tag-gen}
 
