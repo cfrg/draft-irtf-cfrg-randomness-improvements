@@ -156,7 +156,7 @@ in anticipation of future randomness requests. This is possible since the constr
 depends solely upon the CSPRNG output and private key. 
 
 Sig(sk, tag) MUST NOT be used or exposed beyond its role in this computation. Moreover,
-Sig SHOULD be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
+Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 
 # Tag Generation {#sec:tag-gen}
 
@@ -202,6 +202,11 @@ The main reason one might expect the signature to be exposed is via a side-chann
 It is therefore prudent when implementing this construction to take into consideration the
 extra long-term key operation if equipment is used in a hostile environment when such
 considerations are necessary. 
+
+The signature in the construction as well as in the protocol itself MUST be deterministic:
+if the signatures are probabilistic, then with weak entropy, our construction does not
+help and the signatures are still vulnerable due to repeat randomness attacks. In such
+an attack, the adversary could recover the long-term key used in the signature.
 
 Under these conditions, applying this construction should never yield worse security
 guarantees than not applying it. We believe there is always merit in analysing protocols
