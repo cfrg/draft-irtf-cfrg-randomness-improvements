@@ -27,7 +27,7 @@ author:
         street: Wolfson Building, Parks Road
         city: Oxford
         country: England
-        email: luke.garratt@wolfson.ox.ac.uk
+        email: luke.garratt@cs.ox.ac.uk
     -
         ins: S. Smyshlyaev
         name: Stanislav Smyshlyaev
@@ -63,7 +63,8 @@ normative:
             -
                 ins: American National Standards Institute
     DebianBug:
-        title: When private keys are public - Results from the 2008 Debian OpenSSL vulnerability
+        title: When private keys are public - Results from the 2008 Debian OpenSSL
+        vulnerability
         author:
             -
                 ins: Yilek, Scott, et al.
@@ -147,7 +148,7 @@ the CSPRNG output and signature over the fixed string (tag). See section {{sec:t
 details about how "tag" should be generated. The PRF behaves like
 a truly random function from 2^L to 2^M assuming the key is selected at random.
 Thus, the security of this construction depends on secrecy of H(Sig(sk, tag)) and
-G(x). If both are leaked, then the security reduces to the scenario wherein this
+G(x). If the signature is leaked, then security reduces to the scenario wherein this
 wrapping construction is not applied. If G(x) is predictable, then security reduces 
 to randomness of H(Sig(sk, tag)).
 
@@ -174,17 +175,16 @@ string to be used in the context of TLS 1.3.)
 
 # Application to TLS {#sec:tls13}
 
-The PRF randomness wrapper can be applied to any protocol wherein a party has
-a long-term private key and also generates randomness. This is true of most
-TLS servers. Thus, to apply this construction to TLS, one simply replaces the
-"private" PRNG, i.e., the PRNG that generates private values, such as key shares,
-with:
+The PRF randomness wrapper can be applied to any protocol wherein a party has a long-term
+private key and also generates randomness. This is true of most TLS servers. Thus, to
+apply this construction to TLS, one simply replaces the "private" PRNG, i.e., the PRNG
+that generates private values, such as key shares, with:
 
 ~~~
 HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
 ~~~
 
-Moreover, we fix the tag protocol-specific information as "TLS 1.3 Additional Entropy" for
+Moreover, we fix the tag to protocol-specific information as "TLS 1.3 Additional Entropy" for
 TLS 1.3. Older variants use similarly constructed strings.
 
 # IANA Considerations
