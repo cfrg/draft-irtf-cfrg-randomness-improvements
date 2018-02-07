@@ -63,8 +63,7 @@ normative:
             -
                 ins: American National Standards Institute
     DebianBug:
-        title: When private keys are public - Results from the 2008 Debian OpenSSL
-        vulnerability
+        title: When private keys are public - Results from the 2008 Debian OpenSSL vulnerability
         author:
             -
                 ins: Yilek, Scott, et al.
@@ -144,7 +143,7 @@ PRF(KDF(G(x) || H(Sig(sk, tag))), tag)
 ~~~
 
 Functionally, this computes the PRF of a fixed string (tag) with a key derived from
-the CSPRNG output and signature over the fixed string (tag). See section {{sec:tag-gen}} for
+the CSPRNG output and signature over the fixed string (tag). See section {{tag-gen}} for
 details about how "tag" should be generated. The PRF behaves like
 a truly random function from 2^L to 2^M assuming the key is selected at random.
 Thus, the security of this construction depends on secrecy of H(Sig(sk, tag)) and
@@ -159,7 +158,7 @@ depends solely upon the CSPRNG output and private key.
 Sig(sk, tag) MUST NOT be used or exposed beyond its role in this computation. Moreover,
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 
-# Tag Generation {#sec:tag-gen}
+# Tag Generation {#tag-gen}
 
 Tags SHOULD be generated such that they never collide with another accessor or owner
 of the private key. This can happen if, for example, one HSM with a private key is
