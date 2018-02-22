@@ -1,7 +1,7 @@
 ---
 title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements 
-docname: draft-cramers-cfrg-randomness-improvements-latest
+docname: draft-cremers-cfrg-randomness-improvements-latest
 date:
 category: info
 
@@ -13,7 +13,7 @@ pi: [toc, sortrefs, symrefs]
 
 author:
     -
-        ins: C. Cramers
+        ins: C. Cremers
         name: Cas Cremers
         org: University of Oxford
         street: Wolfson Building, Parks Road
