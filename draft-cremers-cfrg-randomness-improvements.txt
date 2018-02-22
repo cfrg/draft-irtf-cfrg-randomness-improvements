@@ -2,7 +2,7 @@
 
 
 
-Network Working Group                                         C. Cramers
+Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
 Expires: August 11, 2018                                   S. Smyshlyaev
@@ -15,7 +15,7 @@ Expires: August 11, 2018                                   S. Smyshlyaev
 
 
              Randomness Improvements for Security Protocols
-           draft-cramers-cfrg-randomness-improvements-latest
+           draft-cremers-cfrg-randomness-improvements-latest
 
 Abstract
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 1]
+Cremers, et al.          Expires August 11, 2018                [Page 1]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 2]
+Cremers, et al.          Expires August 11, 2018                [Page 2]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -164,7 +164,7 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 3]
+Cremers, et al.          Expires August 11, 2018                [Page 3]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -220,7 +220,7 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 4]
+Cremers, et al.          Expires August 11, 2018                [Page 4]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -276,7 +276,7 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 5]
+Cremers, et al.          Expires August 11, 2018                [Page 5]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -332,7 +332,7 @@ Authors' Addresses
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 6]
+Cremers, et al.          Expires August 11, 2018                [Page 6]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -388,4 +388,4 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cramers, et al.          Expires August 11, 2018                [Page 7]
+Cremers, et al.          Expires August 11, 2018                [Page 7]
