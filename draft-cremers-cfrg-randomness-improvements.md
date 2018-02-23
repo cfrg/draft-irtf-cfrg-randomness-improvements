@@ -85,10 +85,11 @@ normative:
 
 Randomness is a crucial ingredient for TLS and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
-can be abused or exploited for malicious purposes. (See the Dual EC random number
-backdoor for a relevant example of this problem.) This document describes a way for
-security protocol participants to mix their long-term private key into the entropy pool from 
-which random values are derived. This may help mitigate problems that stem from broken CSPRNGs.
+can be abused or exploited for malicious purposes. The Dual EC random number
+backdoor and Debian bugs are relevant examples of this problem. This document describes a way for
+security protocol participants to mix their long-term private key into the entropy pool(s) from 
+which random values are derived. This augments and improves randomness from broken or otherwise
+subverted CSPRNGs.
 
 --- middle
 
@@ -115,7 +116,8 @@ equivalent construction is needed.
 The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), 
 where the key is derived from raw entropy output and a private key signature.
 Implementations SHOULD apply this technique when indirect access to a private key
-is available and CSPRNG randomness guarantees are dubious.
+is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees 
+about possible future issues with the randomness.
 
 # Randomness Wrapper
 
@@ -135,7 +137,7 @@ derivation function, e.g., HKDF-Extract {{RFC5869}} (with first argument set to 
 extracts a key of length L suitable for cryptographic use. Lastly, let H be a cryptographic
 hash function that produces output of length M.
 
-The construction is simple: instead of using x when randomness is needed,
+The construction works as follows: instead of using x when randomness is needed,
 use:
 
 ~~~
