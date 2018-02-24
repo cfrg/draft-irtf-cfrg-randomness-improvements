@@ -141,12 +141,12 @@ The construction works as follows: instead of using x when randomness is needed,
 use:
 
 ~~~
-PRF(KDF(G(x) || H(Sig(sk, tag))), tag)
+PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 ~~~
 
-Functionally, this computes the PRF of a fixed string (tag) with a key derived from
-the CSPRNG output and signature over the fixed string (tag). See {{tag-gen}} for
-details about how "tag" should be generated. The PRF behaves in a manner that is
+Functionally, this computes the PRF of a string (tag2) with a key derived from
+the CSPRNG output and signature over a fixed string (tag1). See {{tag-gen}} for
+details about how "tag1" and "tag2" should be generated. The PRF behaves in a manner that is
 indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key
 is selected at random. Thus, the security of this construction depends upon the secrecy
 of H(Sig(sk, tag)) and G(x). If the signature is leaked, then security reduces to the
@@ -162,17 +162,18 @@ Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6
 
 # Tag Generation {#tag-gen}
 
-Tags SHOULD be generated such that they never collide with another accessor or owner
+Both tags SHOULD be generated such that they never collide with another accessor or owner
 of the private key. This can happen if, for example, one HSM with a private key is
 used from several servers, or if virtual machines are cloned.
 
-To mitigate collisions, tag strings SHOULD:
+To mitigate collisions, tag strings SHOULD be constructed as follows:
 
-1. Include a unique timestamps or counter.
-2. Include some data that is specific for a particular device, e.g., MAC
-address. 
-3. Be specific to the protocol in use. (See {{sec:tls13}} for an example
-string to be used in the context of TLS 1.3.)
+- tag1: Constant string bound to a specific device and protocol in use. This allows 
+caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address. 
+See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
+
+- tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
+even if randomness were to repeat.
 
 # Application to TLS {#sec:tls13}
 
