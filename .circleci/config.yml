@@ -1,3 +1,4 @@
+CIRCLE_BRANCH: master
 version: 2
 jobs:
   build:
