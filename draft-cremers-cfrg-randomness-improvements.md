@@ -149,15 +149,15 @@ the CSPRNG output and signature over a fixed string (tag1). See {{tag-gen}} for
 details about how "tag1" and "tag2" should be generated. The PRF behaves in a manner that is
 indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key
 is selected at random. Thus, the security of this construction depends upon the secrecy
-of H(Sig(sk, tag)) and G(x). If the signature is leaked, then security reduces to the
+of H(Sig(sk, tag1)) and G(x). If the signature is leaked, then security reduces to the
 scenario wherein this wrapping construction is not applied. If G(x) is predictable,
-then security reduces to randomness of H(Sig(sk, tag)).
+then security reduces to randomness of H(Sig(sk, tag1)).
 
 In systems where signature computations are not cheap, these values may be precomputed
 in anticipation of future randomness requests. This is possible since the construction
 depends solely upon the CSPRNG output and private key. 
 
-Sig(sk, tag) MUST NOT be used or exposed beyond its role in this computation. Moreover,
+Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this computation. Moreover,
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 
 # Tag Generation {#tag-gen}
@@ -183,10 +183,10 @@ apply this construction to TLS, one simply replaces the "private" PRNG, i.e., th
 that generates private values, such as key shares, with:
 
 ~~~
-HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
+HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
 ~~~
 
-Moreover, we fix the tag to protocol-specific information as "TLS 1.3 Additional Entropy" for
+Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
 TLS 1.3. Older variants use similarly constructed strings.
 
 # IANA Considerations
