@@ -36,7 +36,7 @@ jobs:
       # Create and store artifacts
       - run:
           name: "Create Artifacts"
-          command: "make artifacts CI_ARTIFACTS=/tmp/artifacts"
+          command: "make artifacts CI_ARTIFACTS=/tmp/artifacts && cp /tmp/artifacts/* . && git commit -a -m \"Script update\" && git push"
 
       - store_artifacts:
           path: /tmp/artifacts
