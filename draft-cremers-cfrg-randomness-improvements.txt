@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: August 11, 2018                                   S. Smyshlyaev
+Expires: August 28, 2018                                   S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
                                                                    Apple
-                                                       February 07, 2018
+                                                       February 24, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -22,11 +22,12 @@ Abstract
    Randomness is a crucial ingredient for TLS and related security
    protocols.  Weak or predictable "cryptographically-strong"
    pseudorandom number generators (CSPRNGs) can be abused or exploited
-   for malicious purposes.  (See the Dual EC random number backdoor for
-   a relevant example of this problem.)  This document describes a way
-   for security protocol participants to mix their long-term private key
-   into the entropy pool from which random values are derived.  This may
-   help mitigate problems that stem from broken CSPRNGs.
+   for malicious purposes.  The Dual EC random number backdoor and
+   Debian bugs are relevant examples of this problem.  This document
+   describes a way for security protocol participants to mix their long-
+   term private key into the entropy pool(s) from which random values
+   are derived.  This augments and improves randomness from broken or
+   otherwise subverted CSPRNGs.
 
 Status of This Memo
 
@@ -36,31 +37,35 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 11, 2018.
+   This Internet-Draft will expire on August 28, 2018.
+
+
+
+
+
+
+
+
+Cremers, et al.          Expires August 28, 2018                [Page 1]
+
+Internet-Draft           Randomness Improvements           February 2018
+
 
 Copyright Notice
 
    Copyright (c) 2018 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
-
-
-
-Cremers, et al.          Expires August 11, 2018                [Page 1]
-
-Internet-Draft           Randomness Improvements           February 2018
-
-
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -101,18 +106,20 @@ Table of Contents
    HSMs, direct access to compute H(x, sk) is impossible.  An alternate
    yet functionally equivalent construction is needed.
 
+
+
+
+Cremers, et al.          Expires August 28, 2018                [Page 2]
+
+Internet-Draft           Randomness Improvements           February 2018
+
+
    The approach described herein replaces the NAXOS hash with a keyed
    hash, or pseudorandom function (PRF), where the key is derived from
    raw entropy output and a private key signature.  Implementations
    SHOULD apply this technique when indirect access to a private key is
-   available and CSPRNG randomness guarantees are dubious.
-
-
-
-Cremers, et al.          Expires August 11, 2018                [Page 2]
-
-Internet-Draft           Randomness Improvements           February 2018
-
+   available and CSPRNG randomness guarantees are dubious, or to provide
+   stronger guarantees about possible future issues with the randomness.
 
 2.  Randomness Wrapper
 
@@ -132,59 +139,58 @@ Internet-Draft           Randomness Improvements           February 2018
    output of a CSPRNG.  Let tag be a fixed, context-dependent string.
    Let KDF be a key derivation function, e.g., HKDF-Extract [RFC5869]
    (with first argument set to nil), that extracts a key of length L
-   suitable for cryptographic use. Lastly, let H be a cryptographic
+   suitable for cryptographic use.  Lastly, let H be a cryptographic
    hash function that produces output of length M.
 
-   The construction is simple: instead of using x when randomness is
-   needed, use:
+   The construction works as follows: instead of using x when randomness
+   is needed, use:
 
-   PRF(KDF(G(x) || H(Sig(sk, tag))), tag)
+   PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 
-   Functionally, this computes the PRF of a fixed string (tag) with a
-   key derived from the CSPRNG output and signature over the fixed
-   string (tag). See {{tag-gen}} for details about how "tag" should be
-   generated. The PRR behaves in a manner that is indistinguishable
+   Functionally, this computes the PRF of a string (tag2) with a key
+   derived from the CSPRNG output and signature over a fixed string
+   (tag1).  See Section 3 for details about how "tag1" and "tag2" should
+   be generated.  The PRF behaves in a manner that is indistinguishable
    from a truly random function from {0, 1}^L to {0, 1}^M assuming the
-   key is selected at random. Thus, the security of this construction
-   depends upon the secrecy of H(Sig(sk, tag)) and G(x). If the
+   key is selected at random.  Thus, the security of this construction
+   depends upon the secrecy of H(Sig(sk, tag)) and G(x).  If the
    signature is leaked, then security reduces to the scenario wherein
-   this wrapping construction is not applied. If G(x) is predictable,
+   this wrapping construction is not applied.  If G(x) is predictable,
    then security reduces to randomness of H(Sig(sk, tag)).
+
    In systems where signature computations are not cheap, these values
    may be precomputed in anticipation of future randomness requests.
    This is possible since the construction depends solely upon the
    CSPRNG output and private key.
 
-   Sig(sk, tag) MUST NOT be used or exposed beyond its role in this
-   computation.  Moreover, Sig MUST be a deterministic signature
-   function, e.g., deterministic ECDSA [RFC6979].
 
 
-
-
-
-
-Cremers, et al.          Expires August 11, 2018                [Page 3]
+Cremers, et al.          Expires August 28, 2018                [Page 3]
 
 Internet-Draft           Randomness Improvements           February 2018
 
 
+   Sig(sk, tag) MUST NOT be used or exposed beyond its role in this
+   computation.  Moreover, Sig MUST be a deterministic signature
+   function, e.g., deterministic ECDSA [RFC6979].
+
 3.  Tag Generation
 
-   Tags SHOULD be generated such that they never collide with another
-   accessor or owner of the private key.  This can happen if, for
-   example, one HSM with a private key is used from several servers, or
-   if virtual machines are cloned.
+   Both tags SHOULD be generated such that they never collide with
+   another accessor or owner of the private key.  This can happen if,
+   for example, one HSM with a private key is used from several servers,
+   or if virtual machines are cloned.
 
-   To mitigate collisions, tag strings SHOULD:
+   To mitigate collisions, tag strings SHOULD be constructed as follows:
 
-   1.  Include a unique timestamps or counter.
+   o  tag1: Constant string bound to a specific device and protocol in
+      use.  This allows caching of Sig(sk, tag1).  Device specific
+      information may include, for example, a MAC address.  See
+      Section 4 for example protocol information that can be used in the
+      context of TLS 1.3.
 
-   2.  Include some data that is specific for a particular device, e.g.,
-       MAC address.
-
-   3.  Be specific to the protocol in use.  (See Section 4 for
-       an example string to be used in the context of TLS 1.3.)
+   o  tag2: Non-constant string that includes a timestamp or counter.
+      This ensures change over time even if randomness were to repeat.
 
 4.  Application to TLS
 
@@ -212,18 +218,19 @@ Internet-Draft           Randomness Improvements           February 2018
    scenario wherein the PRF random wrapper was not applied in the first
    place.
 
+
+
+
+Cremers, et al.          Expires August 28, 2018                [Page 4]
+
+Internet-Draft           Randomness Improvements           February 2018
+
+
    The main reason one might expect the signature to be exposed is via a
    side-channel attack.  It is therefore prudent when implementing this
    construction to take into consideration the extra long-term key
    operation if equipment is used in a hostile environment when such
    considerations are necessary.
-
-
-
-Cremers, et al.          Expires August 11, 2018                [Page 4]
-
-Internet-Draft           Randomness Improvements           February 2018
-
 
    The signature in the construction as well as in the protocol itself
    MUST be deterministic: if the signatures are probabilistic, then with
@@ -257,29 +264,28 @@ Internet-Draft           Randomness Improvements           February 2018
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
-              DOI 10.17487/RFC2104, February 1997, <https://www.rfc-
-              editor.org/info/rfc2104>.
+              DOI 10.17487/RFC2104, February 1997,
+              <https://www.rfc-editor.org/info/rfc2104>.
 
    [RFC5869]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
               Key Derivation Function (HKDF)", RFC 5869,
-              DOI 10.17487/RFC5869, May 2010, <https://www.rfc-
-              editor.org/info/rfc5869>.
+              DOI 10.17487/RFC5869, May 2010,
+              <https://www.rfc-editor.org/info/rfc5869>.
+
+
+
+
+
+
+Cremers, et al.          Expires August 28, 2018                [Page 5]
+
+Internet-Draft           Randomness Improvements           February 2018
+
 
    [RFC6979]  Pornin, T., "Deterministic Usage of the Digital Signature
               Algorithm (DSA) and Elliptic Curve Digital Signature
               Algorithm (ECDSA)", RFC 6979, DOI 10.17487/RFC6979, August
               2013, <https://www.rfc-editor.org/info/rfc6979>.
-
-
-
-
-
-
-
-Cremers, et al.          Expires August 11, 2018                [Page 5]
-
-Internet-Draft           Randomness Improvements           February 2018
-
 
    [X9.62]    American National Standards Institute, ., "Public Key
               Cryptography for the Financial Services Industry -- The
@@ -327,12 +333,7 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-Cremers, et al.          Expires August 11, 2018                [Page 6]
+Cremers, et al.          Expires August 28, 2018                [Page 6]
 
 Internet-Draft           Randomness Improvements           February 2018
 
@@ -388,4 +389,4 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 11, 2018                [Page 7]
+Cremers, et al.          Expires August 28, 2018                [Page 7]
