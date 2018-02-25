@@ -146,18 +146,6 @@ func (r *WrappedRandom) GenerateRandomBytes() (output []byte, err error) {
     return output, nil
 }
 
-/*
-func GenerateRandomBytes(n int) ([]byte, error) {
-    b := make([]byte, n)
-    _, err := rand.Read(b)
-    if err != nil {
-        return nil, err
-    }
-
-    return b, nil
-}
-*/
-
 func main() {
     reader := rand.Reader
 	bitSize := 2048
