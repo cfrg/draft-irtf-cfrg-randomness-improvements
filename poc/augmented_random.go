@@ -23,6 +23,10 @@ type WrappedRandom struct {
     privateKey *rsa.PrivateKey
 }
 
+func NewWrappedRandom(info string, key *rsa.PrivateKey) *WrappedRandom {
+    return &WrappedRandom{info, 0, key}
+}
+
 func extract(b []byte, n int) ([]byte, error) {
     hkdf := hkdf.New(sha256.New, b, nil, nil)
     output := make([]byte, n)
@@ -155,7 +159,7 @@ func main() {
         panic(err)
     }
 
-    random := WrappedRandom{"Device Info || Protocol Info", 0, key}
+    random := NewWrappedRandom("Device Info || Protocol Info", key)
 
     fmt.Println("Native:")
     for i := 0; i < 10; i++ {
