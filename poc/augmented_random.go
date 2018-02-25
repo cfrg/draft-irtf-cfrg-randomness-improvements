@@ -124,6 +124,37 @@ func (r *WrappedRandom) Read(b []byte) (n int, err error) {
     return len(b), nil
 }
 
+func (r *WrappedRandom) Read2(b []byte) (n int, err error) {
+    nonce := r.generateNonce()
+    signature, err := r.produceSignature()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
+        return 0, err
+    }
+
+    // key = KDF(Sig(sk, tag1))
+    key, err := extract(signature, 32)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error extracting key: %s\n", err)
+        return 0, err
+    }
+
+    _, err = rand.Read(b)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error sampling from PRNG: %s\n", err)
+        return 0, err
+    }
+
+    // Encrypt input with derived key based on Sig(sk, tag1) and nonce based on tag2
+    err = stretch(key, nonce, b)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error generating random output: %s\n", err)
+        return 0, err
+    }
+
+    return len(b), nil
+}
+
 // PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 func (r *WrappedRandom) GenerateRandomBytes() (output []byte, err error) {
     tag := r.generateNonce()
@@ -161,44 +192,75 @@ func main() {
         panic(err)
     }
 
+    numTrials := 1000
+
     // Use the native wrapper 
     fmt.Println("Native:")
-    for i := 0; i < 10; i++ {
+    totalNative := int64(0)
+    for i := 0; i < numTrials; i++ {
         start := time.Now()
         sample := make([]byte, 32)
         _, err := rand.Read(sample)
-        elapsed := time.Since(start)
+        elapsed := time.Since(start).Nanoseconds()
+        totalNative += elapsed
         if err != nil {
             fmt.Fprintf(os.Stderr, "rand.Read() error: %s\n", err)
             panic(err)
         }
-        fmt.Printf("%s: %s\n", hex.EncodeToString(sample), elapsed)
+        fmt.Printf("%s: %d\n", hex.EncodeToString(sample), elapsed)
     }
 
     random1 := NewWrappedRandom("Device Info || Protocol Info", privateKey)
     fmt.Println("Construction #1:")
-    for i := 0; i < 10; i++ {
+    total1 := int64(0)
+    for i := 0; i < numTrials; i++ {
         start := time.Now()
         sample, err := random1.GenerateRandomBytes()
-        elapsed := time.Since(start)
+        elapsed := time.Since(start).Nanoseconds()
+        total1 += elapsed
         if err != nil {
             fmt.Fprintf(os.Stderr, "random.GenerateRandomBytes() error: %s\n", err)
             panic(err)
         }
-        fmt.Printf("%s: %s\n", hex.EncodeToString(sample), elapsed)
+        fmt.Printf("%s: %d\n", hex.EncodeToString(sample), elapsed)
     }
 
     random2 := NewWrappedRandom("Device Info || Protocol Info", privateKey)
     fmt.Println("Construction #2:")
-    for i := 0; i < 10; i++ {
+    total2 := int64(0)
+    for i := 0; i < numTrials; i++ {
         start := time.Now()
         sample := make([]byte, 32)
         _, err := random2.Read(sample)
-        elapsed := time.Since(start)
+        elapsed := time.Since(start).Nanoseconds()
+        total2 += elapsed
         if err != nil {
             fmt.Fprintf(os.Stderr, "random.Read() error: %s\n", err)
             panic(err)
         }
-        fmt.Printf("%s: %s\n", hex.EncodeToString(sample), elapsed)
+        fmt.Printf("%s: %d\n", hex.EncodeToString(sample), elapsed)
     }
+
+    random3 := NewWrappedRandom("Device Info || Protocol Info", privateKey)
+    fmt.Println("Construction #3:")
+    total3 := int64(0)
+    for i := 0; i < numTrials; i++ {
+        start := time.Now()
+        sample := make([]byte, 32)
+        _, err := random3.Read2(sample)
+        elapsed := time.Since(start).Nanoseconds()
+        total3 += elapsed
+        if err != nil {
+            fmt.Fprintf(os.Stderr, "random.Read2() error: %s\n", err)
+            panic(err)
+        }
+        fmt.Printf("%s: %d\n", hex.EncodeToString(sample), elapsed)
+    }
+
+    fmt.Println("\n\n")
+    fmt.Println("Algorithm: total time [ns]")
+    fmt.Println("Native:         ", totalNative / int64(numTrials))
+    fmt.Println("Construction #1:", total1 / int64(numTrials))
+    fmt.Println("Construction #2:", total2 / int64(numTrials))
+    fmt.Println("Construction #3:", total3 / int64(numTrials))
 }
