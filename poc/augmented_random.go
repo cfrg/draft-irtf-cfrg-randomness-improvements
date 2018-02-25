@@ -18,13 +18,14 @@ import (
 )
 
 type WrappedRandom struct {
-    tag string
+    tag []byte
     count uint64
     privateKey *rsa.PrivateKey
+    signature []byte
 }
 
 func NewWrappedRandom(info string, key *rsa.PrivateKey) *WrappedRandom {
-    return &WrappedRandom{info, 0, key}
+    return &WrappedRandom{[]byte(info), 0, key, nil}
 }
 
 func extract(b []byte, n int) ([]byte, error) {
@@ -49,31 +50,34 @@ func stretch(key, nonce, output []byte) (error) {
     return nil
 }
 
-func (r *WrappedRandom) generateTags() (tag1, tag2 []byte) {
-    tag1 = []byte(r.tag)
-    tag2 = make([]byte, aes.BlockSize)
-    binary.BigEndian.PutUint64(tag2, r.count)
+func (r *WrappedRandom) generateNonce() (tag []byte) {
+    tag = make([]byte, aes.BlockSize)
+    binary.BigEndian.PutUint64(tag, r.count)
     r.count += 1
 
-    return tag1, tag2
+    return tag
 }
 
-func (r *WrappedRandom) sign(b []byte) (output []byte, err error) {
+func (r *WrappedRandom) produceSignature() (output []byte, err error) {
+    if r.signature != nil {
+        return r.signature, nil
+    }
+
     h := sha256.New()
-    h.Write(b)
+    h.Write(r.tag)
     hashed := h.Sum(nil)
 
-    signature, err := rsa.SignPKCS1v15(rand.Reader, r.privateKey, crypto.SHA256, hashed[:])
+    r.signature, err = rsa.SignPKCS1v15(rand.Reader, r.privateKey, crypto.SHA256, hashed[:])
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
         return nil, err
     }
 
-    return signature, nil
+    return r.signature, nil
 }
 
-func (r *WrappedRandom) signToDigest(b []byte) (output []byte, err error) {
-    signature, err := r.sign(b)
+func (r *WrappedRandom) produceSignatureDigest() (output []byte, err error) {
+    signature, err := r.produceSignature()
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
         return nil, err
@@ -88,8 +92,8 @@ func (r *WrappedRandom) signToDigest(b []byte) (output []byte, err error) {
 
 
 func (r *WrappedRandom) Read(b []byte) (n int, err error) {
-    tag1, tag2 := r.generateTags()
-    signature, err := r.sign(tag1)
+    nonce := r.generateNonce()
+    signature, err := r.produceSignature()
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
         return 0, err
@@ -111,7 +115,7 @@ func (r *WrappedRandom) Read(b []byte) (n int, err error) {
     }
 
     // Encrypt input with derived key based on Sig(sk, tag1) and nonce based on tag2
-    err = stretch(key, tag2, b)
+    err = stretch(key, nonce, b)
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error generating random output: %s\n", err)
         return 0, err
@@ -122,8 +126,8 @@ func (r *WrappedRandom) Read(b []byte) (n int, err error) {
 
 // PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 func (r *WrappedRandom) GenerateRandomBytes() (output []byte, err error) {
-    tag1, tag2 := r.generateTags()
-    hashedSignature, err := r.signToDigest(tag1)
+    tag := r.generateNonce()
+    hashedSignature, err := r.produceSignatureDigest()
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
         return nil, err
@@ -144,23 +148,20 @@ func (r *WrappedRandom) GenerateRandomBytes() (output []byte, err error) {
     }
 
     mac := hmac.New(sha256.New, key)
-	mac.Write(tag2)
+	mac.Write(tag)
 	output = mac.Sum(nil)
 
     return output, nil
 }
 
 func main() {
-    reader := rand.Reader
-	bitSize := 2048
-    key, err := rsa.GenerateKey(reader, bitSize)
+    privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error generating private key: %s\n", err)
         panic(err)
     }
 
-    random := NewWrappedRandom("Device Info || Protocol Info", key)
-
+    // Use the native wrapper 
     fmt.Println("Native:")
     for i := 0; i < 10; i++ {
         start := time.Now()
@@ -174,10 +175,11 @@ func main() {
         fmt.Printf("%s: %s\n", hex.EncodeToString(sample), elapsed)
     }
 
+    random1 := NewWrappedRandom("Device Info || Protocol Info", privateKey)
     fmt.Println("Construction #1:")
     for i := 0; i < 10; i++ {
         start := time.Now()
-        sample, err := random.GenerateRandomBytes()
+        sample, err := random1.GenerateRandomBytes()
         elapsed := time.Since(start)
         if err != nil {
             fmt.Fprintf(os.Stderr, "random.GenerateRandomBytes() error: %s\n", err)
@@ -186,11 +188,12 @@ func main() {
         fmt.Printf("%s: %s\n", hex.EncodeToString(sample), elapsed)
     }
 
+    random2 := NewWrappedRandom("Device Info || Protocol Info", privateKey)
     fmt.Println("Construction #2:")
     for i := 0; i < 10; i++ {
         start := time.Now()
         sample := make([]byte, 32)
-        _, err := random.Read(sample)
+        _, err := random2.Read(sample)
         elapsed := time.Since(start)
         if err != nil {
             fmt.Fprintf(os.Stderr, "random.Read() error: %s\n", err)
