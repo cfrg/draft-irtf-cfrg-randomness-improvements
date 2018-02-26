@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<reference  anchor='RFC6979' target='https://www.rfc-editor.org/info/rfc6979'>
+<front>
+<title>Deterministic Usage of the Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm (ECDSA)</title>
+<author initials='T.' surname='Pornin' fullname='T. Pornin'><organization /></author>
+<date year='2013' month='August' />
+<abstract><t>This document defines a deterministic digital signature generation procedure.  Such signatures are compatible with standard Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm (ECDSA) digital signatures and can be processed with unmodified verifiers, which need not be aware of the procedure described therein.  Deterministic signatures retain the cryptographic security features associated with digital signatures but can be more easily implemented in various environments, since they do not need access to a source of high-quality randomness.</t></abstract>
+</front>
+<seriesInfo name='RFC' value='6979'/>
+<seriesInfo name='DOI' value='10.17487/RFC6979'/>
+</reference>

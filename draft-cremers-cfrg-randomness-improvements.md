@@ -85,10 +85,11 @@ normative:
 
 Randomness is a crucial ingredient for TLS and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
-can be abused or exploited for malicious purposes. (See the Dual EC random number
-backdoor for a relevant example of this problem.) This document describes a way for
-security protocol participants to mix their long-term private key into the entropy pool from 
-which random values are derived. This may help mitigate problems that stem from broken CSPRNGs.
+can be abused or exploited for malicious purposes. The Dual EC random number
+backdoor and Debian bugs are relevant examples of this problem. This document describes a way for
+security protocol participants to mix their long-term private key into the entropy pool(s) from 
+which random values are derived. This augments and improves randomness from broken or otherwise
+subverted CSPRNGs.
 
 --- middle
 
@@ -115,7 +116,8 @@ equivalent construction is needed.
 The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), 
 where the key is derived from raw entropy output and a private key signature.
 Implementations SHOULD apply this technique when indirect access to a private key
-is available and CSPRNG randomness guarantees are dubious.
+is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees 
+about possible future issues with the randomness.
 
 # Randomness Wrapper
 
@@ -135,42 +137,42 @@ derivation function, e.g., HKDF-Extract {{RFC5869}} (with first argument set to 
 extracts a key of length L suitable for cryptographic use. Lastly, let H be a cryptographic
 hash function that produces output of length M.
 
-The construction is simple: instead of using x when randomness is needed,
+The construction works as follows: instead of using x when randomness is needed,
 use:
 
 ~~~
-PRF(KDF(G(x) || H(Sig(sk, tag))), tag)
+PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 ~~~
 
-Functionally, this computes the PRF of a fixed string (tag) with a key derived from
-the CSPRNG output and signature over the fixed string (tag). See {{tag-gen}} for
-details about how "tag" should be generated. The PRF behaves in a manner that is
+Functionally, this computes the PRF of a string (tag2) with a key derived from
+the CSPRNG output and signature over a fixed string (tag1). See {{tag-gen}} for
+details about how "tag1" and "tag2" should be generated. The PRF behaves in a manner that is
 indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key
 is selected at random. Thus, the security of this construction depends upon the secrecy
-of H(Sig(sk, tag)) and G(x). If the signature is leaked, then security reduces to the
-scenario wherein this wrapping construction is not applied. If G(x) is predictable,
-then security reduces to randomness of H(Sig(sk, tag)).
+of H(Sig(sk, tag1)) and G(x). If the signature is leaked, then security reduces to the
+scenario wherein the PRF provides only a wrapper to G(x).
 
 In systems where signature computations are not cheap, these values may be precomputed
 in anticipation of future randomness requests. This is possible since the construction
 depends solely upon the CSPRNG output and private key. 
 
-Sig(sk, tag) MUST NOT be used or exposed beyond its role in this computation. Moreover,
+Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this computation. Moreover,
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 
 # Tag Generation {#tag-gen}
 
-Tags SHOULD be generated such that they never collide with another accessor or owner
+Both tags SHOULD be generated such that they never collide with another accessor or owner
 of the private key. This can happen if, for example, one HSM with a private key is
 used from several servers, or if virtual machines are cloned.
 
-To mitigate collisions, tag strings SHOULD:
+To mitigate collisions, tag strings SHOULD be constructed as follows:
 
-1. Include a unique timestamps or counter.
-2. Include some data that is specific for a particular device, e.g., MAC
-address. 
-3. Be specific to the protocol in use. (See {{sec:tls13}} for an example
-string to be used in the context of TLS 1.3.)
+- tag1: Constant string bound to a specific device and protocol in use. This allows 
+caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address. 
+See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
+
+- tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
+even if randomness were to repeat.
 
 # Application to TLS {#sec:tls13}
 
@@ -180,10 +182,10 @@ apply this construction to TLS, one simply replaces the "private" PRNG, i.e., th
 that generates private values, such as key shares, with:
 
 ~~~
-HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
+HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
 ~~~
 
-Moreover, we fix the tag to protocol-specific information as "TLS 1.3 Additional Entropy" for
+Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
 TLS 1.3. Older variants use similarly constructed strings.
 
 # IANA Considerations
@@ -194,8 +196,8 @@ This document makes no request to IANA.
 
 A security analysis was performed by two authors of this document. Generally speaking,
 security depends on keeping the private key secret. If this secret is compromised, the
-scheme reduces to the scenario wherein the PRF random wrapper was not applied in the first
-place.
+scheme reduces to the scenario wherein the PRF provides only an outer wrapper on usual
+CSPRNG generation.
 
 The main reason one might expect the signature to be exposed is via a side-channel attack.
 It is therefore prudent when implementing this construction to take into consideration the
@@ -205,10 +207,11 @@ considerations are necessary.
 The signature in the construction as well as in the protocol itself MUST be deterministic:
 if the signatures are probabilistic, then with weak entropy, our construction does not
 help and the signatures are still vulnerable due to repeat randomness attacks. In such
-an attack, the adversary could recover the long-term key used in the signature.
+an attack, the adversary might be able to recover the long-term key used in the signature.
 
 Under these conditions, applying this construction should never yield worse security
-guarantees than not applying it. We believe there is always merit in analysing protocols
-specifically. However, this construction is generic so the analyses of many protocols will
-still hold even if this proposed construction is incorporated. 
+guarantees than not applying it assuming that applying the PRF does not reduce entropy. We
+believe there is always merit in analysing protocols specifically. However, this
+construction is generic so the analyses of many protocols will still hold even if this
+proposed construction is incorporated. 
 
