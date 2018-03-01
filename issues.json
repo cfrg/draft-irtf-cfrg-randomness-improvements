@@ -1,0 +1,460 @@
+[
+
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/9",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/9/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/9/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/9/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/9",
+    "id": 301507127,
+    "number": 9,
+    "title": "Go POC.",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-03-01T18:16:10Z",
+    "updated_at": "2018-03-01T18:16:28Z",
+    "closed_at": "2018-03-01T18:16:28Z",
+    "author_association": "OWNER",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/9",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/9",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/9.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/9.patch"
+    },
+    "body": ""
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/8",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/8/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/8/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/8/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/8",
+    "id": 299968953,
+    "number": 8,
+    "title": "Wrapping interface does not match the interface for a PRNG. ",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-02-24T20:10:41Z",
+    "updated_at": "2018-02-25T04:32:40Z",
+    "closed_at": null,
+    "author_association": "OWNER",
+    "body": "The current construction works like so:\r\n\r\n   PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)\r\n\r\nThis works fine if |x| is equal to the PRF output size. If it's more (or less), then it becomes somewhat of a pain to use this interface as a direct replacement for the PRNG. What if we modified this slightly as follows:\r\n\r\n  key = KDF(G(x) || Sig(sk, tag1))\r\n  nonce = tag2 // incremented each time\r\n  output = AES-CTR(key, nonce, 0^|x|)\r\n\r\nOr, alternatively:\r\n\r\n  key = KDF(Sig(sk, tag1))\r\n  nonce = tag2 // incremented each time\r\n  output = AES-CTR(key, nonce, G(x))\r\n\r\n\r\n"
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/7",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/7/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/7/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/7/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/7",
+    "id": 299882287,
+    "number": 7,
+    "title": "Include PoC Go code in the appendix.",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-02-23T23:27:54Z",
+    "updated_at": "2018-02-23T23:27:54Z",
+    "closed_at": null,
+    "author_association": "OWNER",
+    "body": ""
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/6",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/6/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/6/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/6/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/6",
+    "id": 295222742,
+    "number": 6,
+    "title": "Updates, once more.",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-02-07T17:20:12Z",
+    "updated_at": "2018-02-24T16:38:23Z",
+    "closed_at": "2018-02-07T17:20:19Z",
+    "author_association": "OWNER",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/6",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/6",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/6.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/6.patch"
+    },
+    "body": ""
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/5",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/5/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/5/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/5/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/5",
+    "id": 295222312,
+    "number": 5,
+    "title": "Caw/edits",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-02-07T17:18:55Z",
+    "updated_at": "2018-02-07T17:19:00Z",
+    "closed_at": "2018-02-07T17:19:00Z",
+    "author_association": "OWNER",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/5",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/5",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/5.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/5.patch"
+    },
+    "body": ""
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/4",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/4/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/4/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/4/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/4",
+    "id": 295221340,
+    "number": 4,
+    "title": "Caw/edits",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-02-07T17:16:11Z",
+    "updated_at": "2018-02-07T17:16:17Z",
+    "closed_at": "2018-02-07T17:16:17Z",
+    "author_association": "OWNER",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/4",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/4",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/4.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/4.patch"
+    },
+    "body": ""
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/3",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/3/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/3/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/3/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/3",
+    "id": 292172563,
+    "number": 3,
+    "title": "Updates from Stanislaw's comments",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 5,
+    "created_at": "2018-01-28T03:03:02Z",
+    "updated_at": "2018-02-03T18:04:04Z",
+    "closed_at": "2018-02-03T18:04:04Z",
+    "author_association": "OWNER",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/3",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/3",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/3.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/3.patch"
+    },
+    "body": "1. First of all, it seems important to state explicitly that such\r\nmeasures as relying on feeding private keys (or signatures created with\r\nthem) to PRNGs can be considered as “last line of defense” only, for\r\ncases when no other entropy sources are available at all.\r\n\r\n2. Secondly, since DSA/ECDSA/EC-RDSA signatures require randomness\r\nthemselves, it seems reasonable to mention that it would be better to\r\ndiscuss keys of deterministic signatures (e.g., RSA, if not to consider\r\nPSS) and RSA signatures regarding the provided construction - not\r\nDSA/ECDSA/EC-RDSA. The signature output is not available to anyone, it’s\r\nonly fed to a PRF, but anyway the usage of signature schemes requiring\r\nrandomness themselves to provide randomness does not seem to be the best\r\nidea.\r\n\r\n3. If an equipment is used in a hostile environment, where side-channel\r\nadversaries should be considered, extra operations with private keys must\r\nbe taken into account when estimating lifetimes of keys.\r\n\r\n4. When a private key is used for such kind of technological signatures,\r\nI’d prefer that the signed data\r\na. would include timestamps and/or counters\r\nb. would include some data that is specific for a particular device – to\r\nprevent the existence of equivalent PRNGs in different devices dealing\r\nwith a single private key (e.g. if one HSM with a server private key is\r\nused from several servers or for the cases of cloned virtual machines).\r\nc. would have some kind of structured form like “This is data signed only\r\nfor the purpose of randomness generations (input parameters = [timestamp],\r\n[counter]).” – so these technical signatures can never be used by any\r\nattacker for other purposes (and to prevent all kinds of signing oracle\r\nhere) – even despite using them only as PRF inputs.\r\n\r\n5. All protocols that exploit this kind of entropy based on long-term\r\nprivate keys should be analyzed specifically together with a specific\r\nsignature scheme, PRF and PRNG – to prevent any influence on security\r\n(e.g. if PRF(KDF(G(x) || Sig(sk, tag)), tag) is used for generation of\r\nrandom values for ECDSA signatures on the key sk, for the cases when G(x)\r\ndegenerates)."
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/2",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/2/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/2/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/2/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/2",
+    "id": 269736324,
+    "number": 2,
+    "title": "Cleanup and whatnot.",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2017-10-30T20:06:59Z",
+    "updated_at": "2018-02-24T16:38:23Z",
+    "closed_at": "2017-10-30T20:17:08Z",
+    "author_association": "OWNER",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/2",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/2",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/2.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/2.patch"
+    },
+    "body": ""
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/1",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/1/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/1/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/1/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/1",
+    "id": 269730896,
+    "number": 1,
+    "title": "Minor changes.",
+    "user": {
+      "login": "grittygrease",
+      "id": 5125095,
+      "avatar_url": "https://avatars1.githubusercontent.com/u/5125095?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/grittygrease",
+      "html_url": "https://github.com/grittygrease",
+      "followers_url": "https://api.github.com/users/grittygrease/followers",
+      "following_url": "https://api.github.com/users/grittygrease/following{/other_user}",
+      "gists_url": "https://api.github.com/users/grittygrease/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/grittygrease/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/grittygrease/subscriptions",
+      "organizations_url": "https://api.github.com/users/grittygrease/orgs",
+      "repos_url": "https://api.github.com/users/grittygrease/repos",
+      "events_url": "https://api.github.com/users/grittygrease/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/grittygrease/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2017-10-30T19:49:10Z",
+    "updated_at": "2018-02-24T16:38:26Z",
+    "closed_at": "2017-10-30T19:56:10Z",
+    "author_association": "COLLABORATOR",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/1",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/1",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/1.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/1.patch"
+    },
+    "body": ""
+  }
+
+]
