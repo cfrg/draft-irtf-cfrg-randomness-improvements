@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: August 30, 2018                                   S. Smyshlyaev
+Expires: September 2, 2018                                 S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
-                                                                   Apple
-                                                       February 26, 2018
+                                                              Apple Inc.
+                                                          March 01, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 30, 2018.
+   This Internet-Draft will expire on September 2, 2018.
 
 
 
@@ -53,9 +53,9 @@ Status of This Memo
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 1]
+Cremers, et al.         Expires September 2, 2018               [Page 1]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
 Copyright Notice
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 2]
+Cremers, et al.         Expires September 2, 2018               [Page 2]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    The approach described herein replaces the NAXOS hash with a keyed
@@ -165,9 +165,9 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 3]
+Cremers, et al.         Expires September 2, 2018               [Page 3]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this
@@ -221,9 +221,9 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 4]
+Cremers, et al.         Expires September 2, 2018               [Page 4]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    The main reason one might expect the signature to be exposed is via a
@@ -277,9 +277,9 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 5]
+Cremers, et al.         Expires September 2, 2018               [Page 5]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    [RFC6979]  Pornin, T., "Deterministic Usage of the Digital Signature
@@ -333,15 +333,15 @@ Authors' Addresses
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 6]
+Cremers, et al.         Expires September 2, 2018               [Page 6]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    Christopher A. Wood
-   Apple
-   1 Infinite Loop
-   Cupertino
+   Apple Inc.
+   One Apple Park Way
+   Cupertino, California 95014
    United States of America
 
    Email: cawood@apple.com
@@ -389,4 +389,4 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 30, 2018                [Page 7]
+Cremers, et al.         Expires September 2, 2018               [Page 7]

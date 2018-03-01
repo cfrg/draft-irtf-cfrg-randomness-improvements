@@ -47,9 +47,9 @@ author:
     -
         ins: C. Wood
         name: Christopher A. Wood
-        org: Apple
-        street: 1 Infinite Loop
-        city: Cupertino
+        org: Apple Inc.
+        street: One Apple Park Way
+        city: Cupertino, California 95014
         country: United States of America
         email: cawood@apple.com
 
