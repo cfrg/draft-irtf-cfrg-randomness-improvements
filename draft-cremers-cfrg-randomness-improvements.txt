@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: August 28, 2018                                   S. Smyshlyaev
+Expires: September 2, 2018                                 S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
-                                                                   Apple
-                                                       February 24, 2018
+                                                              Apple Inc.
+                                                          March 01, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 28, 2018.
+   This Internet-Draft will expire on September 2, 2018.
 
 
 
@@ -53,9 +53,9 @@ Status of This Memo
 
 
 
-Cremers, et al.          Expires August 28, 2018                [Page 1]
+Cremers, et al.         Expires September 2, 2018               [Page 1]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
 Copyright Notice
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Cremers, et al.          Expires August 28, 2018                [Page 2]
+Cremers, et al.         Expires September 2, 2018               [Page 2]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    The approach described herein replaces the NAXOS hash with a keyed
@@ -153,10 +153,9 @@ Internet-Draft           Randomness Improvements           February 2018
    be generated.  The PRF behaves in a manner that is indistinguishable
    from a truly random function from {0, 1}^L to {0, 1}^M assuming the
    key is selected at random.  Thus, the security of this construction
-   depends upon the secrecy of H(Sig(sk, tag)) and G(x).  If the
+   depends upon the secrecy of H(Sig(sk, tag1)) and G(x).  If the
    signature is leaked, then security reduces to the scenario wherein
-   this wrapping construction is not applied.  If G(x) is predictable,
-   then security reduces to randomness of H(Sig(sk, tag)).
+   the PRF provides only a wrapper to G(x).
 
    In systems where signature computations are not cheap, these values
    may be precomputed in anticipation of future randomness requests.
@@ -165,12 +164,13 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 28, 2018                [Page 3]
+
+Cremers, et al.         Expires September 2, 2018               [Page 3]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
-   Sig(sk, tag) MUST NOT be used or exposed beyond its role in this
+   Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this
    computation.  Moreover, Sig MUST be a deterministic signature
    function, e.g., deterministic ECDSA [RFC6979].
 
@@ -200,10 +200,10 @@ Internet-Draft           Randomness Improvements           February 2018
    to TLS, one simply replaces the "private" PRNG, i.e., the PRNG that
    generates private values, such as key shares, with:
 
-   HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
+   HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
 
-   Moreover, we fix the tag to protocol-specific information as "TLS 1.3
-   Additional Entropy" for TLS 1.3.  Older variants use similarly
+   Moreover, we fix tag1 to protocol-specific information such as "TLS
+   1.3 Additional Entropy" for TLS 1.3.  Older variants use similarly
    constructed strings.
 
 5.  IANA Considerations
@@ -215,15 +215,15 @@ Internet-Draft           Randomness Improvements           February 2018
    A security analysis was performed by two authors of this document.
    Generally speaking, security depends on keeping the private key
    secret.  If this secret is compromised, the scheme reduces to the
-   scenario wherein the PRF random wrapper was not applied in the first
-   place.
+   scenario wherein the PRF provides only an outer wrapper on usual
+   CSPRNG generation.
 
 
 
 
-Cremers, et al.          Expires August 28, 2018                [Page 4]
+Cremers, et al.         Expires September 2, 2018               [Page 4]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    The main reason one might expect the signature to be exposed is via a
@@ -236,14 +236,15 @@ Internet-Draft           Randomness Improvements           February 2018
    MUST be deterministic: if the signatures are probabilistic, then with
    weak entropy, our construction does not help and the signatures are
    still vulnerable due to repeat randomness attacks.  In such an
-   attack, the adversary could recover the long-term key used in the
-   signature.
+   attack, the adversary might be able to recover the long-term key used
+   in the signature.
 
    Under these conditions, applying this construction should never yield
-   worse security guarantees than not applying it.  We believe there is
-   always merit in analysing protocols specifically.  However, this
-   construction is generic so the analyses of many protocols will still
-   hold even if this proposed construction is incorporated.
+   worse security guarantees than not applying it assuming that applying
+   the PRF does not reduce entropy.  We believe there is always merit in
+   analysing protocols specifically.  However, this construction is
+   generic so the analyses of many protocols will still hold even if
+   this proposed construction is incorporated.
 
 7.  Normative References
 
@@ -276,10 +277,9 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-
-Cremers, et al.          Expires August 28, 2018                [Page 5]
+Cremers, et al.         Expires September 2, 2018               [Page 5]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    [RFC6979]  Pornin, T., "Deterministic Usage of the Digital Signature
@@ -333,15 +333,15 @@ Authors' Addresses
 
 
 
-Cremers, et al.          Expires August 28, 2018                [Page 6]
+Cremers, et al.         Expires September 2, 2018               [Page 6]
 
-Internet-Draft           Randomness Improvements           February 2018
+Internet-Draft           Randomness Improvements              March 2018
 
 
    Christopher A. Wood
-   Apple
-   1 Infinite Loop
-   Cupertino
+   Apple Inc.
+   One Apple Park Way
+   Cupertino, California 95014
    United States of America
 
    Email: cawood@apple.com
@@ -389,4 +389,4 @@ Internet-Draft           Randomness Improvements           February 2018
 
 
 
-Cremers, et al.          Expires August 28, 2018                [Page 7]
+Cremers, et al.         Expires September 2, 2018               [Page 7]

@@ -278,7 +278,7 @@ address {
   .github-fork-ribbon-wrapper {
     position: fixed;
   }
-/*]]>*/</style>
+  /*]]>*/</style>
 
 
   <link href="#rfc.toc" rel="Contents">
@@ -292,12 +292,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.9.5 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.9.6 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Cremers, C., Garratt, L., Smyshlyaev, S., Sullivan, N., and C. Wood" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-cremers-cfrg-randomness-improvements-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-02-24" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-03-01" />
   <meta name="dct.abstract" content="Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs." />
   <meta name="description" content="Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs." />
 
@@ -321,7 +321,7 @@ address {
 <td class="right">University of Oxford</td>
 </tr>
 <tr>
-<td class="left">Expires: August 28, 2018</td>
+<td class="left">Expires: September 2, 2018</td>
 <td class="right">S. Smyshlyaev</td>
 </tr>
 <tr>
@@ -342,11 +342,11 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">Apple</td>
+<td class="right">Apple Inc.</td>
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 24, 2018</td>
+<td class="right">March 01, 2018</td>
 </tr>
 
     	
@@ -362,7 +362,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 28, 2018.</p>
+<p>This Internet-Draft will expire on September 2, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -407,9 +407,9 @@ address {
 <pre>
 PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 </pre>
-<p id="rfc.section.2.p.4">Functionally, this computes the PRF of a string (tag2) with a key derived from the CSPRNG output and signature over a fixed string (tag1). See <a href="#tag-gen" class="xref">Section 3</a> for details about how &#8220;tag1&#8221; and &#8220;tag2&#8221; should be generated. The PRF behaves in a manner that is indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key is selected at random. Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag)) and G(x). If the signature is leaked, then security reduces to the scenario wherein this wrapping construction is not applied. If G(x) is predictable, then security reduces to randomness of H(Sig(sk, tag)).</p>
+<p id="rfc.section.2.p.4">Functionally, this computes the PRF of a string (tag2) with a key derived from the CSPRNG output and signature over a fixed string (tag1). See <a href="#tag-gen" class="xref">Section 3</a> for details about how &#8220;tag1&#8221; and &#8220;tag2&#8221; should be generated. The PRF behaves in a manner that is indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key is selected at random. Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(x). If the signature is leaked, then security reduces to the scenario wherein the PRF provides only a wrapper to G(x).</p>
 <p id="rfc.section.2.p.5">In systems where signature computations are not cheap, these values may be precomputed in anticipation of future randomness requests. This is possible since the construction depends solely upon the CSPRNG output and private key.</p>
-<p id="rfc.section.2.p.6">Sig(sk, tag) MUST NOT be used or exposed beyond its role in this computation. Moreover, Sig MUST be a deterministic signature function, e.g., deterministic ECDSA <a href="#RFC6979" class="xref">[RFC6979]</a>.</p>
+<p id="rfc.section.2.p.6">Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this computation. Moreover, Sig MUST be a deterministic signature function, e.g., deterministic ECDSA <a href="#RFC6979" class="xref">[RFC6979]</a>.</p>
 <h1 id="rfc.section.3">
 <a href="#rfc.section.3">3.</a> <a href="#tag-gen" id="tag-gen">Tag Generation</a>
 </h1>
@@ -426,9 +426,9 @@ PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
 </h1>
 <p id="rfc.section.4.p.1">The PRF randomness wrapper can be applied to any protocol wherein a party has a long-term private key and also generates randomness. This is true of most TLS servers. Thus, to apply this construction to TLS, one simply replaces the &#8220;private&#8221; PRNG, i.e., the PRNG that generates private values, such as key shares, with:</p>
 <pre>
-HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
+HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
 </pre>
-<p id="rfc.section.4.p.2">Moreover, we fix the tag to protocol-specific information as &#8220;TLS 1.3 Additional Entropy&#8221; for TLS 1.3. Older variants use similarly constructed strings.</p>
+<p id="rfc.section.4.p.2">Moreover, we fix tag1 to protocol-specific information such as &#8220;TLS 1.3 Additional Entropy&#8221; for TLS 1.3. Older variants use similarly constructed strings.</p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#iana-considerations" id="iana-considerations">IANA Considerations</a>
 </h1>
@@ -436,10 +436,10 @@ HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#security-considerations" id="security-considerations">Security Considerations</a>
 </h1>
-<p id="rfc.section.6.p.1">A security analysis was performed by two authors of this document. Generally speaking, security depends on keeping the private key secret. If this secret is compromised, the scheme reduces to the scenario wherein the PRF random wrapper was not applied in the first place.</p>
+<p id="rfc.section.6.p.1">A security analysis was performed by two authors of this document. Generally speaking, security depends on keeping the private key secret. If this secret is compromised, the scheme reduces to the scenario wherein the PRF provides only an outer wrapper on usual CSPRNG generation.</p>
 <p id="rfc.section.6.p.2">The main reason one might expect the signature to be exposed is via a side-channel attack.  It is therefore prudent when implementing this construction to take into consideration the extra long-term key operation if equipment is used in a hostile environment when such considerations are necessary.</p>
-<p id="rfc.section.6.p.3">The signature in the construction as well as in the protocol itself MUST be deterministic: if the signatures are probabilistic, then with weak entropy, our construction does not help and the signatures are still vulnerable due to repeat randomness attacks. In such an attack, the adversary could recover the long-term key used in the signature.</p>
-<p id="rfc.section.6.p.4">Under these conditions, applying this construction should never yield worse security guarantees than not applying it. We believe there is always merit in analysing protocols specifically. However, this construction is generic so the analyses of many protocols will still hold even if this proposed construction is incorporated.</p>
+<p id="rfc.section.6.p.3">The signature in the construction as well as in the protocol itself MUST be deterministic: if the signatures are probabilistic, then with weak entropy, our construction does not help and the signatures are still vulnerable due to repeat randomness attacks. In such an attack, the adversary might be able to recover the long-term key used in the signature.</p>
+<p id="rfc.section.6.p.4">Under these conditions, applying this construction should never yield worse security guarantees than not applying it assuming that applying the PRF does not reduce entropy. We believe there is always merit in analysing protocols specifically. However, this construction is generic so the analyses of many protocols will still hold even if this proposed construction is incorporated.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">7.</a> Normative References</h1>
 <table><tbody>
@@ -576,12 +576,12 @@ HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag)), tag)
 		<span class="family-name">Wood</span>
 	  </span>
 	</span>
-	<span class="org vcardline">Apple</span>
+	<span class="org vcardline">Apple Inc.</span>
 	<span class="adr">
-	  <span class="vcardline">1 Infinite Loop</span>
+	  <span class="vcardline">One Apple Park Way</span>
 
 	  <span class="vcardline">
-		<span class="locality">Cupertino</span>,  
+		<span class="locality">Cupertino, California 95014</span>,  
 		<span class="region"></span>
 		<span class="code"></span>
 	  </span>
