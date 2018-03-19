@@ -133,7 +133,7 @@ For example, when using HMAC with SHA256, L and M are 256 bits.
 Let Sig(sk, m) be a function that computes a signature of message m given
 private key sk. Let G be an algorithm that generates random numbers from raw entropy, i.e.,
 the output of a CSPRNG. Let tag be a fixed, context-dependent string. Let KDF be a key
-derivation function, e.g., HKDF-Extract {{RFC5869}} (with first argument set to nil), that
+derivation function with two inputs, e.g., HKDF-Extract {{RFC5869}}, that
 extracts a key of length L suitable for cryptographic use. Lastly, let H be a cryptographic
 hash function that produces output of length M.
 
@@ -141,7 +141,7 @@ The construction works as follows: instead of using x when randomness is needed,
 use:
 
 ~~~
-PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
+PRF(KDF(G(x), H(Sig(sk, tag1))), tag2)
 ~~~
 
 Functionally, this computes the PRF of a string (tag2) with a key derived from
@@ -182,7 +182,7 @@ apply this construction to TLS, one simply replaces the "private" PRNG, i.e., th
 that generates private values, such as key shares, with:
 
 ~~~
-HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
+HKDF-Expand(HKDF-Extract(G(x), Sig(sk, tag1)), tag2, L)
 ~~~
 
 Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
