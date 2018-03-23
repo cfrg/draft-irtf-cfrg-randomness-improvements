@@ -1,7 +1,7 @@
 ---
 title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements 
-docname: draft-cremers-cfrg-randomness-improvements-latest
+docname: draft-irtf-cfrg-randomness-improvements-latest
 date:
 category: info
 
