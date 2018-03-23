@@ -1,6 +1,104 @@
 [
 
   {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/11",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/11/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/11/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/11/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/11",
+    "id": 306540957,
+    "number": 11,
+    "title": "Split parameters to the KDF",
+    "user": {
+      "login": "martinthomson",
+      "id": 67641,
+      "avatar_url": "https://avatars1.githubusercontent.com/u/67641?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/martinthomson",
+      "html_url": "https://github.com/martinthomson",
+      "followers_url": "https://api.github.com/users/martinthomson/followers",
+      "following_url": "https://api.github.com/users/martinthomson/following{/other_user}",
+      "gists_url": "https://api.github.com/users/martinthomson/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/martinthomson/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/martinthomson/subscriptions",
+      "organizations_url": "https://api.github.com/users/martinthomson/orgs",
+      "repos_url": "https://api.github.com/users/martinthomson/repos",
+      "events_url": "https://api.github.com/users/martinthomson/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/martinthomson/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-03-19T16:40:43Z",
+    "updated_at": "2018-03-19T16:40:43Z",
+    "closed_at": null,
+    "author_association": "FIRST_TIME_CONTRIBUTOR",
+    "pull_request": {
+      "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/11",
+      "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/11",
+      "diff_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/11.diff",
+      "patch_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/pull/11.patch"
+    },
+    "body": "It would be best practice to treat G(x) as a salt for input to HKDF-Extract.\r\n\r\nSeparately, I noticed that this exposes a problem that you might consider separately: HKDF-Extract produces an output that is the same size as the underlying hash output.  Your text assumes that both the PRF and the KDF produce an output of size L.  That's not necessarily the case, even for HKDF, since HKDF produces output of arbitrary size.\r\n\r\nRather than try to address that, I would recommend that you use HKDF more directly unless there is any reason that you need to maintain flexibility."
+  },
+  {
+    "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/10",
+    "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
+    "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/10/labels{/name}",
+    "comments_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/10/comments",
+    "events_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/10/events",
+    "html_url": "https://github.com/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/10",
+    "id": 306229818,
+    "number": 10,
+    "title": "Generate fixed using a KDF",
+    "user": {
+      "login": "chris-wood",
+      "id": 2172048,
+      "avatar_url": "https://avatars3.githubusercontent.com/u/2172048?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chris-wood",
+      "html_url": "https://github.com/chris-wood",
+      "followers_url": "https://api.github.com/users/chris-wood/followers",
+      "following_url": "https://api.github.com/users/chris-wood/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chris-wood/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chris-wood/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chris-wood/subscriptions",
+      "organizations_url": "https://api.github.com/users/chris-wood/orgs",
+      "repos_url": "https://api.github.com/users/chris-wood/repos",
+      "events_url": "https://api.github.com/users/chris-wood/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chris-wood/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "locked": false,
+    "assignee": null,
+    "assignees": [
+
+    ],
+    "milestone": null,
+    "comments": 0,
+    "created_at": "2018-03-18T10:48:35Z",
+    "updated_at": "2018-03-18T10:48:35Z",
+    "closed_at": null,
+    "author_association": "OWNER",
+    "body": "\"I don’t like that the tag is up to the implementation to generate. You end up signing arbitrary data, where the signature could be reused elsewhere. Better to derive a key via a KDF and a unique but exact tag specified in the standard.\"\r\n\r\nhttps://twitter.com/rootlabs/status/975216701468889088\r\n"
+  },
+  {
     "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/9",
     "repository_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements",
     "labels_url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/issues/9/labels{/name}",
