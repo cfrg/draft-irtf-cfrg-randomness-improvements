@@ -156,6 +156,9 @@ In systems where signature computations are not cheap, these values may be preco
 in anticipation of future randomness requests. This is possible since the construction
 depends solely upon the CSPRNG output and private key. 
 
+If one needs a longer output of bits, one can implement PRF as HKDF and use the 
+HKDF-expand functionality. 
+
 Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this computation. Moreover,
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
 

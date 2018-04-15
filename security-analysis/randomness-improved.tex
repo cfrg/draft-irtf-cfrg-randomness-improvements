@@ -1,0 +1,230 @@
+\documentclass[12pt]{article}
+
+%%%%%% MATH MACROS %%%%%%%
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools} 
+
+%%%%%%%% [ocimathesis] MACROS %%%%%%%
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+%%%%%%  OTHER MACROS %%%%%%%%%%%
+\usepackage{todonotes}
+
+%%%%%%%%% CRYPTOCODE MACROS %%%%%%%%%
+
+\let\etoolboxforlistloop\forlistloop % save the good meaning of \forlistloop
+\usepackage[n, advantage, operators, sets, adversary, landau, logic,
+events, complexity, asymptotics, operators, keys, probability,
+notions, ff, primitives, mm]{cryptocode}
+\let\forlistloop\etoolboxforlistloop % restore the good meaning of \forlistloop
+
+%%%%%%%%%%% NEW ENVIRONMENTS %%%%%%%%%
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+
+
+%%%%%%%%%% NEW COMMANDS %%%%%%%%%%%%
+\newcommand{\esk}{\textsf{esk}}
+\newcommand{\sigm}[2]{\sig_{sk_{#1}}(#2)}
+\newcommand{\gensigm}[1]{\sigm{}{#1}}
+\newcommand{\botsig}{\gensigm{\bot}}
+\newcommand{\abotsig}[1]{\sigm{#1}{\bot}}
+\newcommand{\myconcat}{ \;||\; }
+
+\newcommand{\newconsgen}[1]{\prf(#1 \myconcat \botsig, \mathrm{tag} )}
+\newcommand{\newconspi}{\newconsgen{\pi(x)}}
+
+\author{
+  Cas Cremers\\
+  \texttt{cas@cremers@cs.ox.ac.uk}
+  \and
+  Luke Garratt\\
+  \texttt{luke.garratt@cs.ox.ac.uk}
+}
+\title{Security Analysis}
+
+\date{DRAFT v0.1 -- October 11, 2017}
+\begin{document}
+  \maketitle
+
+%\pagenumbering{arabic}
+
+
+\section{Introduction}
+Nearly all cryptographic key exchange protocols (e.g., SSL/TLS, SSH, IKE, etc.) depend on the generation of secure random numbers. At the core of all of these protocols is a Diffie--Hellman key exchange of the following basic form: Alice chooses random number $x$, computes $g^x$ and sends it to Bob. Bob similarly chooses random number $y$, computes $g^y$ and sends it to Alice. Of course, each particular protocol has other essential details such as certificates, signatures, key derivation, comparing of transcripts and so on, but at the heart of all these protocols is the shared secret $g^{xy}$. Therefore, it is essential that $x$ and $y$ are generated as securely as possible. 
+
+In many operating systems, raw entropy comes in the form of events such as mouse movements or keystrokes. As large amounts of raw entropy is difficult to accumulate, Alice and Bob do not generate truly random numbers $x$ and $y$ for their key exchanges. Instead, they use the primitive of a cryptographically secure pseudorandom number generator (CSPRNG), which takes as input a seed, continually harvests more raw entropy and  produces arbitrary many pseudorandom numbers as required. Since CSPRNGs are used to provide the essential secret $g^{xy}$, they clearly need to be as secure as possible. 
+
+However, the current problem we face is that all CSPRNGs depend on raw entropy in some form or another. Therefore, if the underlying randomness is not good, the secret $g^{xy}$ is not secure. Real-world examples of poor random number generation include:
+
+\begin{itemize}
+\item The Debian OpenSSL random number generator vulnerability \cite{DebianRNGflaw, DebianRNGflawTLSDHE};
+
+\item Predictable random numbers in Android's Java OpenSSL \cite{MarvinGoogle2013} leading to theft of bitcoins;
+
+\item The Dual EC random number generator backdoor \cite{DualECstandardisedbackdoor};
+
+\item Random number generator on hardware that degrades over time;
+
+\item Servers that are deployed in settings where good randomness generation cannot be guaranteed;
+
+\item Internet of Things (IoT) devices with good (factory) keys but no good randomness generation after deployment.
+\end{itemize}
+
+We propose a solution to this problem. Our solution is inspired by the
+so-called ``NAXOS trick'' for key exchange protocols. In contrast to the
+NAXOS trick, our design is more generic and applies outside of the AKE
+domain, and we follow a much more conservative approach that enables the
+re-use of existing infrastructure and improved graceful degradation if
+it turns out the hash function's output may reveal partial information
+from the output.
+
+From the academic literature on authenticated key exchange protocols, the NAXOS protocol \cite{LaMacchiaeCK2007} does not just compute pseudorandom numbers $x$ and $y$ from raw entropy and send $g^{x}$ and $g^{y}$, but instead sends $g^{H(x, \sk_{\hat A})}$ and $g^{H(y, \sk_{\hat B})}$ where $H$ is a random oracle, and $\sk_{A}$ and $\sk_{B}$ are the long-term secret keys of Alice and Bob respectively. Intuitively we can see that securely in this case should now depend on the pairs ($x$, $\sk_{\hat A})$ and ($y$, $\sk_{\hat B})$ being secure, as opposed to just $x$ and $y$ being secure. What is more, a protocol that uses $g^{H(x, \sk_{\hat A})}$ can behave in exactly the same way as one that uses $g^x$. The only essential difference is that $H(x, \sk_{\hat A})$ is presumably a safer secret than $x$.
+
+In this note, we take an alternative approach for real-world protocols.
+In particular, often the long-term term $\sk$ is in trusted hardware so
+it is impossible to have direct access to it to compute $H(x, \sk)$.
+For many HSM deployments, this prevents the application of the NAXOS
+trick.
+Moreover, a choice needs to be made as to what function implements the
+random oracle $H$. We will also need to know precisely what security
+guarantees our construction provides.  We will answer these questions
+and provide proofs that are construction meet precisely definition
+security guarantees under standard cryptographic assumptions. We will
+show that our construction improves the generation of pseudorandom
+numbers and provides concrete security guarantees for a generic class of
+protocols including SSL/TLS, SSH, IKE, etc. at negligible cost to efficiency. 
+
+Informally, we propose a ``wrapper'' function around existing
+pseudorandom number generators, in contexts that have access to a
+party's signing algorithm. Let $y$ be the output of the pseudorandom
+number generator. As in the main document, we define the wrapper to be:
+
+$$
+\prf(\texttt{KDF}(y \myconcat \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1}))), \texttt{tag}_2 )
+$$
+
+where $\texttt{tag}_1$ is a value that is outside of the
+normal signature domain\footnote{We will return to this condition in
+	detail later.}. 
+
+\subsection*{Overview}
+In Section \ref{CSPRNG} we call the standard properties of a CSPRNG. In Section \ref{sec:def} we define the security properties we will need in our construction. In Section \ref{construction} we define our construction and in Section \ref{proof} we give a proof it fulfils the security properties we claim. 
+
+
+\section{Background}
+
+\subsection{CSPRNGs} \label{CSPRNG}
+Forward secure cryptographically secure pseudorandom number generators (CSPRNG) are already used as primitives in TLS and other protocols. Let Rand be a forward secure CSPRNG. By this we mean Rand satisfies the following two properties:
+
+\subsubsection*{Property 1. Indistinguishable from random (CSPRNG)}
+
+A family of deterministic polynomial time computable functions $Rand_{k} \colon \{0, 1\}^{k} \rightarrow \{0, 1 \}^{p(k)}$ for some polynomial $p$ is a  CSPRG, if it stretches the length of its input ($p(k) > k$ for any $k$) and if its output is computationally indistinguishable from true randomness, i.e. for any probabilistic polynomial time algorithm $A$, which outputs 1 or 0 as a distinguisher,
+
+$$ |\Pr_{x\gets\{0,1\}^k}[A(Rand(x))=1] - \Pr_{r\gets\{0,1\}^{p(k)}}[A(r)=1]| < \mu(k) $$
+
+\noindent for some negligible function $\mu$.
+
+All this is saying is that, no efficient algorithm (with knowledge of how Rand works) can distinguish the output of Rand from randomness, when the initial seed is unknown and uniformly random. Note that achieving this property is non-trivial: many pseudorandom number generators may achieve output that looks statistically random, but does not satisfy this property. For instance, the function that hashes the initial seed to produce $x$. Then hashes $x$. Then hashes again, and so on, could produce statistically random output, but an efficient adversary that knows how this algorithm works can clearly distinguish this from purely random behaviour after seeing the first two blocks of output (the second being the hash of the first).
+
+Andrew Yao showed that this definition is equivalent to the next-bit test (below).
+
+\subsubsection*{Property 2. Resistance to state compromise extensions (forward secure)}
+Another property we want is for the CSPRNG to be forward secure. A forward-secure CSPRNG with block length $t(k)$ is a $Rand_{k} \colon \{0,1\}^k \to \{0,1\}^k \times \{0,1\}^{t(k)}$, where the input string $s_i$ with length $k$ is the current state at period $i$, and the output $s_{i+1}$, $y_i$) consists of the next state $s_{i+1}$> and the pseudorandom output block $y_i$ of period $i$, such that it withstands state compromise extensions in the following sense. If the initial state $s_1$ is chosen uniformly at random from $\{0,1\}^k$, then for any $i$, the sequence $(y_1, y_2,\dots, y_i,s_{i+1})$ must be computationally indistinguishable from $(r_1,r_2,\dots,r_i,s_{i+1})$, in which the $r_i$ are chosen uniformly at random from $\{0,1\}^{t(k)}$.
+
+\subsubsection*{The next-bit test (equivalent definition of CSPRNG)}
+By satisfying the next-bit test, we mean that given the first $k$ bits of outputs from Rand sequence, there is no polynomial-time algorithm that can predict the $(k+1)$th bit with probability of success better than 50\% (without knowing the seed). Andrew Yao proved in 1982 that a generator passing the next-bit test will pass all other polynomial-time statistical tests for randomness.
+
+Let $P$ be a polynomial, and $S=\{S_k\}$ be a collection of sets such that $S_k$ contains $(k)$-bit long sequences. Moreover, let $\mu_k$ be the probability distribution of the strings in $S_k$.
+
+Let $\mathcal{M}$ be a probabilistic Turing machine, working in polynomial time. Let $p_{k,i}^{\mathcal{M}}$ be the probability that $\mathcal{M}$ predicts the $(i+1)$st bit correctly, i.e.
+
+$$p_{k,i}^{\mathcal{M}}={\mathcal{P}}[M(s_1\ldots s_i)=s_{i+1} | s\in S_k\text{ with probability }\mu_k(s)]$$
+
+We say that collection $S = \{ S_k \}$ passes the next-bit test if for all polynomial $Q$, for all but finitely many $k$, for all $0 < i < k$: 
+
+$$
+p_{k,i}^{\mathcal M}<\frac{1}{2}+\frac{1}{Q(k)}
+$$
+
+\subsection{Security definitions} \label{sec:def}
+
+\subsubsection*{Pseudorandom functions} \label{PRFdef}
+A pseudorandom function is an algorithm $\prf$. This algorithm implements a deterministic function $z=\prf(k, x)$, taking as input a key $k$ and some bit string $x$, and returning a string $z \in \{0, 1 \}^{\mu}$. In a very simple security game, it is supposed to be hard for any polynomial time algorithm to differentiate $\prf(k, x)$ from uniformly randomly chosen $z$ (even for known $x$) without querying $\prf$ on $k$ (for unknown $k$). The advantage above $\frac{1}{2}$ should be negligible in the key size.
+
+\subsubsection*{Signature schemes}
+In our construction, we will not want to use the long-term key $\sk$ directly. We will instead use a signature of a value $\texttt{tag}_1$ signed with $\sk$. For our proof, we require the signature scheme to fulfil the following standard security definition.
+
+A signature scheme is a triple $(\kgen, \sig, \verify)$. $\kgen$ is a probabilistic algorithm which takes as input the security parameter $1^k$ and outputs a public signature verification key $\pk$ and secret signing key $\sk$. $\sig$ is a (possibly probabilistic) signing algorithm which generates a signature $\sigma$ for message $m$ using secret key $\sk$. $\verify$ is a deterministic signature verification algorithm which, given input $(\pk, \sigma, m)$, outputs $1$ if $\sigma$ is a valid signature of $m$ under key $\pk$, and $0$ otherwise. It is required that for every $k$, every $(\sk, \pk)$ output by $\kgen (1^k)$, and every message $m$, it holds that
+
+$$\verify (m , \sig ({\sk, m})) = 1$$
+
+We require the following security property of our signature scheme. Consider the following game between a challenger and a polynomial time adversary:
+
+\begin{enumerate}
+\item The challenger generates a public/private key pair $(\pk, \sk)$ using $\kgen$ and gives the adversary $\mathcal{A}$ the public key $\pk$.
+
+\item $\mathcal{A}$ is allowed to query adaptively chosen messages $m_1,
+	\dots , m_q$ for some $q \in \mathbb{N}$ to the challenger so long as none of the queries $m_i$ are $\texttt{tag}_1$. The
+		challenger responses to each query with $\sigma_{i}=
+		\sig{(\sk, m_i})$. 
+
+\item After the adversary asks all of her queries, she outputs a pair $(\texttt{tag}_1, \sigma)$. The adversary wins if 
+
+$$\verify (m , \sig ({\sk, \texttt{tag}_1})) = 1$$
+
+\end{enumerate}
+
+We require that the probability of any probabilistic polynomial time adversary winning the above game is negligible in the security parameter.
+
+\subsection{Hash function}
+The property of the function $\texttt{H}$ we require is the rather trivial property that any polynomial time adversary should have negligible probability in guessing $\texttt{H}(x)$ for unknown $x$.
+
+\section{Security model}
+We run a game between the challenger and the adversary as follows. The challenger uniformly randomly chooses a key $\sk$. The adversary is allowed to query the challenger for pseudorandom outputs. At each query, the challenger chooses an $x_i$ uniformly randomly and produces $$
+\prf(\texttt{KDF}(G(x_i) \myconcat \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1}))), \texttt{tag}_2 )
+$$ Call this the output from $x_i$. The adversary is allowed to query the challenger for $x_i$ or $\sk$. We say that the output form $x_i$ is fresh if the adversary has not queried both $x_i$ and $\sk$.
+
+At some point in time, the adversary issues a test query on one particular output from $x_i$. The test must be fresh. The challenger then flips a coin and either responds with the genuine output or a uniformly randomly chosen string of the same length. The adversary wins the game if it is able to differentiate between these two situations with non-negligible advantage over $\frac{1}{2}$.
+
+\section{Proof of security} \label{proof}
+
+\begin{theorem}
+If $\prf$, $\sig$ and $\texttt{H}$ satisfy the security definitions above, then every polynomial time adversary has only negligible advantage in winning the security game.
+\end{theorem}
+
+\begin{proof}
+We prove this theorem in a case partition. Let the test be on $x_i$.
+
+If the adversary has queried for $x_i$, then it must now either compute $\texttt{H}(\sig(\sk, \texttt{tag}_1))$ and then trivially compute the output to answer the challenge, or find some other way to answer the challenge. By the assumption on $\texttt{H}$, there is no way for the adversary to do the former case without forging $\sig (\sk, \texttt{tag}_1)$. This is also impossible by our assumption of $\sig$.	So the only option is the latter case. But under the assumption of $\prf$ this cannot be done either.
+
+\todo[inline]{do the game hops.. v trivial}
+
+Alternatively, if the adversary has queried for $\sk$, then again it is plain to see that the adversary will either need to break the assumption on $\prf$.
+\end{proof}
+
+\subsection{Notes}
+
+\subsection{Repeating tags}
+Note the security analysis is about one instance of $\texttt{tag}_1$ and (essentially a predictable counter) for $\texttt{tag}_2$. This therefore means that if the tags were to repeat (for instance identical VMs in identical conditions) and the adversary already queried $\sk$, then the adversary will be able to win the game on the second attempt as the outputs will be the same, except possibly on the test query. This means that it is essential for $\texttt{tag}_1$ to be different on every instance. In such situations as identical VMs, generating $\texttt{tag}_1$ probabilistically with an external randomness source may be helpful.
+
+\subsubsection{Leaking $\botsig$ }
+
+Our construction offers benefits as long as $\sig (\sk, \texttt{tag}_1)$ never appears elsewhere in
+the protocol so that the adversary has no hope of seeing it and using
+it. Otherwise, security degrades to the normal case of generating
+pseudorandom numbers with $G(x_i)$. Of course, in practice actually
+forcing $$\sig (\sk, \texttt{tag}_1)$$ to appear may still be difficult. However,
+in no case can our construction be worse. Note furthermore that these
+signatures are agent-specific, which improves containment. Thus, leaking
+or forging $\sig (\sk_{\hat A}, \texttt{tag}_1)$ for a specific agent $\hat A$ only affects $\hat A$, and
+has no consequences for other agents.
+
+
+\bibliographystyle{plain}
+\bibliography{masterbib}
+
+\end{document}
+
