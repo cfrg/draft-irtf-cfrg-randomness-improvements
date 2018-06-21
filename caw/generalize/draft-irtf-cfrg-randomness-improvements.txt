@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: September 24, 2018                                S. Smyshlyaev
+Expires: December 23, 2018                                 S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
                                                               Apple Inc.
-                                                          March 23, 2018
+                                                           June 21, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 24, 2018.
+   This Internet-Draft will expire on December 23, 2018.
 
 
 
@@ -53,9 +53,9 @@ Status of This Memo
 
 
 
-Cremers, et al.        Expires September 24, 2018               [Page 1]
+Cremers, et al.         Expires December 23, 2018               [Page 1]
 
-Internet-Draft           Randomness Improvements              March 2018
+Internet-Draft           Randomness Improvements               June 2018
 
 
 Copyright Notice
@@ -81,7 +81,8 @@ Table of Contents
    4.  Application to TLS  . . . . . . . . . . . . . . . . . . . . .   4
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
-   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
+   7.  Comparison to RFC 6979  . . . . . . . . . . . . . . . . . . .   5
+   8.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
 1.  Introduction
@@ -108,10 +109,9 @@ Table of Contents
 
 
 
-
-Cremers, et al.        Expires September 24, 2018               [Page 2]
+Cremers, et al.         Expires December 23, 2018               [Page 2]
 
-Internet-Draft           Randomness Improvements              March 2018
+Internet-Draft           Randomness Improvements               June 2018
 
 
    The approach described herein replaces the NAXOS hash with a keyed
@@ -130,54 +130,55 @@ Internet-Draft           Randomness Improvements              March 2018
    the CSPRNG output with a construction that artificially injects
    randomness into a value that may be lacking entropy.
 
-   Let PRF(k, m) be a cryptographic pseudorandom function, e.g., HMAC
-   [RFC2104], that takes as input a key k of length L and message m and
-   produces an output of length M.  For example, when using HMAC with
-   SHA256, L and M are 256 bits.  Let Sig(sk, m) be a function that
-   computes a signature of message m given private key sk.  Let G be an
-   algorithm that generates random numbers from raw entropy, i.e., the
-   output of a CSPRNG.  Let tag be a fixed, context-dependent string.
-   Let KDF be a key derivation function, e.g., HKDF-Extract [RFC5869]
-   (with first argument set to nil), that extracts a key of length L
-   suitable for cryptographic use.  Lastly, let H be a cryptographic
-   hash function that produces output of length M.
+   Let G(n) be an algorithm that generates n random bytes from raw
+   entropy, i.e., the output of a CSPRNG.  Let Sig(sk, m) be a function
+   that computes a signature of message m given private key sk.  Let H
+   be a cryptographic hash function that produces output of length M.
+   Let Extract be a randomness extraction function, e.g., HKDF-Extract
+   [RFC5869], which accepts a salt and input keying material (IKM)
+   parameter and produces a pseudorandom key of length L suitable for
+   cryptographic use.  Let Expand(k, info, n) be a randomness extractor,
+   e.g., HKDF-Expand [RFC5869], that takes as input a pseudorandom key k
+   of length L, info string, and output length n, and produces output of
+   length n.  Finally, let tag1 be a fixed, context-dependent string,
+   and let tag2 be a dynamically changing string.
 
-   The construction works as follows: instead of using x when randomness
-   is needed, use:
+   The construction works as follows.  Instead of using x = G(n) when
+   randomness is needed, use:
 
-   PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
+          x = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 
-   Functionally, this computes the PRF of a string (tag2) with a key
-   derived from the CSPRNG output and signature over a fixed string
-   (tag1).  See Section 3 for details about how "tag1" and "tag2" should
-   be generated.  The PRF behaves in a manner that is indistinguishable
-   from a truly random function from {0, 1}^L to {0, 1}^M assuming the
-   key is selected at random.  Thus, the security of this construction
-   depends upon the secrecy of H(Sig(sk, tag1)) and G(x).  If the
-   signature is leaked, then security reduces to the scenario wherein
-   the PRF provides only a wrapper to G(x).
+   Functionally, this expands n random bytes from a key derived from the
+   CSPRNG output and signature over a fixed string (tag1).  See
+   Section 3 for details about how "tag1" and "tag2" should be generated
+   and used per invocation of the randomness wrapper.  Expand()
+   generates a string that is computationally indistinguishable from a
+   truly random string of length n.  Thus, the security of this
+   construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n).
+   If the signature is leaked, then security reduces to the scenario
+   wherein randomness is expanded directly from G(n).
 
-   In systems where signature computations are not cheap, these values
-   may be precomputed in anticipation of future randomness requests.
-   This is possible since the construction depends solely upon the
-   CSPRNG output and private key.
-
-
+   Also, in systems where signature computations are expensive, these
+   values may be precomputed in anticipation of future randomness
+   requests.  This is possible since the construction depends solely
+   upon the CSPRNG output and private key.
 
 
-Cremers, et al.        Expires September 24, 2018               [Page 3]
+
+Cremers, et al.         Expires December 23, 2018               [Page 3]
 
-Internet-Draft           Randomness Improvements              March 2018
+Internet-Draft           Randomness Improvements               June 2018
 
 
-   Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this
-   computation.  Moreover, Sig MUST be a deterministic signature
+   Sig(sk, tag1) should only be computed once for the lifetime of the
+   randomness wrapper, and MUST NOT be used or exposed beyond its role
+   in this computation.  Moreover, Sig MUST be a deterministic signature
    function, e.g., deterministic ECDSA [RFC6979].
 
 3.  Tag Generation
 
    Both tags SHOULD be generated such that they never collide with
-   another accessor or owner of the private key.  This can happen if,
+   another contender or owner of the private key.  This can happen if,
    for example, one HSM with a private key is used from several servers,
    or if virtual machines are cloned.
 
@@ -200,7 +201,7 @@ Internet-Draft           Randomness Improvements              March 2018
    to TLS, one simply replaces the "private" PRNG, i.e., the PRNG that
    generates private values, such as key shares, with:
 
-   HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
+   HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 
    Moreover, we fix tag1 to protocol-specific information such as "TLS
    1.3 Additional Entropy" for TLS 1.3.  Older variants use similarly
@@ -220,10 +221,9 @@ Internet-Draft           Randomness Improvements              March 2018
 
 
 
-
-Cremers, et al.        Expires September 24, 2018               [Page 4]
+Cremers, et al.         Expires December 23, 2018               [Page 4]
 
-Internet-Draft           Randomness Improvements              March 2018
+Internet-Draft           Randomness Improvements               June 2018
 
 
    The main reason one might expect the signature to be exposed is via a
@@ -242,11 +242,22 @@ Internet-Draft           Randomness Improvements              March 2018
    Under these conditions, applying this construction should never yield
    worse security guarantees than not applying it assuming that applying
    the PRF does not reduce entropy.  We believe there is always merit in
-   analysing protocols specifically.  However, this construction is
+   analyzing protocols specifically.  However, this construction is
    generic so the analyses of many protocols will still hold even if
    this proposed construction is incorporated.
 
-7.  Normative References
+7.  Comparison to RFC 6979
+
+   Section 3.3 of RFC 6979 [RFC6979] specifies an alternative way to
+   deterministically generate the k value used in ECDSA.  Specifically,
+   it recommends instantiating an instance of the HMAC DRBG pseudorandom
+   number generator, described in [SP80090A] and Annex D of [X962],
+   using the private key sk as the entropy_input parameter and H(m) as
+   the nonce.  The construction provided herein is similar, with the
+   exception that a key derived from G(x) and H(Sig(sk, tag1)) is used
+   as the entropy input and tag2 is the nonce.
+
+8.  Normative References
 
    [DebianBug]
               Yilek, Scott, et al, ., "When private keys are public -
@@ -263,6 +274,14 @@ Internet-Draft           Randomness Improvements              March 2018
               <https://www.microsoft.com/en-us/research/wp-
               content/uploads/2016/02/strongake-submitted.pdf>.
 
+
+
+
+Cremers, et al.         Expires December 23, 2018               [Page 5]
+
+Internet-Draft           Randomness Improvements               June 2018
+
+
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
               DOI 10.17487/RFC2104, February 1997,
@@ -273,24 +292,26 @@ Internet-Draft           Randomness Improvements              March 2018
               DOI 10.17487/RFC5869, May 2010,
               <https://www.rfc-editor.org/info/rfc5869>.
 
-
-
-
-
-Cremers, et al.        Expires September 24, 2018               [Page 5]
-
-Internet-Draft           Randomness Improvements              March 2018
-
-
    [RFC6979]  Pornin, T., "Deterministic Usage of the Digital Signature
               Algorithm (DSA) and Elliptic Curve Digital Signature
               Algorithm (ECDSA)", RFC 6979, DOI 10.17487/RFC6979, August
               2013, <https://www.rfc-editor.org/info/rfc6979>.
 
+   [SP80090A]
+              "Recommendation for Random Number Generation Using
+              Deterministic Random Bit Generators (Revised), NIST
+              Special Publication 800-90A, January 2012.", n.d.,
+              <National Institute of Standards and Technology>.
+
    [X9.62]    American National Standards Institute, ., "Public Key
               Cryptography for the Financial Services Industry -- The
               Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI
               X9.62-2005, November 2005.", n.d..
+
+   [X962]     "Public Key Cryptography for the Financial Services
+              Industry -- The Elliptic Curve Digital Signature Algorithm
+              (ECDSA), ANSI X9.62-2005, November 2005.", n.d., <American
+              National Standards Institute>.
 
 Authors' Addresses
 
@@ -301,6 +322,20 @@ Authors' Addresses
    England
 
    Email: cas.cremers@cs.ox.ac.uk
+
+
+
+
+
+
+
+
+
+
+
+Cremers, et al.         Expires December 23, 2018               [Page 6]
+
+Internet-Draft           Randomness Improvements               June 2018
 
 
    Luke Garratt
@@ -330,14 +365,6 @@ Authors' Addresses
    Email: nick@cloudflare.com
 
 
-
-
-
-Cremers, et al.        Expires September 24, 2018               [Page 6]
-
-Internet-Draft           Randomness Improvements              March 2018
-
-
    Christopher A. Wood
    Apple Inc.
    One Apple Park Way
@@ -362,31 +389,4 @@ Internet-Draft           Randomness Improvements              March 2018
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Cremers, et al.        Expires September 24, 2018               [Page 7]
+Cremers, et al.         Expires December 23, 2018               [Page 7]
