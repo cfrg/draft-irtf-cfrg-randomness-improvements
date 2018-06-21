@@ -127,9 +127,9 @@ this is not always true. To mitigate this problem, we propose an approach for wr
 the CSPRNG output with a construction that artificially injects randomness into
 a value that may be lacking entropy.
 
-Let PRF(k, m) be a cryptographic pseudorandom function, e.g., HMAC {{RFC2104}}, that
-takes as input a key k of length L and message m and produces an output of length M. 
-For example, when using HMAC with SHA256, L and M are 256 bits.
+Let Expand(k, info, n) be a randomness extractor, e.g., HKDF-Expand {{RFC5869}}, that
+takes as input a pseudorandom key k of length L, info string, and output length n, 
+and produces L an output of length M. For example, when using HMAC with SHA256, L and M are 256 bits.
 Let Sig(sk, m) be a function that computes a signature of message m given
 private key sk. Let G be an algorithm that generates random numbers from raw entropy, i.e.,
 the output of a CSPRNG. Let tag be a fixed, context-dependent string. Let KDF be a key
@@ -137,11 +137,11 @@ derivation function with two inputs, e.g., HKDF-Extract {{RFC5869}}, that
 extracts a key of length L suitable for cryptographic use. Lastly, let H be a cryptographic
 hash function that produces output of length M.
 
-The construction works as follows: instead of using x when randomness is needed,
+The construction works as follows. Instead of using x when randomness is needed,
 use:
 
 ~~~
-PRF(KDF(G(x), H(Sig(sk, tag1))), tag2)
+Expand(Extract(G(x), H(Sig(sk, tag1))), tag2)
 ~~~
 
 Functionally, this computes the PRF of a string (tag2) with a key derived from
@@ -211,7 +211,7 @@ an attack, the adversary might be able to recover the long-term key used in the 
 
 Under these conditions, applying this construction should never yield worse security
 guarantees than not applying it assuming that applying the PRF does not reduce entropy. We
-believe there is always merit in analysing protocols specifically. However, this
+believe there is always merit in analyzing protocols specifically. However, this
 construction is generic so the analyses of many protocols will still hold even if this
 proposed construction is incorporated. 
 
