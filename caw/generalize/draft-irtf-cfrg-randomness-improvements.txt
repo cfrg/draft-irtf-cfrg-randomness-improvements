@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: December 23, 2018                                 S. Smyshlyaev
+Expires: December 24, 2018                                 S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
                                                               Apple Inc.
-                                                           June 21, 2018
+                                                           June 22, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -37,14 +37,14 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at https://datatracker.ietf.org/drafts/current/.
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 23, 2018.
+   This Internet-Draft will expire on December 24, 2018.
 
 
 
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Cremers, et al.         Expires December 23, 2018               [Page 1]
+Cremers, et al.         Expires December 24, 2018               [Page 1]
 
 Internet-Draft           Randomness Improvements               June 2018
 
@@ -65,7 +65,7 @@ Copyright Notice
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-   (https://trustee.ietf.org/license-info) in effect on the date of
+   (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -80,10 +80,10 @@ Table of Contents
    3.  Tag Generation  . . . . . . . . . . . . . . . . . . . . . . .   4
    4.  Application to TLS  . . . . . . . . . . . . . . . . . . . . .   4
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
    7.  Comparison to RFC 6979  . . . . . . . . . . . . . . . . . . .   5
    8.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
 
 1.  Introduction
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Cremers, et al.         Expires December 23, 2018               [Page 2]
+Cremers, et al.         Expires December 24, 2018               [Page 2]
 
 Internet-Draft           Randomness Improvements               June 2018
 
@@ -165,7 +165,7 @@ Internet-Draft           Randomness Improvements               June 2018
 
 
 
-Cremers, et al.         Expires December 23, 2018               [Page 3]
+Cremers, et al.         Expires December 24, 2018               [Page 3]
 
 Internet-Draft           Randomness Improvements               June 2018
 
@@ -173,7 +173,10 @@ Internet-Draft           Randomness Improvements               June 2018
    Sig(sk, tag1) should only be computed once for the lifetime of the
    randomness wrapper, and MUST NOT be used or exposed beyond its role
    in this computation.  Moreover, Sig MUST be a deterministic signature
-   function, e.g., deterministic ECDSA [RFC6979].
+   function, e.g., deterministic ECDSA [RFC6979], or use an independent
+   (and completely reliable) entropy source, e.g., if Sig is implemented
+   in an HSM with its own internal trusted entropy source for signature
+   generation.
 
 3.  Tag Generation
 
@@ -211,6 +214,18 @@ Internet-Draft           Randomness Improvements               June 2018
 
    This document makes no request to IANA.
 
+
+
+
+
+
+
+
+Cremers, et al.         Expires December 24, 2018               [Page 4]
+
+Internet-Draft           Randomness Improvements               June 2018
+
+
 6.  Security Considerations
 
    A security analysis was performed by two authors of this document.
@@ -219,13 +234,6 @@ Internet-Draft           Randomness Improvements               June 2018
    scenario wherein the PRF provides only an outer wrapper on usual
    CSPRNG generation.
 
-
-
-Cremers, et al.         Expires December 23, 2018               [Page 4]
-
-Internet-Draft           Randomness Improvements               June 2018
-
-
    The main reason one might expect the signature to be exposed is via a
    side-channel attack.  It is therefore prudent when implementing this
    construction to take into consideration the extra long-term key
@@ -233,11 +241,14 @@ Internet-Draft           Randomness Improvements               June 2018
    considerations are necessary.
 
    The signature in the construction as well as in the protocol itself
-   MUST be deterministic: if the signatures are probabilistic, then with
-   weak entropy, our construction does not help and the signatures are
-   still vulnerable due to repeat randomness attacks.  In such an
-   attack, the adversary might be able to recover the long-term key used
-   in the signature.
+   MUST NOT use randomness from entropy sources with dubious randomness
+   guarantees.  Thus, the signature scheme MUST either use a reliable
+   entropy source (independent from the CSPRNG that is being improved
+   with the proposed construction) or be deterministic: if the
+   signatures are probabilistic and use weak entropy, our construction
+   does not help and the signatures are still vulnerable due to repeat
+   randomness attacks.  In such an attack, the adversary might be able
+   to recover the long-term key used in the signature.
 
    Under these conditions, applying this construction should never yield
    worse security guarantees than not applying it assuming that applying
@@ -259,6 +270,18 @@ Internet-Draft           Randomness Improvements               June 2018
 
 8.  Normative References
 
+
+
+
+
+
+
+
+Cremers, et al.         Expires December 24, 2018               [Page 5]
+
+Internet-Draft           Randomness Improvements               June 2018
+
+
    [DebianBug]
               Yilek, Scott, et al, ., "When private keys are public -
               Results from the 2008 Debian OpenSSL vulnerability", n.d.,
@@ -274,23 +297,15 @@ Internet-Draft           Randomness Improvements               June 2018
               <https://www.microsoft.com/en-us/research/wp-
               content/uploads/2016/02/strongake-submitted.pdf>.
 
-
-
-
-Cremers, et al.         Expires December 23, 2018               [Page 5]
-
-Internet-Draft           Randomness Improvements               June 2018
-
-
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
-              DOI 10.17487/RFC2104, February 1997,
-              <https://www.rfc-editor.org/info/rfc2104>.
+              DOI 10.17487/RFC2104, February 1997, <https://www.rfc-
+              editor.org/info/rfc2104>.
 
    [RFC5869]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
               Key Derivation Function (HKDF)", RFC 5869,
-              DOI 10.17487/RFC5869, May 2010,
-              <https://www.rfc-editor.org/info/rfc5869>.
+              DOI 10.17487/RFC5869, May 2010, <https://www.rfc-
+              editor.org/info/rfc5869>.
 
    [RFC6979]  Pornin, T., "Deterministic Usage of the Digital Signature
               Algorithm (DSA) and Elliptic Curve Digital Signature
@@ -313,6 +328,16 @@ Internet-Draft           Randomness Improvements               June 2018
               (ECDSA), ANSI X9.62-2005, November 2005.", n.d., <American
               National Standards Institute>.
 
+
+
+
+
+
+Cremers, et al.         Expires December 24, 2018               [Page 6]
+
+Internet-Draft           Randomness Improvements               June 2018
+
+
 Authors' Addresses
 
    Cas Cremers
@@ -322,20 +347,6 @@ Authors' Addresses
    England
 
    Email: cas.cremers@cs.ox.ac.uk
-
-
-
-
-
-
-
-
-
-
-
-Cremers, et al.         Expires December 23, 2018               [Page 6]
-
-Internet-Draft           Randomness Improvements               June 2018
 
 
    Luke Garratt
@@ -378,15 +389,4 @@ Internet-Draft           Randomness Improvements               June 2018
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-Cremers, et al.         Expires December 23, 2018               [Page 7]
+Cremers, et al.         Expires December 24, 2018               [Page 7]
