@@ -9,80 +9,30 @@
 
   
 <style type="text/css">/*<![CDATA[*/
-@viewport {
-  zoom: 1.0;
-  width: extend-to-zoom;
-}
-@-ms-viewport {
-  width: extend-to-zoom;
-  zoom: 1.0;
-}
-
-@media screen and (min-width: 1024px) {
-  body>ul.toc, body>#rfc\.toc {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    right: calc(50vw - 550px);
-    width: 300px;
-    z-index: 1;
-  }
-  #rfc\.toc {
-    top: 55px;
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
-  ul.toc, #rfc\.toc {
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
-  body>ul.toc {
-    top: 140px;
-  }
-
-  body {
-    padding-right: 350px;
-  }
-}
 
 body {
-  font: 16px "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font: 16px "Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif;
   color: #333;
   font-size-adjust: 0.5;
   line-height: 24px;
   margin: 75px auto;
-  max-width: 724px;
+  max-width: 624px;
+  padding: 0 5px;
 }
 
-.title, .filename, h1, h2, h3, h4 {
-  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+.title, .filename, h1, h2, h3, h4, h5 {
+  font: 16px "Roboto Condensed","Helvetica Neue","Open Sans",Helvetica,Calibri,sans-serif;
   font-size-adjust: 0.5;
-  font-weight: 500;
+  font-weight: bold;
   color: #333;
   line-height: 100%;
   margin: 0.8em 0 0.3em;
 }
-.title { font-size: 36px; }
-h1 { font-size: 36px; }
-h2 { font-size: 24px; }
-h3, h4 { font-size: 18px; }
+.title, #rfc\.title h1 { font-size: 32px; }
+h1, section h1, h2, section h2, section h3, nav h2 { font-size: 20px; }
+h3, section h4, h4, section h5 { font-size: 16px; }
 h1 a[href], h2 a[href], h3 a[href], h4 a[href] {
   color: #333;
-}
-
-ul.toc li {
-  list-style: none;
-  text-indent: -2.5em;
-  padding-left: 2.5em;
-  padding-bottom: 5px;
-  margin: 0;
-}
-ul.toc ul {
-  margin: 0;
-}
-/* xml2rfc nests ul directly inside ul which messes with the style badly */
-ul.toc, ul.toc>ul, ul.toc ul>ul {
-  margin: 0 0 0 1.5em;
 }
 
 table {
@@ -111,28 +61,30 @@ td.reference {
 }
 
 
-table.header {
+table.header, table#rfc\.headerblock {
   width: 100%;
 }
-table.header td {
+table.header td, table#rfc\.headerblock td {
   border: none;
   background-color: transparent;
   color: black;
+  padding: 0;
 }
 .filename {
+  display: block;
   color: rgb(119, 119, 119);
-  font-size: 23px;
+  font-size: 20px;
   font-weight: normal;
-  height: auto;
   line-height: 100%;
+  margin: 10px 0 32px;
 }
 #rfc\.abstract+p, #rfc\.abstract p {
-  font-size: 18px;
-  line-height: 27px%;
+  font-size: 20px;
+  line-height: 28px;
 }
 
 samp, tt, code, pre {
-  font: 11pt consolas, monospace;
+  font: 15px Consolas, monospace;
   font-size-adjust: none;
 }
 pre {
@@ -142,13 +94,15 @@ pre {
   padding: 5px;
   margin: 5px;
 }
-.figure {
+.figure, caption {
   font-style: italic;
   margin: 0 1.5em;
+  text-align: left;
 }
 
 address {
-  margin: 10px 0 0;
+  margin: 16px 2px;
+  line-height: 20px;
 }
 .vcard {
   font-style: normal;
@@ -156,8 +110,8 @@ address {
 .vcardline {
   display: block;
 }
-.vcardline .fn {
-  font-weight: bold;
+.vcardline .fn, address b {
+  font-weight: normal;
 }
 .vcardline .hidden {
   display: none;
@@ -222,6 +176,45 @@ address {
   font-style: normal;
 }
 
+ul.toc ul {
+  margin: 0 0 0 2em;
+}
+ul.toc li {
+  list-style: none;
+  margin: 0;
+}
+
+@media screen and (min-width: 924px) {
+  body {
+    padding-right: 350px;
+  }
+  body>ul.toc, body>#rfc\.toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 500px);
+    width: 300px;
+    z-index: 1;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  body>#rfc\.toc {
+    top: 55px;
+  }
+  body>ul.toc {
+    top: 100px;
+  }
+
+  ul.toc {
+    margin: 0 0 0 4px;
+    font-size: 12px;
+    line-height: 20px;
+  }
+  ul.toc ul {
+    margin-left: 1.2em;
+  }
+}
+
 .github-fork-ribbon-wrapper {
   display: none;
 }
@@ -279,25 +272,27 @@ address {
     position: fixed;
   }
 /*]]>*/</style>
+<meta name="viewport" content="initial-scale=1.0">
 
 
-  <link href="#rfc.toc" rel="Contents">
-<link href="#rfc.section.1" rel="Chapter" title="1 Introduction">
-<link href="#rfc.section.2" rel="Chapter" title="2 Randomness Wrapper">
-<link href="#rfc.section.3" rel="Chapter" title="3 Tag Generation">
-<link href="#rfc.section.4" rel="Chapter" title="4 Application to TLS">
-<link href="#rfc.section.5" rel="Chapter" title="5 IANA Considerations">
-<link href="#rfc.section.6" rel="Chapter" title="6 Security Considerations">
-<link href="#rfc.references" rel="Chapter" title="7 Normative References">
-<link href="#rfc.authors" rel="Chapter">
+  <link href="#rfc.toc" rel="Contents"/>
+<link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Randomness Wrapper"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 Tag Generation"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 Application to TLS"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 IANA Considerations"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Security Considerations"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 Comparison to RFC 6979"/>
+<link href="#rfc.references" rel="Chapter" title="8 Normative References"/>
+<link href="#rfc.authors" rel="Chapter"/>
 
 
-  <meta name="generator" content="xml2rfc version 2.9.5 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.5.2 - http://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Cremers, C., Garratt, L., Smyshlyaev, S., Sullivan, N., and C. Wood" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-irtf-cfrg-randomness-improvements-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-03-23" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-6-22" />
   <meta name="dct.abstract" content="Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs." />
   <meta name="description" content="Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs." />
 
@@ -309,44 +304,44 @@ address {
     <tbody>
     
     	<tr>
-<td class="left">Network Working Group</td>
-<td class="right">C. Cremers</td>
+  <td class="left">Network Working Group</td>
+  <td class="right">C. Cremers</td>
 </tr>
 <tr>
-<td class="left">Internet-Draft</td>
-<td class="right">L. Garratt</td>
+  <td class="left">Internet-Draft</td>
+  <td class="right">L. Garratt</td>
 </tr>
 <tr>
-<td class="left">Intended status: Informational</td>
-<td class="right">University of Oxford</td>
+  <td class="left">Intended status: Informational</td>
+  <td class="right">University of Oxford</td>
 </tr>
 <tr>
-<td class="left">Expires: September 24, 2018</td>
-<td class="right">S. Smyshlyaev</td>
+  <td class="left">Expires: December 24, 2018</td>
+  <td class="right">S. Smyshlyaev</td>
 </tr>
 <tr>
-<td class="left"></td>
-<td class="right">CryptoPro</td>
+  <td class="left"></td>
+  <td class="right">CryptoPro</td>
 </tr>
 <tr>
-<td class="left"></td>
-<td class="right">N. Sullivan</td>
+  <td class="left"></td>
+  <td class="right">N. Sullivan</td>
 </tr>
 <tr>
-<td class="left"></td>
-<td class="right">Cloudflare</td>
+  <td class="left"></td>
+  <td class="right">Cloudflare</td>
 </tr>
 <tr>
-<td class="left"></td>
-<td class="right">C. Wood</td>
+  <td class="left"></td>
+  <td class="right">C. Wood</td>
 </tr>
 <tr>
-<td class="left"></td>
-<td class="right">Apple Inc.</td>
+  <td class="left"></td>
+  <td class="right">Apple Inc.</td>
 </tr>
 <tr>
-<td class="left"></td>
-<td class="right">March 23, 2018</td>
+  <td class="left"></td>
+  <td class="right">June 22, 2018</td>
 </tr>
 
     	
@@ -356,130 +351,131 @@ address {
   <p class="title">Randomness Improvements for Security Protocols<br />
   <span class="filename">draft-irtf-cfrg-randomness-improvements-latest</span></p>
   
-  <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
+  <h1 id="rfc.abstract">
+  <a href="#rfc.abstract">Abstract</a>
+</h1>
 <p>Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs.</p>
-<h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
+<h1 id="rfc.status">
+  <a href="#rfc.status">Status of This Memo</a>
+</h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
-<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
+<p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on September 24, 2018.</p>
-<h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
+<p>This Internet-Draft will expire on December 24, 2018.</p>
+<h1 id="rfc.copyrightnotice">
+  <a href="#rfc.copyrightnotice">Copyright Notice</a>
+</h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
-<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
 
   
   <hr class="noprint" />
   <h1 class="np" id="rfc.toc"><a href="#rfc.toc">Table of Contents</a></h1>
   <ul class="toc">
 
-  	<li>1.   <a href="#rfc.section.1">Introduction</a>
-</li>
-<li>2.   <a href="#rfc.section.2">Randomness Wrapper</a>
-</li>
-<li>3.   <a href="#rfc.section.3">Tag Generation</a>
-</li>
-<li>4.   <a href="#rfc.section.4">Application to TLS</a>
-</li>
-<li>5.   <a href="#rfc.section.5">IANA Considerations</a>
-</li>
-<li>6.   <a href="#rfc.section.6">Security Considerations</a>
-</li>
-<li>7.   <a href="#rfc.references">Normative References</a>
-</li>
-<li><a href="#rfc.authors">Authors' Addresses</a>
-</li>
+  	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
+<li>2.   <a href="#rfc.section.2">Randomness Wrapper</a></li>
+<li>3.   <a href="#rfc.section.3">Tag Generation</a></li>
+<li>4.   <a href="#rfc.section.4">Application to TLS</a></li>
+<li>5.   <a href="#rfc.section.5">IANA Considerations</a></li>
+<li>6.   <a href="#rfc.section.6">Security Considerations</a></li>
+<li>7.   <a href="#rfc.section.7">Comparison to RFC 6979</a></li>
+<li>8.   <a href="#rfc.references">Normative References</a></li>
+<li><a href="#rfc.authors">Authors' Addresses</a></li>
 
 
   </ul>
 
-  <h1 id="rfc.section.1">
-<a href="#rfc.section.1">1.</a> <a href="#introduction" id="introduction">Introduction</a>
-</h1>
-<p id="rfc.section.1.p.1">Randomness is a crucial ingredient for TLS and related transport security protocols.  TLS in particular uses Random Number Generators (RNGs) to generate several values: session IDs, ephemeral key shares, and ClientHello and ServerHello random values. RNG failures such as the Debian bug described in <a href="#DebianBug" class="xref">[DebianBug]</a> can lead to insecure TLS connections.  RNGs may also be intentionally weakened to cause harm <a href="#DualEC" class="xref">[DualEC]</a>.  In such cases where RNGs are poorly implemented or insecure, an adversary may be able to predict its output and recover secret Diffie-Hellman key shares that protect the connection.</p>
-<p id="rfc.section.1.p.2">This document proposes an improvement to randomness generation in security protocols inspired by the &#8220;NAXOS trick&#8221; <a href="#NAXOS" class="xref">[NAXOS]</a>. Specifically, instead of using raw entropy where needed, e.g., in generating ephemeral key shares, a party&#8217;s long-term private key is mixed into the entropy pool. In the NAXOS key exchange protocol, raw entropy output x is replaced by H(x, sk), where sk is the sender&#8217;s private key.  Unfortunately, as private keys are often isolated in HSMs, direct access to compute H(x, sk) is impossible. An alternate yet functionally equivalent construction is needed.</p>
+  <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> <a href="#introduction" id="introduction">Introduction</a></h1>
+<p id="rfc.section.1.p.1">Randomness is a crucial ingredient for TLS and related transport security protocols.  TLS in particular uses Random Number Generators (RNGs) to generate several values: session IDs, ephemeral key shares, and ClientHello and ServerHello random values. RNG failures such as the Debian bug described in <a href="#DebianBug">[DebianBug]</a> can lead to insecure TLS connections.  RNGs may also be intentionally weakened to cause harm <a href="#DualEC">[DualEC]</a>.  In such cases where RNGs are poorly implemented or insecure, an adversary may be able to predict its output and recover secret Diffie-Hellman key shares that protect the connection.</p>
+<p id="rfc.section.1.p.2">This document proposes an improvement to randomness generation in security protocols inspired by the &#8220;NAXOS trick&#8221; <a href="#NAXOS">[NAXOS]</a>. Specifically, instead of using raw entropy where needed, e.g., in generating ephemeral key shares, a party&#8217;s long-term private key is mixed into the entropy pool. In the NAXOS key exchange protocol, raw entropy output x is replaced by H(x, sk), where sk is the sender&#8217;s private key.  Unfortunately, as private keys are often isolated in HSMs, direct access to compute H(x, sk) is impossible. An alternate yet functionally equivalent construction is needed.</p>
 <p id="rfc.section.1.p.3">The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), where the key is derived from raw entropy output and a private key signature.  Implementations SHOULD apply this technique when indirect access to a private key is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees about possible future issues with the randomness.</p>
-<h1 id="rfc.section.2">
-<a href="#rfc.section.2">2.</a> <a href="#randomness-wrapper" id="randomness-wrapper">Randomness Wrapper</a>
-</h1>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#randomness-wrapper" id="randomness-wrapper">Randomness Wrapper</a></h1>
 <p id="rfc.section.2.p.1">Let x be the raw entropy output of a CSPRNG. When properly instantiated, x should be indistinguishable from a random string of length |x|. However, as previously discussed, this is not always true. To mitigate this problem, we propose an approach for wrapping the CSPRNG output with a construction that artificially injects randomness into a value that may be lacking entropy.</p>
-<p id="rfc.section.2.p.2">Let PRF(k, m) be a cryptographic pseudorandom function, e.g., HMAC <a href="#RFC2104" class="xref">[RFC2104]</a>, that takes as input a key k of length L and message m and produces an output of length M.  For example, when using HMAC with SHA256, L and M are 256 bits.  Let Sig(sk, m) be a function that computes a signature of message m given private key sk. Let G be an algorithm that generates random numbers from raw entropy, i.e., the output of a CSPRNG. Let tag be a fixed, context-dependent string. Let KDF be a key derivation function, e.g., HKDF-Extract <a href="#RFC5869" class="xref">[RFC5869]</a> (with first argument set to nil), that extracts a key of length L suitable for cryptographic use. Lastly, let H be a cryptographic hash function that produces output of length M.</p>
-<p id="rfc.section.2.p.3">The construction works as follows: instead of using x when randomness is needed, use:</p>
+<p id="rfc.section.2.p.2">Let G(n) be an algorithm that generates n random bytes from raw entropy, i.e., the output of a CSPRNG. Let Sig(sk, m) be a function that computes a signature of message m given private key sk. Let H be a cryptographic hash function that produces output of length M. Let Extract be a randomness extraction function, e.g., HKDF-Extract <a href="#RFC5869">[RFC5869]</a>, which accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., HKDF-Expand <a href="#RFC5869">[RFC5869]</a>, that takes as input a pseudorandom key k of length L, info string, and output length n, and produces output of length n. Finally, let tag1 be a fixed, context-dependent string, and let tag2 be a dynamically changing string.</p>
+<p id="rfc.section.2.p.3">The construction works as follows. Instead of using x = G(n) when randomness is needed, use:</p>
 <pre>
-PRF(KDF(G(x) || H(Sig(sk, tag1))), tag2)
+       x = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 </pre>
-<p id="rfc.section.2.p.4">Functionally, this computes the PRF of a string (tag2) with a key derived from the CSPRNG output and signature over a fixed string (tag1). See <a href="#tag-gen" class="xref">Section 3</a> for details about how &#8220;tag1&#8221; and &#8220;tag2&#8221; should be generated. The PRF behaves in a manner that is indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key is selected at random. Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(x). If the signature is leaked, then security reduces to the scenario wherein the PRF provides only a wrapper to G(x).</p>
-<p id="rfc.section.2.p.5">In systems where signature computations are not cheap, these values may be precomputed in anticipation of future randomness requests. This is possible since the construction depends solely upon the CSPRNG output and private key.</p>
-<p id="rfc.section.2.p.6">Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this computation. Moreover, Sig MUST be a deterministic signature function, e.g., deterministic ECDSA <a href="#RFC6979" class="xref">[RFC6979]</a>.</p>
-<h1 id="rfc.section.3">
-<a href="#rfc.section.3">3.</a> <a href="#tag-gen" id="tag-gen">Tag Generation</a>
-</h1>
-<p id="rfc.section.3.p.1">Both tags SHOULD be generated such that they never collide with another accessor or owner of the private key. This can happen if, for example, one HSM with a private key is used from several servers, or if virtual machines are cloned.</p>
+<p id="rfc.section.2.p.4">Functionally, this expands n random bytes from a key derived from the CSPRNG output and signature over a fixed string (tag1). See <a href="#tag-gen">Section 3</a> for details about how &#8220;tag1&#8221; and &#8220;tag2&#8221; should be generated and used per invocation of the randomness wrapper. Expand() generates a string that is computationally indistinguishable from a truly random string of length n.  Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n).  If the signature is leaked, then security reduces to the scenario wherein randomness is expanded directly from G(n).</p>
+<p id="rfc.section.2.p.5">Also, in systems where signature computations are expensive, these values may be precomputed in anticipation of future randomness requests. This is possible since the construction depends solely upon the CSPRNG output and private key.</p>
+<p id="rfc.section.2.p.6">Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper, and MUST NOT be used or exposed beyond its role in this computation. Moreover, Sig MUST be a deterministic signature function, e.g., deterministic ECDSA <a href="#RFC6979">[RFC6979]</a>, or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented in an HSM with its own internal trusted entropy source for signature generation.</p>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#tag-gen" id="tag-gen">Tag Generation</a></h1>
+<p id="rfc.section.3.p.1">Both tags SHOULD be generated such that they never collide with another contender or owner of the private key. This can happen if, for example, one HSM with a private key is used from several servers, or if virtual machines are cloned.</p>
 <p id="rfc.section.3.p.2">To mitigate collisions, tag strings SHOULD be constructed as follows:</p>
-<p></p>
+<p/>
 
 <ul>
-<li>tag1: Constant string bound to a specific device and protocol in use. This allows caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address.  See <a href="#sec:tls13" class="xref">Section 4</a> for example protocol information that can be used in the context of TLS 1.3.</li>
-<li>tag2: Non-constant string that includes a timestamp or counter. This ensures change over time even if randomness were to repeat.</li>
+  <li>tag1: Constant string bound to a specific device and protocol in use. This allows caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address.  See <a href="#sec:tls13">Section 4</a> for example protocol information that can be used in the context of TLS 1.3.</li>
+  <li>tag2: Non-constant string that includes a timestamp or counter. This ensures change over time even if randomness were to repeat.</li>
 </ul>
-<h1 id="rfc.section.4">
-<a href="#rfc.section.4">4.</a> <a href="#sec:tls13" id="sec:tls13">Application to TLS</a>
-</h1>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#sec:tls13" id="sec:tls13">Application to TLS</a></h1>
 <p id="rfc.section.4.p.1">The PRF randomness wrapper can be applied to any protocol wherein a party has a long-term private key and also generates randomness. This is true of most TLS servers. Thus, to apply this construction to TLS, one simply replaces the &#8220;private&#8221; PRNG, i.e., the PRNG that generates private values, such as key shares, with:</p>
 <pre>
-HMAC(HKDF-Extract(nil, G(x) || Sig(sk, tag1)), tag2)
+HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 </pre>
 <p id="rfc.section.4.p.2">Moreover, we fix tag1 to protocol-specific information such as &#8220;TLS 1.3 Additional Entropy&#8221; for TLS 1.3. Older variants use similarly constructed strings.</p>
-<h1 id="rfc.section.5">
-<a href="#rfc.section.5">5.</a> <a href="#iana-considerations" id="iana-considerations">IANA Considerations</a>
-</h1>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#iana-considerations" id="iana-considerations">IANA Considerations</a></h1>
 <p id="rfc.section.5.p.1">This document makes no request to IANA.</p>
-<h1 id="rfc.section.6">
-<a href="#rfc.section.6">6.</a> <a href="#security-considerations" id="security-considerations">Security Considerations</a>
-</h1>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#security-considerations" id="security-considerations">Security Considerations</a></h1>
 <p id="rfc.section.6.p.1">A security analysis was performed by two authors of this document. Generally speaking, security depends on keeping the private key secret. If this secret is compromised, the scheme reduces to the scenario wherein the PRF provides only an outer wrapper on usual CSPRNG generation.</p>
 <p id="rfc.section.6.p.2">The main reason one might expect the signature to be exposed is via a side-channel attack.  It is therefore prudent when implementing this construction to take into consideration the extra long-term key operation if equipment is used in a hostile environment when such considerations are necessary.</p>
-<p id="rfc.section.6.p.3">The signature in the construction as well as in the protocol itself MUST be deterministic: if the signatures are probabilistic, then with weak entropy, our construction does not help and the signatures are still vulnerable due to repeat randomness attacks. In such an attack, the adversary might be able to recover the long-term key used in the signature.</p>
-<p id="rfc.section.6.p.4">Under these conditions, applying this construction should never yield worse security guarantees than not applying it assuming that applying the PRF does not reduce entropy. We believe there is always merit in analysing protocols specifically. However, this construction is generic so the analyses of many protocols will still hold even if this proposed construction is incorporated.</p>
-<h1 id="rfc.references">
-<a href="#rfc.references">7.</a> Normative References</h1>
-<table><tbody>
-<tr>
-<td class="reference"><b id="DebianBug">[DebianBug]</b></td>
-<td class="top">
-<a>Yilek, Scott, et al, .</a>, "<a href="https://pdfs.semanticscholar.org/fcf9/fe0946c20e936b507c023bbf89160cc995b9.pdf">When private keys are public - Results from the 2008 Debian OpenSSL vulnerability</a>", n.d..</td>
-</tr>
-<tr>
-<td class="reference"><b id="DualEC">[DualEC]</b></td>
-<td class="top">
-<a>Bernstein, Daniel et al, .</a>, "<a href="https://projectbullrun.org/dual-ec/documents/dual-ec-20150731.pdf">Dual EC - A standardized back door</a>", n.d..</td>
-</tr>
-<tr>
-<td class="reference"><b id="NAXOS">[NAXOS]</b></td>
-<td class="top">
-<a>LaMacchia, Brian et al, .</a>, "<a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf">Stronger Security of Authenticated Key Exchange</a>", n.d..</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC2104">[RFC2104]</b></td>
-<td class="top">
-<a>Krawczyk, H.</a>, <a>Bellare, M.</a> and <a>R. Canetti</a>, "<a href="https://tools.ietf.org/html/rfc2104">HMAC: Keyed-Hashing for Message Authentication</a>", RFC 2104, DOI 10.17487/RFC2104, February 1997.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC5869">[RFC5869]</b></td>
-<td class="top">
-<a>Krawczyk, H.</a> and <a>P. Eronen</a>, "<a href="https://tools.ietf.org/html/rfc5869">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)</a>", RFC 5869, DOI 10.17487/RFC5869, May 2010.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC6979">[RFC6979]</b></td>
-<td class="top">
-<a>Pornin, T.</a>, "<a href="https://tools.ietf.org/html/rfc6979">Deterministic Usage of the Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm (ECDSA)</a>", RFC 6979, DOI 10.17487/RFC6979, August 2013.</td>
-</tr>
-<tr>
-<td class="reference"><b id="X9.62">[X9.62]</b></td>
-<td class="top">
-<a>American National Standards Institute, .</a>, "<a>Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI X9.62-2005, November 2005.</a>", n.d..</td>
-</tr>
-</tbody></table>
-<h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
+<p id="rfc.section.6.p.3">The signature in the construction as well as in the protocol itself MUST NOT use randomness from entropy sources with dubious randomness guarantees. Thus, the signature scheme MUST either use a reliable entropy source (independent from the CSPRNG that is being improved with the proposed construction) or be deterministic: if the signatures are probabilistic and use weak entropy, our construction does not help and the signatures are still vulnerable due to repeat randomness attacks. In such an attack, the adversary might be able to recover the long-term key used in the signature.</p>
+<p id="rfc.section.6.p.4">Under these conditions, applying this construction should never yield worse security guarantees than not applying it assuming that applying the PRF does not reduce entropy. We believe there is always merit in analyzing protocols specifically. However, this construction is generic so the analyses of many protocols will still hold even if this proposed construction is incorporated.</p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#comparison-to-rfc-6979" id="comparison-to-rfc-6979">Comparison to RFC 6979</a></h1>
+<p id="rfc.section.7.p.1">Section 3.3 of RFC 6979 <a href="#RFC6979">[RFC6979]</a> specifies an alternative way to deterministically generate the k value used in ECDSA. Specifically, it recommends instantiating an instance of the HMAC DRBG pseudorandom number generator, described in <a href="#SP80090A">[SP80090A]</a> and Annex D of <a href="#X962">[X962]</a>, using the private key sk as the entropy_input parameter and H(m) as the nonce. The construction provided herein is similar, with the exception that a key derived from G(x) and H(Sig(sk, tag1)) is used as the entropy input and tag2 is the nonce.</p>
+<h1 id="rfc.references"><a href="#rfc.references">8.</a> Normative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="DebianBug">[DebianBug]</b>
+      </td>
+      <td class="top"><a>Yilek, Scott, et al, .</a>, "<a href="https://pdfs.semanticscholar.org/fcf9/fe0946c20e936b507c023bbf89160cc995b9.pdf">When private keys are public - Results from the 2008 Debian OpenSSL vulnerability</a>", n.d..</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="DualEC">[DualEC]</b>
+      </td>
+      <td class="top"><a>Bernstein, Daniel et al, .</a>, "<a href="https://projectbullrun.org/dual-ec/documents/dual-ec-20150731.pdf">Dual EC - A standardized back door</a>", n.d..</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="NAXOS">[NAXOS]</b>
+      </td>
+      <td class="top"><a>LaMacchia, Brian et al, .</a>, <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf">Stronger Security of Authenticated Key Exchange</a>", n.d..</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC2104">[RFC2104]</b>
+      </td>
+      <td class="top"><a>Krawczyk, H.</a>, <a>Bellare, M.</a> and <a>R. Canetti</a>, "<a href="http://tools.ietf.org/html/rfc2104">HMAC: Keyed-Hashing for Message Authentication</a>", RFC 2104, DOI 10.17487/RFC2104, February 1997.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5869">[RFC5869]</b>
+      </td>
+      <td class="top"><a>Krawczyk, H.</a> and <a>P. Eronen</a>, "<a href="http://tools.ietf.org/html/rfc5869">HMAC-based Extract-and-Expand Key Derivation Function (HKDF)</a>", RFC 5869, DOI 10.17487/RFC5869, May 2010.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC6979">[RFC6979]</b>
+      </td>
+      <td class="top"><a>Pornin, T.</a>, "<a href="http://tools.ietf.org/html/rfc6979">Deterministic Usage of the Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm (ECDSA)</a>", RFC 6979, DOI 10.17487/RFC6979, August 2013.</td>
+    </tr>
+    <tr><td class="reference"><b id="SP80090A">[SP80090A]</b></td><td class="top"><a href="National Institute of Standards and Technology">Recommendation for Random Number Generation Using Deterministic Random Bit Generators (Revised), NIST Special Publication 800-90A, January 2012.</a>", n.d..</td>, "</tr>
+    <tr>
+      <td class="reference">
+        <b id="X9.62">[X9.62]</b>
+      </td>
+      <td class="top"><a>American National Standards Institute, .</a>, "<a>Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI X9.62-2005, November 2005.</a>", n.d..</td>
+    </tr>
+    <tr><td class="reference"><b id="X962">[X962]</b></td><td class="top"><a href="American National Standards Institute">Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA), ANSI X9.62-2005, November 2005.</a>", n.d..</td>, "</tr>
+  </tbody>
+</table>
+<h1 id="rfc.authors">
+  <a href="#rfc.authors">Authors' Addresses</a>
+</h1>
 <div class="avoidbreak">
   <address class="vcard">
 	<span class="vcardline">

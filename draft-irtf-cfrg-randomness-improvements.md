@@ -164,7 +164,9 @@ depends solely upon the CSPRNG output and private key.
 
 Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper,
 and MUST NOT be used or exposed beyond its role in this computation. Moreover,
-Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
+Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}},
+or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
+in an HSM with its own internal trusted entropy source for signature generation.
 
 # Tag Generation {#tag-gen}
 
@@ -211,10 +213,13 @@ It is therefore prudent when implementing this construction to take into conside
 extra long-term key operation if equipment is used in a hostile environment when such
 considerations are necessary. 
 
-The signature in the construction as well as in the protocol itself MUST be deterministic:
-if the signatures are probabilistic, then with weak entropy, our construction does not
-help and the signatures are still vulnerable due to repeat randomness attacks. In such
-an attack, the adversary might be able to recover the long-term key used in the signature.
+The signature in the construction as well as in the protocol itself MUST NOT use randomness
+from entropy sources with dubious randomness guarantees. Thus, the signature scheme MUST either 
+use a reliable entropy source (independent from the CSPRNG that is being improved with the 
+proposed construction) or be deterministic: if the signatures are probabilistic and use weak entropy, 
+our construction does not help and the signatures are still vulnerable due to repeat randomness 
+attacks. In such an attack, the adversary might be able to recover the long-term key used in 
+the signature.
 
 Under these conditions, applying this construction should never yield worse security
 guarantees than not applying it assuming that applying the PRF does not reduce entropy. We
