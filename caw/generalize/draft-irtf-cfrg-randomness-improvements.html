@@ -287,12 +287,12 @@ ul.toc li {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.9.8 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.9.9 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Cremers, C., Garratt, L., Smyshlyaev, S., Sullivan, N., and C. Wood" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-irtf-cfrg-randomness-improvements-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-06-22" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-06-27" />
   <meta name="dct.abstract" content="Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs." />
   <meta name="description" content="Randomness is a crucial ingredient for TLS and related security protocols.  Weak or predictable &#8220;cryptographically-strong&#8221; pseudorandom number generators (CSPRNGs) can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs are relevant examples of this problem. This document describes a way for security protocol participants to mix their long-term private key into the entropy pool(s) from which random values are derived. This augments and improves randomness from broken or otherwise subverted CSPRNGs." />
 
@@ -316,7 +316,7 @@ ul.toc li {
 <td class="right">University of Oxford</td>
 </tr>
 <tr>
-<td class="left">Expires: December 24, 2018</td>
+<td class="left">Expires: December 29, 2018</td>
 <td class="right">S. Smyshlyaev</td>
 </tr>
 <tr>
@@ -341,7 +341,7 @@ ul.toc li {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 22, 2018</td>
+<td class="right">June 27, 2018</td>
 </tr>
 
     	
@@ -357,7 +357,7 @@ ul.toc li {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 24, 2018.</p>
+<p>This Internet-Draft will expire on December 29, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -394,7 +394,14 @@ ul.toc li {
 </h1>
 <p id="rfc.section.1.p.1">Randomness is a crucial ingredient for TLS and related transport security protocols.  TLS in particular uses Random Number Generators (RNGs) to generate several values: session IDs, ephemeral key shares, and ClientHello and ServerHello random values. RNG failures such as the Debian bug described in <a href="#DebianBug" class="xref">[DebianBug]</a> can lead to insecure TLS connections.  RNGs may also be intentionally weakened to cause harm <a href="#DualEC" class="xref">[DualEC]</a>.  In such cases where RNGs are poorly implemented or insecure, an adversary may be able to predict its output and recover secret Diffie-Hellman key shares that protect the connection.</p>
 <p id="rfc.section.1.p.2">This document proposes an improvement to randomness generation in security protocols inspired by the &#8220;NAXOS trick&#8221; <a href="#NAXOS" class="xref">[NAXOS]</a>. Specifically, instead of using raw entropy where needed, e.g., in generating ephemeral key shares, a party&#8217;s long-term private key is mixed into the entropy pool. In the NAXOS key exchange protocol, raw entropy output x is replaced by H(x, sk), where sk is the sender&#8217;s private key.  Unfortunately, as private keys are often isolated in HSMs, direct access to compute H(x, sk) is impossible. An alternate yet functionally equivalent construction is needed.</p>
-<p id="rfc.section.1.p.3">The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), where the key is derived from raw entropy output and a private key signature.  Implementations SHOULD apply this technique when indirect access to a private key is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees about possible future issues with the randomness.</p>
+<p id="rfc.section.1.p.3">The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), where the key is derived from raw entropy output and a private key signature.  Implementations SHOULD apply this technique when indirect access to a private key is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees about possible future issues with the randomness. Roughly, the security properties provided by the proposed construction are as follows:</p>
+<p></p>
+
+<ol>
+<li>If the CSPRNG works fine, that is, in a certain adversary model the CSPRNG output is indistinguishable from a truly random sequence, then the output of the proposed construction is also indistinguishable from a truly random sequence in that adversary model.</li>
+<li>An adversary Adv with full control of a (potentially broken) CSPRNG and able to observe all outputs of the proposed construction, does not obtain any non-negligible advantage in leaking the private key, modulo side channel attacks.</li>
+<li>If the CSPRNG is broken or controlled by adversary Adv, the output of the proposed construction remains indistinguishable from random provided the private key remains unknown to Adv.</li>
+</ol>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#randomness-wrapper" id="randomness-wrapper">Randomness Wrapper</a>
 </h1>
@@ -440,7 +447,8 @@ HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 <h1 id="rfc.section.7">
 <a href="#rfc.section.7">7.</a> <a href="#comparison-to-rfc-6979" id="comparison-to-rfc-6979">Comparison to RFC 6979</a>
 </h1>
-<p id="rfc.section.7.p.1">Section 3.3 of RFC 6979 <a href="#RFC6979" class="xref">[RFC6979]</a> specifies an alternative way to deterministically generate the k value used in ECDSA. Specifically, it recommends instantiating an instance of the HMAC DRBG pseudorandom number generator, described in <a href="#SP80090A" class="xref">[SP80090A]</a> and Annex D of <a href="#X962" class="xref">[X962]</a>, using the private key sk as the entropy_input parameter and H(m) as the nonce. The construction provided herein is similar, with the exception that a key derived from G(x) and H(Sig(sk, tag1)) is used as the entropy input and tag2 is the nonce.</p>
+<p id="rfc.section.7.p.1">The construction proposed herein has similarities with that of RFC 6979 <a href="#RFC6979" class="xref">[RFC6979]</a>: both of them use private keys to seed a DRBG. Section 3.3 of RFC 6979 recommends deterministically instantiating an instance of the HMAC DRBG pseudorandom number generator, described in <a href="#SP80090A" class="xref">[SP80090A]</a> and Annex D of <a href="#X962" class="xref">[X962]</a>, using the private key sk as the entropy_input parameter and H(m) as the nonce. The construction provided herein is similar, with such difference that a key derived from G(x) and H(Sig(sk, tag1)) is used as the entropy input and tag2 is the nonce.</p>
+<p id="rfc.section.7.p.2">However, the semantics and the security properties obtained by using these two constructions are different. The proposed construction aims to improve CSPRNG usage such that certain trusted randomness would remain even if the CSPRNG is completely broken. Using a signature scheme which requires entropy sources according to RFC 6979 is intended for different purposes and does not assume possession of any entropy source &#8211; even an unstable one.  For example, if in a certain system all private key operations are performed within an HSM, then the differences will manifest as follows: the HMAC DRBG construction of RFC 6979 may be implemented inside the HSM for the sake of signature generation, while the proposed construction would assume calling the signature implemented in the HSM.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">8.</a> Normative References</h1>
 <table><tbody>
