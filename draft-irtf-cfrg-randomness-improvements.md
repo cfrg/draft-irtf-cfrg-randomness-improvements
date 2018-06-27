@@ -119,11 +119,21 @@ Unfortunately, as private keys are often isolated in HSMs,
 direct access to compute H(x, sk) is impossible. An alternate yet functionally
 equivalent construction is needed.
 
-The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), 
-where the key is derived from raw entropy output and a private key signature.
+The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom 
+function (PRF), where the key is derived from raw entropy output and a private key signature.
 Implementations SHOULD apply this technique when indirect access to a private key
 is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees 
-about possible future issues with the randomness.
+about possible future issues with the randomness. Roughly, the security properties provided 
+by the proposed construction are as follows:
+
+1. If the CSPRNG works fine, that is, in a certain adversary model the CSPRNG output is 
+indistinguishable from a truly random sequence, then the output of the proposed construction 
+is also indistinguishable from a truly random sequence in that adversary model.
+2. An adversary Adv with full control of a (potentially broken) CSPRNG and able to 
+observe all outputs of the proposed construction, does not obtain any non-negligible 
+advantage in leaking the private key, modulo side channel attacks.
+3. If the CSPRNG is broken or controlled by adversary Adv, the output of the proposed construction 
+remains indistinguishable from random provided the private key remains unknown to Adv.
 
 # Randomness Wrapper
 
@@ -229,10 +239,22 @@ proposed construction is incorporated.
 
 # Comparison to RFC 6979
 
-Section 3.3 of RFC 6979 {{RFC6979}} specifies an alternative way to deterministically 
-generate the k value used in ECDSA. Specifically, it recommends instantiating an instance
-of the HMAC DRBG pseudorandom number generator, described in {{SP80090A}} and Annex D
-of {{X962}}, using the private key sk as the entropy_input parameter and H(m) as the
-nonce. The construction provided herein is similar, with the exception that a key derived
-from G(x) and H(Sig(sk, tag1)) is used as the entropy input and tag2 is the nonce. 
+The construction proposed herein has similarities with that of RFC 6979 {{RFC6979}}:
+both of them use private keys to seed a DRBG. Section 3.3 of RFC 6979 recommends deterministically 
+instantiating an instance of the HMAC DRBG pseudorandom number generator, described in {{SP80090A}} 
+and Annex D of {{X962}}, using the private key sk as the entropy_input parameter and H(m)
+as the nonce. The construction provided herein is similar, with such
+difference that a key derived from G(x) and H(Sig(sk, tag1)) is used as the
+entropy input and tag2 is the nonce.
 
+However, the semantics and the security properties obtained by using these
+two constructions are different. The proposed construction aims to improve 
+CSPRNG usage such that certain trusted randomness would remain even if the CSPRNG is 
+completely broken. Using a signature scheme which requires entropy sources 
+according to RFC 6979 is intended for different purposes and does not assume 
+possession of any entropy source -- even an unstable one. 
+For example, if in a certain system all private key operations are
+performed within an HSM, then the differences will manifest as follows: the HMAC 
+DRBG construction of RFC 6979 may be implemented inside the HSM for the sake of
+signature generation, while the proposed construction would assume calling
+the signature implemented in the HSM.
