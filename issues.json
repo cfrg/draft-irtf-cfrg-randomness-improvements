@@ -34,7 +34,7 @@
     "labels": [
 
     ],
-    "state": "open",
+    "state": "closed",
     "locked": false,
     "assignee": null,
     "assignees": [
@@ -43,8 +43,8 @@
     "milestone": null,
     "comments": 2,
     "created_at": "2018-06-21T00:37:02Z",
-    "updated_at": "2018-06-27T17:04:36Z",
-    "closed_at": null,
+    "updated_at": "2018-07-09T09:08:45Z",
+    "closed_at": "2018-07-09T09:08:45Z",
     "author_association": "OWNER",
     "pull_request": {
       "url": "https://api.github.com/repos/chris-wood/draft-cremers-cfrg-randomness-improvements/pulls/20",
