@@ -80,6 +80,12 @@ normative:
             -
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
+    SP80090A:
+        title: Recommendation for Random Number Generation Using Deterministic Random Bit Generators (Revised), NIST Special Publication 800-90A, January 2012.
+        target: National Institute of Standards and Technology
+    X962:
+        title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA), ANSI X9.62-2005, November 2005.
+        target: American National Standards Institute
 
 --- abstract
 
@@ -113,11 +119,21 @@ Unfortunately, as private keys are often isolated in HSMs,
 direct access to compute H(x, sk) is impossible. An alternate yet functionally
 equivalent construction is needed.
 
-The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom function (PRF), 
-where the key is derived from raw entropy output and a private key signature.
+The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom 
+function (PRF), where the key is derived from raw entropy output and a private key signature.
 Implementations SHOULD apply this technique when indirect access to a private key
 is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees 
-about possible future issues with the randomness.
+about possible future issues with the randomness. Roughly, the security properties provided 
+by the proposed construction are as follows:
+
+1. If the CSPRNG works fine, that is, in a certain adversary model the CSPRNG output is 
+indistinguishable from a truly random sequence, then the output of the proposed construction 
+is also indistinguishable from a truly random sequence in that adversary model.
+2. An adversary Adv with full control of a (potentially broken) CSPRNG and able to 
+observe all outputs of the proposed construction, does not obtain any non-negligible 
+advantage in leaking the private key, modulo side channel attacks.
+3. If the CSPRNG is broken or controlled by adversary Adv, the output of the proposed construction 
+remains indistinguishable from random provided the private key remains unknown to Adv.
 
 # Randomness Wrapper
 
@@ -127,44 +143,44 @@ this is not always true. To mitigate this problem, we propose an approach for wr
 the CSPRNG output with a construction that artificially injects randomness into
 a value that may be lacking entropy.
 
-Let PRF(k, m) be a cryptographic pseudorandom function, e.g., HMAC {{RFC2104}}, that
-takes as input a key k of length L and message m and produces an output of length M. 
-For example, when using HMAC with SHA256, L and M are 256 bits.
-Let Sig(sk, m) be a function that computes a signature of message m given
-private key sk. Let G be an algorithm that generates random numbers from raw entropy, i.e.,
-the output of a CSPRNG. Let tag be a fixed, context-dependent string. Let KDF be a key
-derivation function with two inputs, e.g., HKDF-Extract {{RFC5869}}, that
-extracts a key of length L suitable for cryptographic use. Lastly, let H be a cryptographic
-hash function that produces output of length M.
+Let G(n) be an algorithm that generates n random bytes from raw entropy, i.e.,
+the output of a CSPRNG. Let Sig(sk, m) be a function that computes a signature of message 
+m given private key sk. Let H be a cryptographic hash function that produces output 
+of length M. Let Extract be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
+accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
+suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., 
+HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
+and output length n, and produces output of length n. Finally, let tag1 be a fixed, 
+context-dependent string, and let tag2 be a dynamically changing string.
 
-The construction works as follows: instead of using x when randomness is needed,
+The construction works as follows. Instead of using x = G(n) when randomness is needed,
 use:
 
 ~~~
-PRF(KDF(G(x), H(Sig(sk, tag1))), tag2)
+       x = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 ~~~
 
-Functionally, this computes the PRF of a string (tag2) with a key derived from
-the CSPRNG output and signature over a fixed string (tag1). See {{tag-gen}} for
-details about how "tag1" and "tag2" should be generated. The PRF behaves in a manner that is
-indistinguishable from a truly random function from {0, 1}^L to {0, 1}^M assuming the key
-is selected at random. Thus, the security of this construction depends upon the secrecy
-of H(Sig(sk, tag1)) and G(x). If the signature is leaked, then security reduces to the
-scenario wherein the PRF provides only a wrapper to G(x).
+Functionally, this expands n random bytes from a key derived from the CSPRNG output and 
+signature over a fixed string (tag1). See {{tag-gen}} for details about how "tag1" and "tag2" 
+should be generated and used per invocation of the randomness wrapper. Expand() generates
+a string that is computationally indistinguishable from a truly random string of length n.
+Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n). 
+If the signature is leaked, then security reduces to the scenario wherein randomness is expanded
+directly from G(n).
 
-In systems where signature computations are not cheap, these values may be precomputed
+Also, in systems where signature computations are expensive, these values may be precomputed
 in anticipation of future randomness requests. This is possible since the construction
-depends solely upon the CSPRNG output and private key. 
+depends solely upon the CSPRNG output and private key.
 
-If one needs a longer output of bits, one can implement PRF as HKDF and use the 
-HKDF-expand functionality. 
-
-Sig(sk, tag1) MUST NOT be used or exposed beyond its role in this computation. Moreover,
-Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}}.
+Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper,
+and MUST NOT be used or exposed beyond its role in this computation. Moreover,
+Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}},
+or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
+in an HSM with its own internal trusted entropy source for signature generation.
 
 # Tag Generation {#tag-gen}
 
-Both tags SHOULD be generated such that they never collide with another accessor or owner
+Both tags SHOULD be generated such that they never collide with another contender or owner
 of the private key. This can happen if, for example, one HSM with a private key is
 used from several servers, or if virtual machines are cloned.
 
@@ -185,7 +201,7 @@ apply this construction to TLS, one simply replaces the "private" PRNG, i.e., th
 that generates private values, such as key shares, with:
 
 ~~~
-HKDF-Expand(HKDF-Extract(G(x), Sig(sk, tag1)), tag2, L)
+HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 ~~~
 
 Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
@@ -207,14 +223,38 @@ It is therefore prudent when implementing this construction to take into conside
 extra long-term key operation if equipment is used in a hostile environment when such
 considerations are necessary. 
 
-The signature in the construction as well as in the protocol itself MUST be deterministic:
-if the signatures are probabilistic, then with weak entropy, our construction does not
-help and the signatures are still vulnerable due to repeat randomness attacks. In such
-an attack, the adversary might be able to recover the long-term key used in the signature.
+The signature in the construction as well as in the protocol itself MUST NOT use randomness
+from entropy sources with dubious randomness guarantees. Thus, the signature scheme MUST either 
+use a reliable entropy source (independent from the CSPRNG that is being improved with the 
+proposed construction) or be deterministic: if the signatures are probabilistic and use weak entropy, 
+our construction does not help and the signatures are still vulnerable due to repeat randomness 
+attacks. In such an attack, the adversary might be able to recover the long-term key used in 
+the signature.
 
 Under these conditions, applying this construction should never yield worse security
 guarantees than not applying it assuming that applying the PRF does not reduce entropy. We
-believe there is always merit in analysing protocols specifically. However, this
+believe there is always merit in analyzing protocols specifically. However, this
 construction is generic so the analyses of many protocols will still hold even if this
 proposed construction is incorporated. 
 
+# Comparison to RFC 6979
+
+The construction proposed herein has similarities with that of RFC 6979 {{RFC6979}}:
+both of them use private keys to seed a DRBG. Section 3.3 of RFC 6979 recommends deterministically 
+instantiating an instance of the HMAC DRBG pseudorandom number generator, described in {{SP80090A}} 
+and Annex D of {{X962}}, using the private key sk as the entropy_input parameter and H(m)
+as the nonce. The construction provided herein is similar, with such
+difference that a key derived from G(x) and H(Sig(sk, tag1)) is used as the
+entropy input and tag2 is the nonce.
+
+However, the semantics and the security properties obtained by using these
+two constructions are different. The proposed construction aims to improve 
+CSPRNG usage such that certain trusted randomness would remain even if the CSPRNG is 
+completely broken. Using a signature scheme which requires entropy sources 
+according to RFC 6979 is intended for different purposes and does not assume 
+possession of any entropy source -- even an unstable one. 
+For example, if in a certain system all private key operations are
+performed within an HSM, then the differences will manifest as follows: the HMAC 
+DRBG construction of RFC 6979 may be implemented inside the HSM for the sake of
+signature generation, while the proposed construction would assume calling
+the signature implemented in the HSM.
