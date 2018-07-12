@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: December 24, 2018                                 S. Smyshlyaev
+Expires: January 13, 2019                                  S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
                                                               Apple Inc.
-                                                           June 22, 2018
+                                                           July 12, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -37,14 +37,14 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 24, 2018.
+   This Internet-Draft will expire on January 13, 2019.
 
 
 
@@ -53,9 +53,9 @@ Status of This Memo
 
 
 
-Cremers, et al.         Expires December 24, 2018               [Page 1]
+Cremers, et al.         Expires January 13, 2019                [Page 1]
 
-Internet-Draft           Randomness Improvements               June 2018
+Internet-Draft           Randomness Improvements               July 2018
 
 
 Copyright Notice
@@ -65,7 +65,7 @@ Copyright Notice
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -79,10 +79,10 @@ Table of Contents
    2.  Randomness Wrapper  . . . . . . . . . . . . . . . . . . . . .   3
    3.  Tag Generation  . . . . . . . . . . . . . . . . . . . . . . .   4
    4.  Application to TLS  . . . . . . . . . . . . . . . . . . . . .   4
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   7.  Comparison to RFC 6979  . . . . . . . . . . . . . . . . . . .   5
-   8.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
+   7.  Comparison to RFC 6979  . . . . . . . . . . . . . . . . . . .   6
+   8.  Normative References  . . . . . . . . . . . . . . . . . . . .   6
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
 
 1.  Introduction
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Cremers, et al.         Expires December 24, 2018               [Page 2]
+Cremers, et al.         Expires January 13, 2019                [Page 2]
 
-Internet-Draft           Randomness Improvements               June 2018
+Internet-Draft           Randomness Improvements               July 2018
 
 
    The approach described herein replaces the NAXOS hash with a keyed
@@ -120,6 +120,23 @@ Internet-Draft           Randomness Improvements               June 2018
    SHOULD apply this technique when indirect access to a private key is
    available and CSPRNG randomness guarantees are dubious, or to provide
    stronger guarantees about possible future issues with the randomness.
+   Roughly, the security properties provided by the proposed
+   construction are as follows:
+
+   1.  If the CSPRNG works fine, that is, in a certain adversary model
+       the CSPRNG output is indistinguishable from a truly random
+       sequence, then the output of the proposed construction is also
+       indistinguishable from a truly random sequence in that adversary
+       model.
+
+   2.  An adversary Adv with full control of a (potentially broken)
+       CSPRNG and able to observe all outputs of the proposed
+       construction, does not obtain any non-negligible advantage in
+       leaking the private key, modulo side channel attacks.
+
+   3.  If the CSPRNG is broken or controlled by adversary Adv, the
+       output of the proposed construction remains indistinguishable
+       from random provided the private key remains unknown to Adv.
 
 2.  Randomness Wrapper
 
@@ -146,6 +163,13 @@ Internet-Draft           Randomness Improvements               June 2018
    The construction works as follows.  Instead of using x = G(n) when
    randomness is needed, use:
 
+
+
+Cremers, et al.         Expires January 13, 2019                [Page 3]
+
+Internet-Draft           Randomness Improvements               July 2018
+
+
           x = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 
    Functionally, this expands n random bytes from a key derived from the
@@ -162,13 +186,6 @@ Internet-Draft           Randomness Improvements               June 2018
    values may be precomputed in anticipation of future randomness
    requests.  This is possible since the construction depends solely
    upon the CSPRNG output and private key.
-
-
-
-Cremers, et al.         Expires December 24, 2018               [Page 3]
-
-Internet-Draft           Randomness Improvements               June 2018
-
 
    Sig(sk, tag1) should only be computed once for the lifetime of the
    randomness wrapper, and MUST NOT be used or exposed beyond its role
@@ -201,6 +218,14 @@ Internet-Draft           Randomness Improvements               June 2018
    The PRF randomness wrapper can be applied to any protocol wherein a
    party has a long-term private key and also generates randomness.
    This is true of most TLS servers.  Thus, to apply this construction
+
+
+
+Cremers, et al.         Expires January 13, 2019                [Page 4]
+
+Internet-Draft           Randomness Improvements               July 2018
+
+
    to TLS, one simply replaces the "private" PRNG, i.e., the PRNG that
    generates private values, such as key shares, with:
 
@@ -213,18 +238,6 @@ Internet-Draft           Randomness Improvements               June 2018
 5.  IANA Considerations
 
    This document makes no request to IANA.
-
-
-
-
-
-
-
-
-Cremers, et al.         Expires December 24, 2018               [Page 4]
-
-Internet-Draft           Randomness Improvements               June 2018
-
 
 6.  Security Considerations
 
@@ -257,30 +270,44 @@ Internet-Draft           Randomness Improvements               June 2018
    generic so the analyses of many protocols will still hold even if
    this proposed construction is incorporated.
 
+
+
+
+
+
+
+
+Cremers, et al.         Expires January 13, 2019                [Page 5]
+
+Internet-Draft           Randomness Improvements               July 2018
+
+
 7.  Comparison to RFC 6979
 
-   Section 3.3 of RFC 6979 [RFC6979] specifies an alternative way to
-   deterministically generate the k value used in ECDSA.  Specifically,
-   it recommends instantiating an instance of the HMAC DRBG pseudorandom
-   number generator, described in [SP80090A] and Annex D of [X962],
-   using the private key sk as the entropy_input parameter and H(m) as
-   the nonce.  The construction provided herein is similar, with the
-   exception that a key derived from G(x) and H(Sig(sk, tag1)) is used
-   as the entropy input and tag2 is the nonce.
+   The construction proposed herein has similarities with that of RFC
+   6979 [RFC6979]: both of them use private keys to seed a DRBG.
+   Section 3.3 of RFC 6979 recommends deterministically instantiating an
+   instance of the HMAC DRBG pseudorandom number generator, described in
+   [SP80090A] and Annex D of [X962], using the private key sk as the
+   entropy_input parameter and H(m) as the nonce.  The construction
+   provided herein is similar, with such difference that a key derived
+   from G(x) and H(Sig(sk, tag1)) is used as the entropy input and tag2
+   is the nonce.
+
+   However, the semantics and the security properties obtained by using
+   these two constructions are different.  The proposed construction
+   aims to improve CSPRNG usage such that certain trusted randomness
+   would remain even if the CSPRNG is completely broken.  Using a
+   signature scheme which requires entropy sources according to RFC 6979
+   is intended for different purposes and does not assume possession of
+   any entropy source - even an unstable one.  For example, if in a
+   certain system all private key operations are performed within an
+   HSM, then the differences will manifest as follows: the HMAC DRBG
+   construction of RFC 6979 may be implemented inside the HSM for the
+   sake of signature generation, while the proposed construction would
+   assume calling the signature implemented in the HSM.
 
 8.  Normative References
-
-
-
-
-
-
-
-
-Cremers, et al.         Expires December 24, 2018               [Page 5]
-
-Internet-Draft           Randomness Improvements               June 2018
-
 
    [DebianBug]
               Yilek, Scott, et al, ., "When private keys are public -
@@ -299,13 +326,22 @@ Internet-Draft           Randomness Improvements               June 2018
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
-              DOI 10.17487/RFC2104, February 1997, <https://www.rfc-
-              editor.org/info/rfc2104>.
+              DOI 10.17487/RFC2104, February 1997,
+              <https://www.rfc-editor.org/info/rfc2104>.
+
+
+
+
+
+Cremers, et al.         Expires January 13, 2019                [Page 6]
+
+Internet-Draft           Randomness Improvements               July 2018
+
 
    [RFC5869]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
               Key Derivation Function (HKDF)", RFC 5869,
-              DOI 10.17487/RFC5869, May 2010, <https://www.rfc-
-              editor.org/info/rfc5869>.
+              DOI 10.17487/RFC5869, May 2010,
+              <https://www.rfc-editor.org/info/rfc5869>.
 
    [RFC6979]  Pornin, T., "Deterministic Usage of the Digital Signature
               Algorithm (DSA) and Elliptic Curve Digital Signature
@@ -328,16 +364,6 @@ Internet-Draft           Randomness Improvements               June 2018
               (ECDSA), ANSI X9.62-2005, November 2005.", n.d., <American
               National Standards Institute>.
 
-
-
-
-
-
-Cremers, et al.         Expires December 24, 2018               [Page 6]
-
-Internet-Draft           Randomness Improvements               June 2018
-
-
 Authors' Addresses
 
    Cas Cremers
@@ -356,6 +382,16 @@ Authors' Addresses
    England
 
    Email: luke.garratt@cs.ox.ac.uk
+
+
+
+
+
+
+
+Cremers, et al.         Expires January 13, 2019                [Page 7]
+
+Internet-Draft           Randomness Improvements               July 2018
 
 
    Stanislav Smyshlyaev
@@ -389,4 +425,24 @@ Authors' Addresses
 
 
 
-Cremers, et al.         Expires December 24, 2018               [Page 7]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cremers, et al.         Expires January 13, 2019                [Page 8]
