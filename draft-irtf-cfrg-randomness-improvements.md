@@ -115,13 +115,13 @@ This improves randomness from broken or otherwise subverted CSPRNGs.
 # Introduction
 
 Randomness is a crucial ingredient for TLS and related transport security protocols.
-TLS in particular uses Random Number Generators (RNGs) to generate several values: session IDs,
-ephemeral key shares, and ClientHello and ServerHello random values. RNG failures
+TLS in particular uses random number generators (generally speaking, CSPRNGs) to generate several values: session IDs,
+ephemeral key shares, and ClientHello and ServerHello random values. CSPRNG failures
 such as the Debian bug described in {{DebianBug}} can lead to insecure TLS connections.
-RNGs may also be intentionally weakened to cause harm {{DualEC}}. 
+CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}. 
 Entropy sources can also be weak or broken, and that would lead to insecurity 
 of all CSPRNG instances seeded with them.
-In such cases where RNGs are poorly implemented or insecure, an adversary may be
+In such cases where CSPRNGs are poorly implemented or insecure, an adversary may be
 able to predict its output and recover secret Diffie-Hellman key shares that protect
 the connection.
 
@@ -170,7 +170,7 @@ and output length n, and produces output of length n. Finally, let tag1 be a fix
 context-dependent string, and let tag2 be a dynamically changing string.
 
 The construction works as follows. Instead of using G(n) when randomness is needed,
-use G'(n) ,where
+use G'(n), where
 
 ~~~
        G'(n) = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
@@ -183,6 +183,10 @@ a string that is computationally indistinguishable from a truly random string of
 Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n). 
 If the signature is leaked, then security of G'(n) reduces to the scenario wherein randomness is expanded
 directly from G(n).
+
+If a private key sk is stored and used inside an HSM, then the signature calculation is implemented inside it, 
+while all other operations (including calculation of a hash function, Extract and Expand functions) can be implemented
+either inside or outside the HSM.
 
 Also, in systems where signature computations are expensive, these values may be precomputed
 in anticipation of future randomness requests. This is possible since the construction
@@ -221,7 +225,7 @@ even if randomness were to repeat.
 
 The PRF randomness wrapper can be applied to any protocol wherein a party has a long-term
 private key and also generates randomness. This is true of most TLS servers. Thus, to
-apply this construction to TLS, one simply replaces the "private" PRNG G(n), i.e., the PRNG
+apply this construction to TLS, one simply replaces the "private" CSPRNG G(n), i.e., the CSPRNG
 that generates private values, such as key shares, with:
 
 ~~~
