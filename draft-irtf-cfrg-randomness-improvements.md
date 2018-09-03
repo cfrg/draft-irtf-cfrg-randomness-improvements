@@ -87,7 +87,7 @@ normative:
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
     RY2010:
-        title: When Good Randomness Goes Bad: Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
+        title: When Good Randomness Goes Bad\: Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
         author:
             -
                 ins: Ristenpart, Yilek
