@@ -240,6 +240,10 @@ Internet-Draft           Randomness Improvements          September 2018
 
    o  tag2: Non-constant string that includes a timestamp or counter.
       This ensures change over time even if randomness were to repeat.
+      It MUST be implemented such that its values never repeat.  This
+      means, in particular, that timestamp is guaranteed to change
+      between two requests to CSPRNG (otherwise counters should be
+      used).
 
 4.  Application to TLS
 
@@ -270,10 +274,6 @@ Internet-Draft           Randomness Improvements          September 2018
    The main reason one might expect the signature to be exposed is via a
    side-channel attack.  It is therefore prudent when implementing this
    construction to take into consideration the extra long-term key
-   operation if equipment is used in a hostile environment when such
-   considerations are necessary.
-
-
 
 
 
@@ -281,6 +281,9 @@ Cremers, et al.           Expires March 7, 2019                 [Page 5]
 
 Internet-Draft           Randomness Improvements          September 2018
 
+
+   operation if equipment is used in a hostile environment when such
+   considerations are necessary.
 
    The signature in the construction as well as in the protocol itself
    MUST NOT use randomness from entropy sources with dubious randomness
@@ -327,9 +330,6 @@ Internet-Draft           Randomness Improvements          September 2018
    certain system all private key operations are performed within an
    HSM, then the differences will manifest as follows: the HMAC DRBG
    construction of RFC 6979 may be implemented inside the HSM for the
-   sake of signature generation, while the proposed construction would
-   assume calling the signature implemented in the HSM.
-
 
 
 
@@ -337,6 +337,9 @@ Cremers, et al.           Expires March 7, 2019                 [Page 6]
 
 Internet-Draft           Randomness Improvements          September 2018
 
+
+   sake of signature generation, while the proposed construction would
+   assume calling the signature implemented in the HSM.
 
 8.  Normative References
 
@@ -380,11 +383,8 @@ Internet-Draft           Randomness Improvements          September 2018
               Cryptography", n.d.,
               <https://rist.tech.cornell.edu/papers/sslhedge.pdf>.
 
-   [SP80090A]
-              "Recommendation for Random Number Generation Using
-              Deterministic Random Bit Generators (Revised), NIST
-              Special Publication 800-90A, January 2012.", n.d.,
-              <National Institute of Standards and Technology>.
+
+
 
 
 
@@ -393,6 +393,12 @@ Cremers, et al.           Expires March 7, 2019                 [Page 7]
 
 Internet-Draft           Randomness Improvements          September 2018
 
+
+   [SP80090A]
+              "Recommendation for Random Number Generation Using
+              Deterministic Random Bit Generators (Revised), NIST
+              Special Publication 800-90A, January 2012.", n.d.,
+              <National Institute of Standards and Technology>.
 
    [X9.62]    American National Standards Institute, ., "Public Key
               Cryptography for the Financial Services Industry -- The
@@ -433,13 +439,7 @@ Authors' Addresses
    Email: svs@cryptopro.ru
 
 
-   Nick Sullivan
-   Cloudflare
-   101 Townsend St
-   San Francisco
-   United States of America
 
-   Email: nick@cloudflare.com
 
 
 
@@ -450,6 +450,15 @@ Cremers, et al.           Expires March 7, 2019                 [Page 8]
 Internet-Draft           Randomness Improvements          September 2018
 
 
+   Nick Sullivan
+   Cloudflare
+   101 Townsend St
+   San Francisco
+   United States of America
+
+   Email: nick@cloudflare.com
+
+
    Christopher A. Wood
    Apple Inc.
    One Apple Park Way
@@ -457,15 +466,6 @@ Internet-Draft           Randomness Improvements          September 2018
    United States of America
 
    Email: cawood@apple.com
-
-
-
-
-
-
-
-
-
 
 
 
