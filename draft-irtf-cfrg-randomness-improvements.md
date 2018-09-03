@@ -219,7 +219,9 @@ It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}.
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
 
 - tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
-even if randomness were to repeat.
+even if randomness were to repeat. It MUST be implemented such that its values never repeat. 
+This means, in particular, that timestamp is guaranteed to change between two requests to CSPRNG 
+(otherwise counters should be used).
 
 # Application to TLS {#sec:tls13}
 
