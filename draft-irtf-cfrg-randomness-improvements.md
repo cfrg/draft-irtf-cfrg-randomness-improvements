@@ -74,7 +74,7 @@ normative:
             -
                 ins: Bernstein, Daniel et al.
         target: https://projectbullrun.org/dual-ec/documents/dual-ec-20150731.pdf
-	MAFS2017:
+    MAFS2017:
         title: PRNG Failures and TLS Vulnerabilities in the Wild
         author:
             -
@@ -86,7 +86,7 @@ normative:
             -
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
-	RY2010:
+    RY2010:
         title: When Good Randomness Goes Bad: Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
         author:
             -
