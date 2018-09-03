@@ -82,22 +82,23 @@ Table of Contents
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
    7.  Comparison to RFC 6979  . . . . . . . . . . . . . . . . . . .   6
-   8.  Normative References  . . . . . . . . . . . . . . . . . . . .   6
+   8.  Normative References  . . . . . . . . . . . . . . . . . . . .   7
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
 
    Randomness is a crucial ingredient for TLS and related transport
-   security protocols.  TLS in particular uses Random Number Generators
-   (RNGs) to generate several values: session IDs, ephemeral key shares,
-   and ClientHello and ServerHello random values.  RNG failures such as
-   the Debian bug described in [DebianBug] can lead to insecure TLS
-   connections.  RNGs may also be intentionally weakened to cause harm
-   [DualEC].  Entropy sources can also be weak or broken, and that would
-   lead to insecurity of all CSPRNG instances seeded with them.  In such
-   cases where RNGs are poorly implemented or insecure, an adversary may
-   be able to predict its output and recover secret Diffie-Hellman key
-   shares that protect the connection.
+   security protocols.  TLS in particular uses random number generators
+   (generally speaking, CSPRNGs) to generate several values: session
+   IDs, ephemeral key shares, and ClientHello and ServerHello random
+   values.  CSPRNG failures such as the Debian bug described in
+   [DebianBug] can lead to insecure TLS connections.  CSPRNGs may also
+   be intentionally weakened to cause harm [DualEC].  Entropy sources
+   can also be weak or broken, and that would lead to insecurity of all
+   CSPRNG instances seeded with them.  In such cases where CSPRNGs are
+   poorly implemented or insecure, an adversary may be able to predict
+   its output and recover secret Diffie-Hellman key shares that protect
+   the connection.
 
    This document proposes an improvement to randomness generation in
    security protocols inspired by the "NAXOS trick" [NAXOS].
@@ -105,7 +106,6 @@ Table of Contents
    generating ephemeral key shares, a party's long-term private key is
    mixed into the entropy pool.  In the NAXOS key exchange protocol, raw
    entropy output x is replaced by H(x, sk), where sk is the sender's
-   private key.  Unfortunately, as private keys are often isolated in
 
 
 
@@ -114,6 +114,7 @@ Cremers, et al.           Expires March 7, 2019                 [Page 2]
 Internet-Draft           Randomness Improvements          September 2018
 
 
+   private key.  Unfortunately, as private keys are often isolated in
    HSMs, direct access to compute H(x, sk) is impossible.  An alternate
    yet functionally equivalent construction is needed.
 
@@ -164,7 +165,6 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-
 Cremers, et al.           Expires March 7, 2019                 [Page 3]
 
 Internet-Draft           Randomness Improvements          September 2018
@@ -174,7 +174,7 @@ Internet-Draft           Randomness Improvements          September 2018
    be a dynamically changing string.
 
    The construction works as follows.  Instead of using G(n) when
-   randomness is needed, use G'(n) ,where
+   randomness is needed, use G'(n), where
 
           G'(n) = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 
@@ -187,6 +187,12 @@ Internet-Draft           Randomness Improvements          September 2018
    construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n).
    If the signature is leaked, then security of G'(n) reduces to the
    scenario wherein randomness is expanded directly from G(n).
+
+   If a private key sk is stored and used inside an HSM, then the
+   signature calculation is implemented inside it, while all other
+   operations (including calculation of a hash function, Extract and
+   Expand functions) can be implemented either inside or outside the
+   HSM.
 
    Also, in systems where signature computations are expensive, these
    values may be precomputed in anticipation of future randomness
@@ -213,12 +219,6 @@ Internet-Draft           Randomness Improvements          September 2018
 
    To mitigate collisions, tag strings SHOULD be constructed as follows:
 
-   o  tag1: Constant string bound to a specific device and protocol in
-      use.  This allows caching of Sig(sk, tag1).  Device specific
-      information may include, for example, a MAC address.  To provide
-      security in the cases of usage of CSPRNGs in virtual environments,
-      it is RECOMMENDED to incorporate all available information
-
 
 
 Cremers, et al.           Expires March 7, 2019                 [Page 4]
@@ -226,6 +226,11 @@ Cremers, et al.           Expires March 7, 2019                 [Page 4]
 Internet-Draft           Randomness Improvements          September 2018
 
 
+   o  tag1: Constant string bound to a specific device and protocol in
+      use.  This allows caching of Sig(sk, tag1).  Device specific
+      information may include, for example, a MAC address.  To provide
+      security in the cases of usage of CSPRNGs in virtual environments,
+      it is RECOMMENDED to incorporate all available information
       specific to the process that would ensure the uniqueness of each
       tag1 value among different instances of virtual machines
       (including ones that were cloned or recovered from snapshots).  It
@@ -241,8 +246,8 @@ Internet-Draft           Randomness Improvements          September 2018
    The PRF randomness wrapper can be applied to any protocol wherein a
    party has a long-term private key and also generates randomness.
    This is true of most TLS servers.  Thus, to apply this construction
-   to TLS, one simply replaces the "private" PRNG G(n), i.e., the PRNG
-   that generates private values, such as key shares, with:
+   to TLS, one simply replaces the "private" CSPRNG G(n), i.e., the
+   CSPRNG that generates private values, such as key shares, with:
 
    G'(n) = HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 
@@ -268,12 +273,7 @@ Internet-Draft           Randomness Improvements          September 2018
    operation if equipment is used in a hostile environment when such
    considerations are necessary.
 
-   The signature in the construction as well as in the protocol itself
-   MUST NOT use randomness from entropy sources with dubious randomness
-   guarantees.  Thus, the signature scheme MUST either use a reliable
-   entropy source (independent from the CSPRNG that is being improved
-   with the proposed construction) or be deterministic: if the
-   signatures are probabilistic and use weak entropy, our construction
+
 
 
 
@@ -282,6 +282,12 @@ Cremers, et al.           Expires March 7, 2019                 [Page 5]
 Internet-Draft           Randomness Improvements          September 2018
 
 
+   The signature in the construction as well as in the protocol itself
+   MUST NOT use randomness from entropy sources with dubious randomness
+   guarantees.  Thus, the signature scheme MUST either use a reliable
+   entropy source (independent from the CSPRNG that is being improved
+   with the proposed construction) or be deterministic: if the
+   signatures are probabilistic and use weak entropy, our construction
    does not help and the signatures are still vulnerable due to repeat
    randomness attacks.  In such an attack, the adversary might be able
    to recover the long-term key used in the signature.
@@ -324,12 +330,6 @@ Internet-Draft           Randomness Improvements          September 2018
    sake of signature generation, while the proposed construction would
    assume calling the signature implemented in the HSM.
 
-8.  Normative References
-
-
-
-
-
 
 
 
@@ -337,6 +337,8 @@ Cremers, et al.           Expires March 7, 2019                 [Page 6]
 
 Internet-Draft           Randomness Improvements          September 2018
 
+
+8.  Normative References
 
    [DebianBug]
               Yilek, Scott, et al, ., "When private keys are public -
@@ -383,8 +385,6 @@ Internet-Draft           Randomness Improvements          September 2018
               Deterministic Random Bit Generators (Revised), NIST
               Special Publication 800-90A, January 2012.", n.d.,
               <National Institute of Standards and Technology>.
-
-
 
 
 
