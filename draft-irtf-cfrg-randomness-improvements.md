@@ -75,11 +75,11 @@ normative:
                 ins: Bernstein, Daniel et al.
         target: https://projectbullrun.org/dual-ec/documents/dual-ec-20150731.pdf
 	MAFS2017:
-		title: PRNG Failures and TLS Vulnerabilities in the Wild
-		author:
-			-
-				ins: McGrew, Anderson, Fluhrer, Shenefeil
-		target: https://rwc.iacr.org/2017/Slides/david.mcgrew.pptx
+        title: PRNG Failures and TLS Vulnerabilities in the Wild
+        author:
+            -
+                ins: McGrew, Anderson, Fluhrer, Shenefeil
+        target: https://rwc.iacr.org/2017/Slides/david.mcgrew.pptx
     NAXOS:
         title: Stronger Security of Authenticated Key Exchange
         author:
@@ -87,11 +87,11 @@ normative:
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
 	RY2010:
-		title: When Good Randomness Goes Bad: Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
-		author:
-			-
-				ins: Ristenpart, Yilek
-		target: https://rist.tech.cornell.edu/papers/sslhedge.pdf
+        title: When Good Randomness Goes Bad: Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
+        author:
+            -
+                ins: Ristenpart, Yilek
+        target: https://rist.tech.cornell.edu/papers/sslhedge.pdf
     SP80090A:
         title: Recommendation for Random Number Generation Using Deterministic Random Bit Generators (Revised), NIST Special Publication 800-90A, January 2012.
         target: National Institute of Standards and Technology
