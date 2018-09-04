@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: March 7, 2019                                     S. Smyshlyaev
+Expires: March 8, 2019                                     S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
                                                               Apple Inc.
-                                                      September 03, 2018
+                                                      September 04, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -23,13 +23,13 @@ Abstract
    protocols.  Weak or predictable "cryptographically-strong"
    pseudorandom number generators (CSPRNGs) can be abused or exploited
    for malicious purposes.  The Dual EC random number backdoor and
-   Debian bugs are relevant examples of this problem.  An entropy source
-   that seeds a CSPRNG might be weak or broken as well, that can also
-   lead to critical problems with overall security.  This document
-   describes a way for security protocol participants to augment their
-   CSPRNGs using a particular technique involving usage of long-term
-   private keys.  This improves randomness from broken or otherwise
-   subverted CSPRNGs.
+   Debian bugs are relevant examples of this problem.  An initial
+   entropy source that seeds a CSPRNG might be weak or broken as well,
+   that can also lead to critical problems with the overall security.
+   This document describes a way for security protocol participants to
+   augment their CSPRNGs using a particular technique involving usage of
+   long-term private keys.  This improves randomness from broken or
+   otherwise subverted CSPRNGs.
 
 Status of This Memo
 
@@ -46,14 +46,14 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 7, 2019.
+   This Internet-Draft will expire on March 8, 2019.
 
 
 
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 1]
+Cremers, et al.           Expires March 8, 2019                 [Page 1]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -93,23 +93,23 @@ Table of Contents
    IDs, ephemeral key shares, and ClientHello and ServerHello random
    values.  CSPRNG failures such as the Debian bug described in
    [DebianBug] can lead to insecure TLS connections.  CSPRNGs may also
-   be intentionally weakened to cause harm [DualEC].  Entropy sources
-   can also be weak or broken, and that would lead to insecurity of all
-   CSPRNG instances seeded with them.  In such cases where CSPRNGs are
-   poorly implemented or insecure, an adversary may be able to predict
-   its output and recover secret Diffie-Hellman key shares that protect
-   the connection.
+   be intentionally weakened to cause harm [DualEC].  Initial entropy
+   sources can also be weak or broken, and that would lead to insecurity
+   of all CSPRNG instances seeded with them.  In such cases where
+   CSPRNGs are poorly implemented or insecure, an adversary may be able
+   to predict its output and recover secret Diffie-Hellman key shares
+   that protect the connection.
 
    This document proposes an improvement to randomness generation in
    security protocols inspired by the "NAXOS trick" [NAXOS].
-   Specifically, instead of using raw entropy where needed, e.g., in
+   Specifically, instead of using raw randomness where needed, e.g., in
    generating ephemeral key shares, a party's long-term private key is
-   mixed into the entropy pool.  In the NAXOS key exchange protocol, raw
-   entropy output x is replaced by H(x, sk), where sk is the sender's
+   mixed into the entropy pool.  In the NAXOS key exchange protocol, a
+   raw random value x is replaced by H(x, sk), where sk is the sender's
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 2]
+Cremers, et al.           Expires March 8, 2019                 [Page 2]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -119,9 +119,9 @@ Internet-Draft           Randomness Improvements          September 2018
    yet functionally equivalent construction is needed.
 
    The approach described herein replaces the NAXOS hash with a keyed
-   hash, or pseudorandom function (PRF), where the key is derived from
-   raw entropy output and a private key signature.  Implementations
-   SHOULD apply this technique when indirect access to a private key is
+   hash, or pseudorandom function (PRF), where the key is derived from a
+   raw random value and a private key signature.  Implementations SHOULD
+   apply this technique when indirect access to a private key is
    available and CSPRNG randomness guarantees are dubious, or to provide
    stronger guarantees about possible future issues with the randomness.
    Roughly, the security properties provided by the proposed
@@ -144,34 +144,34 @@ Internet-Draft           Randomness Improvements          September 2018
 
 2.  Randomness Wrapper
 
-   Let x be the raw entropy output of a CSPRNG.  When properly
-   instantiated, x should be indistinguishable from a random string of
-   length |x|. However, as previously discussed, this is not always
-   true.  To mitigate this problem, we propose an approach for wrapping
-   the CSPRNG output with a construction that artificially injects
-   randomness into a value that may be lacking entropy.
+   Let x be the output of a CSPRNG.  When properly instantiated, x
+   should be indistinguishable from a random string of length |x|.
+   However, as previously discussed, this is not always true.  To
+   mitigate this problem, we propose an approach for wrapping the CSPRNG
+   output with a construction that mixes secret data into a value that
+   may be lacking randomness.
 
-   Let G(n) be an algorithm that generates n random bytes from raw
-   entropy, i.e., the output of a CSPRNG.  Define an augmented CSPRNG G'
-   as follows.  Let Sig(sk, m) be a function that computes a signature
-   of message m given private key sk.  Let H be a cryptographic hash
-   function that produces output of length M.  Let Extract be a
-   randomness extraction function, e.g., HKDF-Extract [RFC5869], which
-   accepts a salt and input keying material (IKM) parameter and produces
-   a pseudorandom key of length L suitable for cryptographic use.  Let
-   Expand(k, info, n) be a randomness extractor, e.g., HKDF-Expand
-   [RFC5869], that takes as input a pseudorandom key k of length L, info
-   string, and output length n, and produces output of length n.
+   Let G(n) be an algorithm that generates n random bytes, i.e., the
+   output of a CSPRNG.  Define an augmented CSPRNG G' as follows.  Let
+   Sig(sk, m) be a function that computes a signature of message m given
+   private key sk.  Let H be a cryptographic hash function that produces
+   output of length M.  Let Extract be a randomness extraction function,
+   e.g., HKDF-Extract [RFC5869], which accepts a salt and input keying
+   material (IKM) parameter and produces a pseudorandom key of length L
+   suitable for cryptographic use.  Let Expand(k, info, n) be a
+   randomness extractor, e.g., HKDF-Expand [RFC5869], that takes as
+   input a pseudorandom key k of length L, info string, and output
+   length n, and produces output of length n.  Finally, let tag1 be a
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 3]
+Cremers, et al.           Expires March 8, 2019                 [Page 3]
 
 Internet-Draft           Randomness Improvements          September 2018
 
 
-   Finally, let tag1 be a fixed, context-dependent string, and let tag2
-   be a dynamically changing string.
+   fixed, context-dependent string, and let tag2 be a dynamically
+   changing string.
 
    The construction works as follows.  Instead of using G(n) when
    randomness is needed, use G'(n), where
@@ -221,7 +221,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 4]
+Cremers, et al.           Expires March 8, 2019                 [Page 4]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -239,9 +239,9 @@ Internet-Draft           Randomness Improvements          September 2018
       be used in the context of TLS 1.3.
 
    o  tag2: Non-constant string that includes a timestamp or counter.
-      This ensures change over time even if randomness were to repeat.
-      It MUST be implemented such that its values never repeat.  This
-      means, in particular, that timestamp is guaranteed to change
+      This ensures change over time even if outputs of G(L) were to
+      repeat.  It MUST be implemented such that its values never repeat.
+      This means, in particular, that timestamp is guaranteed to change
       between two requests to CSPRNG (otherwise counters should be
       used).
 
@@ -277,7 +277,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 5]
+Cremers, et al.           Expires March 8, 2019                 [Page 5]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -286,7 +286,7 @@ Internet-Draft           Randomness Improvements          September 2018
    considerations are necessary.
 
    The signature in the construction as well as in the protocol itself
-   MUST NOT use randomness from entropy sources with dubious randomness
+   MUST NOT use randomness from entropy sources with dubious security
    guarantees.  Thus, the signature scheme MUST either use a reliable
    entropy source (independent from the CSPRNG that is being improved
    with the proposed construction) or be deterministic: if the
@@ -333,7 +333,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 6]
+Cremers, et al.           Expires March 8, 2019                 [Page 6]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -389,7 +389,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 7]
+Cremers, et al.           Expires March 8, 2019                 [Page 7]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -445,7 +445,7 @@ Authors' Addresses
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 8]
+Cremers, et al.           Expires March 8, 2019                 [Page 8]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -501,4 +501,4 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 7, 2019                 [Page 9]
+Cremers, et al.           Expires March 8, 2019                 [Page 9]
