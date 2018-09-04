@@ -105,7 +105,7 @@ Randomness is a crucial ingredient for TLS and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
 can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs 
 are relevant examples of this problem. 
-An entropy source that seeds a CSPRNG might be weak or broken as well, that can also lead to critical problems with overall security. 
+An initial entropy source that seeds a CSPRNG might be weak or broken as well, that can also lead to critical problems with the overall security. 
 This document describes a way for
 security protocol participants to augment their CSPRNGs using a particular technique involving usage of long-term private keys. 
 This improves randomness from broken or otherwise subverted CSPRNGs.
@@ -119,23 +119,23 @@ TLS in particular uses random number generators (generally speaking, CSPRNGs) to
 ephemeral key shares, and ClientHello and ServerHello random values. CSPRNG failures
 such as the Debian bug described in {{DebianBug}} can lead to insecure TLS connections.
 CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}. 
-Entropy sources can also be weak or broken, and that would lead to insecurity 
+Initial entropy sources can also be weak or broken, and that would lead to insecurity 
 of all CSPRNG instances seeded with them.
 In such cases where CSPRNGs are poorly implemented or insecure, an adversary may be
 able to predict its output and recover secret Diffie-Hellman key shares that protect
 the connection.
 
 This document proposes an improvement to randomness generation in security protocols
-inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw entropy
+inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw randomness
 where needed, e.g., in generating ephemeral key shares, a party's long-term private key
-is mixed into the entropy pool. In the NAXOS key exchange protocol, raw entropy
-output x is replaced by H(x, sk), where sk is the sender's private key.
+is mixed into the entropy pool. In the NAXOS key exchange protocol, a raw random 
+value x is replaced by H(x, sk), where sk is the sender's private key.
 Unfortunately, as private keys are often isolated in HSMs,
 direct access to compute H(x, sk) is impossible. An alternate yet functionally
 equivalent construction is needed.
 
 The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom 
-function (PRF), where the key is derived from raw entropy output and a private key signature.
+function (PRF), where the key is derived from a raw random value and a private key signature.
 Implementations SHOULD apply this technique when indirect access to a private key
 is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees 
 about possible future issues with the randomness. Roughly, the security properties provided 
@@ -152,13 +152,13 @@ remains indistinguishable from random provided the private key remains unknown t
 
 # Randomness Wrapper
 
-Let x be the raw entropy output of a CSPRNG. When properly instantiated, x should be
+Let x be the output of a CSPRNG. When properly instantiated, x should be
 indistinguishable from a random string of length |x|. However, as previously discussed,
 this is not always true. To mitigate this problem, we propose an approach for wrapping
-the CSPRNG output with a construction that artificially injects randomness into
-a value that may be lacking entropy.
+the CSPRNG output with a construction that mixes secret data into
+a value that may be lacking randomness.
 
-Let G(n) be an algorithm that generates n random bytes from raw entropy, i.e.,
+Let G(n) be an algorithm that generates n random bytes, i.e.,
 the output of a CSPRNG. Define an augmented CSPRNG G' as follows.
 Let Sig(sk, m) be a function that computes a signature of message 
 m given private key sk. Let H be a cryptographic hash function that produces output 
@@ -219,7 +219,7 @@ It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}.
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
 
 - tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
-even if randomness were to repeat. It MUST be implemented such that its values never repeat. 
+even if outputs of G(L) were to repeat. It MUST be implemented such that its values never repeat. 
 This means, in particular, that timestamp is guaranteed to change between two requests to CSPRNG 
 (otherwise counters should be used).
 
@@ -254,7 +254,7 @@ extra long-term key operation if equipment is used in a hostile environment when
 considerations are necessary. 
 
 The signature in the construction as well as in the protocol itself MUST NOT use randomness
-from entropy sources with dubious randomness guarantees. Thus, the signature scheme MUST either 
+from entropy sources with dubious security guarantees. Thus, the signature scheme MUST either 
 use a reliable entropy source (independent from the CSPRNG that is being improved with the 
 proposed construction) or be deterministic: if the signatures are probabilistic and use weak entropy, 
 our construction does not help and the signatures are still vulnerable due to repeat randomness 
