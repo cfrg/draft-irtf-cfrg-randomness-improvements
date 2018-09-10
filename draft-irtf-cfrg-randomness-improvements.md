@@ -74,12 +74,24 @@ normative:
             -
                 ins: Bernstein, Daniel et al.
         target: https://projectbullrun.org/dual-ec/documents/dual-ec-20150731.pdf
+    MAFS2017:
+        title: PRNG Failures and TLS Vulnerabilities in the Wild
+        author:
+            -
+                ins: McGrew, Anderson, Fluhrer, Shenefeil
+        target: https://rwc.iacr.org/2017/Slides/david.mcgrew.pptx
     NAXOS:
         title: Stronger Security of Authenticated Key Exchange
         author:
             -
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
+    RY2010:
+        title: When Good Randomness Goes Bad|:| Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
+        author:
+            -
+                ins: Ristenpart, Yilek
+        target: https://rist.tech.cornell.edu/papers/sslhedge.pdf
     SP80090A:
         title: Recommendation for Random Number Generation Using Deterministic Random Bit Generators (Revised), NIST Special Publication 800-90A, January 2012.
         target: National Institute of Standards and Technology
@@ -91,36 +103,39 @@ normative:
 
 Randomness is a crucial ingredient for TLS and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
-can be abused or exploited for malicious purposes. The Dual EC random number
-backdoor and Debian bugs are relevant examples of this problem. This document describes a way for
-security protocol participants to mix their long-term private key into the entropy pool(s) from 
-which random values are derived. This augments and improves randomness from broken or otherwise
-subverted CSPRNGs.
+can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs 
+are relevant examples of this problem. 
+An initial entropy source that seeds a CSPRNG might be weak or broken as well, which can also lead to critical and systemic security problems. 
+This document describes a way for
+security protocol participants to augment their CSPRNGs using long-term private keys. 
+This improves randomness from broken or otherwise subverted CSPRNGs.
 
 --- middle
 
 # Introduction
 
 Randomness is a crucial ingredient for TLS and related transport security protocols.
-TLS in particular uses Random Number Generators (RNGs) to generate several values: session IDs,
-ephemeral key shares, and ClientHello and ServerHello random values. RNG failures
+TLS in particular uses random number generators (generally speaking, CSPRNGs) to generate several values: session IDs,
+ephemeral key shares, and ClientHello and ServerHello random values. CSPRNG failures
 such as the Debian bug described in {{DebianBug}} can lead to insecure TLS connections.
-RNGs may also be intentionally weakened to cause harm {{DualEC}}.
-In such cases where RNGs are poorly implemented or insecure, an adversary may be
+CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}. 
+Initial entropy sources can also be weak or broken, and that would lead to insecurity 
+of all CSPRNG instances seeded with them.
+In such cases where CSPRNGs are poorly implemented or insecure, an adversary may be
 able to predict its output and recover secret Diffie-Hellman key shares that protect
 the connection.
 
 This document proposes an improvement to randomness generation in security protocols
-inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw entropy
+inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw randomness
 where needed, e.g., in generating ephemeral key shares, a party's long-term private key
-is mixed into the entropy pool. In the NAXOS key exchange protocol, raw entropy
-output x is replaced by H(x, sk), where sk is the sender's private key.
+is mixed into the entropy pool. In the NAXOS key exchange protocol, raw random 
+value x is replaced by H(x, sk), where sk is the sender's private key.
 Unfortunately, as private keys are often isolated in HSMs,
 direct access to compute H(x, sk) is impossible. An alternate yet functionally
 equivalent construction is needed.
 
 The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom 
-function (PRF), where the key is derived from raw entropy output and a private key signature.
+function (PRF), where the key is derived from a raw random value and a private key signature.
 Implementations SHOULD apply this technique when indirect access to a private key
 is available and CSPRNG randomness guarantees are dubious, or to provide stronger guarantees 
 about possible future issues with the randomness. Roughly, the security properties provided 
@@ -137,14 +152,15 @@ remains indistinguishable from random provided the private key remains unknown t
 
 # Randomness Wrapper
 
-Let x be the raw entropy output of a CSPRNG. When properly instantiated, x should be
+Let x be the output of a CSPRNG. When properly instantiated, x should be
 indistinguishable from a random string of length |x|. However, as previously discussed,
 this is not always true. To mitigate this problem, we propose an approach for wrapping
-the CSPRNG output with a construction that artificially injects randomness into
-a value that may be lacking entropy.
+the CSPRNG output with a construction that mixes secret data into
+a value that may be lacking randomness.
 
-Let G(n) be an algorithm that generates n random bytes from raw entropy, i.e.,
-the output of a CSPRNG. Let Sig(sk, m) be a function that computes a signature of message 
+Let G(n) be an algorithm that generates n random bytes, i.e.,
+the output of a CSPRNG. Define an augmented CSPRNG G' as follows.
+Let Sig(sk, m) be a function that computes a signature of message 
 m given private key sk. Let H be a cryptographic hash function that produces output 
 of length M. Let Extract be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
@@ -153,11 +169,11 @@ HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, i
 and output length n, and produces output of length n. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string.
 
-The construction works as follows. Instead of using x = G(n) when randomness is needed,
-use:
+The construction works as follows. Instead of using G(n) when randomness is needed,
+use G'(n), where
 
 ~~~
-       x = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
+       G'(n) = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 ~~~
 
 Functionally, this expands n random bytes from a key derived from the CSPRNG output and 
@@ -165,15 +181,22 @@ signature over a fixed string (tag1). See {{tag-gen}} for details about how "tag
 should be generated and used per invocation of the randomness wrapper. Expand() generates
 a string that is computationally indistinguishable from a truly random string of length n.
 Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n). 
-If the signature is leaked, then security reduces to the scenario wherein randomness is expanded
+If the signature is leaked, then security of G'(n) reduces to the scenario wherein randomness is expanded
 directly from G(n).
+
+If a private key sk is stored and used inside an HSM, then the signature calculation is implemented inside it, 
+while all other operations (including calculation of a hash function, Extract and Expand functions) can be implemented
+either inside or outside the HSM.
 
 Also, in systems where signature computations are expensive, these values may be precomputed
 in anticipation of future randomness requests. This is possible since the construction
 depends solely upon the CSPRNG output and private key.
 
 Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper,
-and MUST NOT be used or exposed beyond its role in this computation. Moreover,
+and MUST NOT be used or exposed beyond its role in this computation. To achieve this, 
+tag1 may have the format that is not supported (or explicitly forbidden) by other applications 
+using sk.
+
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}},
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
@@ -188,20 +211,27 @@ To mitigate collisions, tag strings SHOULD be constructed as follows:
 
 - tag1: Constant string bound to a specific device and protocol in use. This allows 
 caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address. 
+To provide security in the cases of usage of CSPRNGs in virtual environments, 
+it is RECOMMENDED to incorporate all available information specific to the process that 
+would ensure the uniqueness of each tag1 value among different instances of virtual machines 
+(including ones that were cloned or recovered from snapshots). 
+It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}.
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
 
 - tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
-even if randomness were to repeat.
+even if outputs of G(L) were to repeat. It MUST be implemented such that its values never repeat. 
+This means, in particular, that timestamp is guaranteed to change between two requests to CSPRNG 
+(otherwise counters should be used).
 
 # Application to TLS {#sec:tls13}
 
 The PRF randomness wrapper can be applied to any protocol wherein a party has a long-term
 private key and also generates randomness. This is true of most TLS servers. Thus, to
-apply this construction to TLS, one simply replaces the "private" PRNG, i.e., the PRNG
+apply this construction to TLS, one simply replaces the "private" CSPRNG G(n), i.e., the CSPRNG
 that generates private values, such as key shares, with:
 
 ~~~
-HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
+G'(n) = HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 ~~~
 
 Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
@@ -224,7 +254,7 @@ extra long-term key operation if equipment is used in a hostile environment when
 considerations are necessary. 
 
 The signature in the construction as well as in the protocol itself MUST NOT use randomness
-from entropy sources with dubious randomness guarantees. Thus, the signature scheme MUST either 
+from entropy sources with dubious security guarantees. Thus, the signature scheme MUST either 
 use a reliable entropy source (independent from the CSPRNG that is being improved with the 
 proposed construction) or be deterministic: if the signatures are probabilistic and use weak entropy, 
 our construction does not help and the signatures are still vulnerable due to repeat randomness 
@@ -237,14 +267,18 @@ believe there is always merit in analyzing protocols specifically. However, this
 construction is generic so the analyses of many protocols will still hold even if this
 proposed construction is incorporated. 
 
+The proposed construction cannot provide any guarantees of security if the CSPRNG state is cloned 
+due to the virtual machine snapshots or process forking (see {{MAFS2017}}). Thus tag1 SHOULD incorporate
+all available information about the environment, such as process attributes, virtual machine user information, etc.
+
 # Comparison to RFC 6979
 
 The construction proposed herein has similarities with that of RFC 6979 {{RFC6979}}:
 both of them use private keys to seed a DRBG. Section 3.3 of RFC 6979 recommends deterministically 
 instantiating an instance of the HMAC DRBG pseudorandom number generator, described in {{SP80090A}} 
 and Annex D of {{X962}}, using the private key sk as the entropy_input parameter and H(m)
-as the nonce. The construction provided herein is similar, with such
-difference that a key derived from G(x) and H(Sig(sk, tag1)) is used as the
+as the nonce. The construction G'(n) provided herein is similar, with such
+difference that a key derived from G(n) and H(Sig(sk, tag1)) is used as the
 entropy input and tag2 is the nonce.
 
 However, the semantics and the security properties obtained by using these
