@@ -25,11 +25,10 @@ Abstract
    for malicious purposes.  The Dual EC random number backdoor and
    Debian bugs are relevant examples of this problem.  An initial
    entropy source that seeds a CSPRNG might be weak or broken as well,
-   that can also lead to critical problems with the overall security.
-   This document describes a way for security protocol participants to
-   augment their CSPRNGs using a particular technique involving usage of
-   long-term private keys.  This improves randomness from broken or
-   otherwise subverted CSPRNGs.
+   which can also lead to critical and systemic security problems.  This
+   document describes a way for security protocol participants to
+   augment their CSPRNGs using long-term private keys.  This improves
+   randomness from broken or otherwise subverted CSPRNGs.
 
 Status of This Memo
 
@@ -47,6 +46,7 @@ Status of This Memo
    material or to cite them other than as "work in progress."
 
    This Internet-Draft will expire on March 14, 2019.
+
 
 
 
@@ -104,8 +104,8 @@ Table of Contents
    security protocols inspired by the "NAXOS trick" [NAXOS].
    Specifically, instead of using raw randomness where needed, e.g., in
    generating ephemeral key shares, a party's long-term private key is
-   mixed into the entropy pool.  In the NAXOS key exchange protocol, a
-   raw random value x is replaced by H(x, sk), where sk is the sender's
+   mixed into the entropy pool.  In the NAXOS key exchange protocol, raw
+   random value x is replaced by H(x, sk), where sk is the sender's
 
 
 
@@ -145,7 +145,7 @@ Internet-Draft           Randomness Improvements          September 2018
 2.  Randomness Wrapper
 
    Let x be the output of a CSPRNG.  When properly instantiated, x
-   should be indistinguishable from a random string of length |x|.
+   should be indistinguishable from a random string of x bytes.
    However, as previously discussed, this is not always true.  To
    mitigate this problem, we propose an approach for wrapping the CSPRNG
    output with a construction that mixes secret data into a value that
@@ -161,7 +161,7 @@ Internet-Draft           Randomness Improvements          September 2018
    pseudorandom key of length L suitable for cryptographic use.  Let
    Expand(k, info, n) be a randomness extractor, e.g., HKDF-Expand
    [RFC5869], that takes as input a pseudorandom key k of length L, info
-   string, and output length n, and produces output of length n.
+   string, and output length n, and produces output of n bytes.
 
 
 
@@ -183,7 +183,7 @@ Internet-Draft           Randomness Improvements          September 2018
    Section 3 for details about how "tag1" and "tag2" should be generated
    and used per invocation of the randomness wrapper.  Expand()
    generates a string that is computationally indistinguishable from a
-   truly random string of length n.  Thus, the security of this
+   truly random string of n bytes.  Thus, the security of this
    construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n).
    If the signature is leaked, then security of G'(n) reduces to the
    scenario wherein randomness is expanded directly from G(n).
@@ -306,7 +306,7 @@ Internet-Draft           Randomness Improvements          September 2018
    if the CSPRNG state is cloned due to the virtual machine snapshots or
    process forking (see [MAFS2017]).  Thus tag1 SHOULD incorporate all
    available information about the environment, such as process
-   attributes, virtual machine user information etc.
+   attributes, virtual machine user information, etc.
 
 7.  Comparison to RFC 6979
 
