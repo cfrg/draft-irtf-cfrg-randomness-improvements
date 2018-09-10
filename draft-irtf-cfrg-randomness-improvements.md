@@ -153,7 +153,7 @@ remains indistinguishable from random provided the private key remains unknown t
 # Randomness Wrapper
 
 Let x be the output of a CSPRNG. When properly instantiated, x should be
-indistinguishable from a random string of length |x|. However, as previously discussed,
+indistinguishable from a random string of x bytes. However, as previously discussed,
 this is not always true. To mitigate this problem, we propose an approach for wrapping
 the CSPRNG output with a construction that mixes secret data into
 a value that may be lacking randomness.
@@ -162,11 +162,11 @@ Let G(n) be an algorithm that generates n random bytes, i.e.,
 the output of a CSPRNG. Define an augmented CSPRNG G' as follows.
 Let Sig(sk, m) be a function that computes a signature of message 
 m given private key sk. Let H be a cryptographic hash function that produces output 
-of length M. Let Extract be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
+of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
 suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., 
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
-and output length n, and produces output of length n. Finally, let tag1 be a fixed, 
+and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string.
 
 The construction works as follows. Instead of using G(n) when randomness is needed,
@@ -179,18 +179,14 @@ use G'(n), where
 Functionally, this expands n random bytes from a key derived from the CSPRNG output and 
 signature over a fixed string (tag1). See {{tag-gen}} for details about how "tag1" and "tag2" 
 should be generated and used per invocation of the randomness wrapper. Expand() generates
-a string that is computationally indistinguishable from a truly random string of length n.
+a string that is computationally indistinguishable from a truly random string of n bytes.
 Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n). 
 If the signature is leaked, then security of G'(n) reduces to the scenario wherein randomness is expanded
 directly from G(n).
 
-If a private key sk is stored and used inside an HSM, then the signature calculation is implemented inside it, 
-while all other operations (including calculation of a hash function, Extract and Expand functions) can be implemented
-either inside or outside the HSM.
-
-Also, in systems where signature computations are expensive, these values may be precomputed
-in anticipation of future randomness requests. This is possible since the construction
-depends solely upon the CSPRNG output and private key.
+If a private key sk is stored and used inside an HSM, then the signature calculation is 
+implemented inside it, while all other operations (including calculation of a hash function, 
+Extract and Expand functions) can be implemented either inside or outside the HSM.
 
 Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper,
 and MUST NOT be used or exposed beyond its role in this computation. To achieve this, 
@@ -200,6 +196,9 @@ using sk.
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}},
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
+
+In systems where signature computations are expensive, G'(n) may be precomputed and pooled.
+This is possible since the construction depends solely upon the CSPRNG output and private key.
 
 # Tag Generation {#tag-gen}
 
