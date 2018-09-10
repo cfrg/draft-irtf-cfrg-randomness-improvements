@@ -105,9 +105,9 @@ Randomness is a crucial ingredient for TLS and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
 can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs 
 are relevant examples of this problem. 
-An initial entropy source that seeds a CSPRNG might be weak or broken as well, that can also lead to critical problems with the overall security. 
+An initial entropy source that seeds a CSPRNG might be weak or broken as well, which can also lead to critical and systemic security problems. 
 This document describes a way for
-security protocol participants to augment their CSPRNGs using a particular technique involving usage of long-term private keys. 
+security protocol participants to augment their CSPRNGs using long-term private keys. 
 This improves randomness from broken or otherwise subverted CSPRNGs.
 
 --- middle
@@ -128,7 +128,7 @@ the connection.
 This document proposes an improvement to randomness generation in security protocols
 inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw randomness
 where needed, e.g., in generating ephemeral key shares, a party's long-term private key
-is mixed into the entropy pool. In the NAXOS key exchange protocol, a raw random 
+is mixed into the entropy pool. In the NAXOS key exchange protocol, raw random 
 value x is replaced by H(x, sk), where sk is the sender's private key.
 Unfortunately, as private keys are often isolated in HSMs,
 direct access to compute H(x, sk) is impossible. An alternate yet functionally
@@ -268,7 +268,7 @@ proposed construction is incorporated.
 
 The proposed construction cannot provide any guarantees of security if the CSPRNG state is cloned 
 due to the virtual machine snapshots or process forking (see {{MAFS2017}}). Thus tag1 SHOULD incorporate
-all available information about the environment, such as process attributes, virtual machine user information etc.
+all available information about the environment, such as process attributes, virtual machine user information, etc.
 
 # Comparison to RFC 6979
 
