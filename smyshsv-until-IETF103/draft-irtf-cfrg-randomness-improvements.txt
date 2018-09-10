@@ -5,13 +5,13 @@
 Network Working Group                                         C. Cremers
 Internet-Draft                                                L. Garratt
 Intended status: Informational                      University of Oxford
-Expires: March 8, 2019                                     S. Smyshlyaev
+Expires: March 14, 2019                                    S. Smyshlyaev
                                                                CryptoPro
                                                              N. Sullivan
                                                               Cloudflare
                                                                  C. Wood
                                                               Apple Inc.
-                                                      September 04, 2018
+                                                      September 10, 2018
 
 
              Randomness Improvements for Security Protocols
@@ -25,11 +25,10 @@ Abstract
    for malicious purposes.  The Dual EC random number backdoor and
    Debian bugs are relevant examples of this problem.  An initial
    entropy source that seeds a CSPRNG might be weak or broken as well,
-   that can also lead to critical problems with the overall security.
-   This document describes a way for security protocol participants to
-   augment their CSPRNGs using a particular technique involving usage of
-   long-term private keys.  This improves randomness from broken or
-   otherwise subverted CSPRNGs.
+   which can also lead to critical and systemic security problems.  This
+   document describes a way for security protocol participants to
+   augment their CSPRNGs using long-term private keys.  This improves
+   randomness from broken or otherwise subverted CSPRNGs.
 
 Status of This Memo
 
@@ -46,14 +45,15 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 8, 2019.
+   This Internet-Draft will expire on March 14, 2019.
 
 
 
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 1]
+
+Cremers, et al.          Expires March 14, 2019                 [Page 1]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -104,12 +104,12 @@ Table of Contents
    security protocols inspired by the "NAXOS trick" [NAXOS].
    Specifically, instead of using raw randomness where needed, e.g., in
    generating ephemeral key shares, a party's long-term private key is
-   mixed into the entropy pool.  In the NAXOS key exchange protocol, a
-   raw random value x is replaced by H(x, sk), where sk is the sender's
+   mixed into the entropy pool.  In the NAXOS key exchange protocol, raw
+   random value x is replaced by H(x, sk), where sk is the sender's
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 2]
+Cremers, et al.          Expires March 14, 2019                 [Page 2]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -165,7 +165,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 3]
+Cremers, et al.          Expires March 14, 2019                 [Page 3]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -221,7 +221,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 4]
+Cremers, et al.          Expires March 14, 2019                 [Page 4]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -277,7 +277,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 5]
+Cremers, et al.          Expires March 14, 2019                 [Page 5]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -306,7 +306,7 @@ Internet-Draft           Randomness Improvements          September 2018
    if the CSPRNG state is cloned due to the virtual machine snapshots or
    process forking (see [MAFS2017]).  Thus tag1 SHOULD incorporate all
    available information about the environment, such as process
-   attributes, virtual machine user information etc.
+   attributes, virtual machine user information, etc.
 
 7.  Comparison to RFC 6979
 
@@ -333,7 +333,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 6]
+Cremers, et al.          Expires March 14, 2019                 [Page 6]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -389,7 +389,7 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 7]
+Cremers, et al.          Expires March 14, 2019                 [Page 7]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -445,7 +445,7 @@ Authors' Addresses
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 8]
+Cremers, et al.          Expires March 14, 2019                 [Page 8]
 
 Internet-Draft           Randomness Improvements          September 2018
 
@@ -501,4 +501,4 @@ Internet-Draft           Randomness Improvements          September 2018
 
 
 
-Cremers, et al.           Expires March 8, 2019                 [Page 9]
+Cremers, et al.          Expires March 14, 2019                 [Page 9]
