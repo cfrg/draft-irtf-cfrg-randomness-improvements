@@ -153,7 +153,7 @@ remains indistinguishable from random provided the private key remains unknown t
 # Randomness Wrapper
 
 Let x be the output of a CSPRNG. When properly instantiated, x should be
-indistinguishable from a random string of length |x|. However, as previously discussed,
+indistinguishable from a random string of x bytes. However, as previously discussed,
 this is not always true. To mitigate this problem, we propose an approach for wrapping
 the CSPRNG output with a construction that mixes secret data into
 a value that may be lacking randomness.
@@ -166,7 +166,7 @@ of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., H
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
 suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., 
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
-and output length n, and produces output of length n. Finally, let tag1 be a fixed, 
+and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string.
 
 The construction works as follows. Instead of using G(n) when randomness is needed,
@@ -179,7 +179,7 @@ use G'(n), where
 Functionally, this expands n random bytes from a key derived from the CSPRNG output and 
 signature over a fixed string (tag1). See {{tag-gen}} for details about how "tag1" and "tag2" 
 should be generated and used per invocation of the randomness wrapper. Expand() generates
-a string that is computationally indistinguishable from a truly random string of length n.
+a string that is computationally indistinguishable from a truly random string of n bytes.
 Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n). 
 If the signature is leaked, then security of G'(n) reduces to the scenario wherein randomness is expanded
 directly from G(n).
