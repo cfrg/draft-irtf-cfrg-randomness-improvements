@@ -146,7 +146,7 @@ a value that may be lacking entropy.
 Let G(n) be an algorithm that generates n random bytes from raw entropy, i.e.,
 the output of a CSPRNG. Let Sig(sk, m) be a function that computes a signature of message 
 m given private key sk. Let H be a cryptographic hash function that produces output 
-of length M. Let Extract be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
+of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
 suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., 
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
@@ -168,15 +168,14 @@ Thus, the security of this construction depends upon the secrecy of H(Sig(sk, ta
 If the signature is leaked, then security reduces to the scenario wherein randomness is expanded
 directly from G(n).
 
-Also, in systems where signature computations are expensive, these values may be precomputed
-in anticipation of future randomness requests. This is possible since the construction
-depends solely upon the CSPRNG output and private key.
-
 Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper,
 and MUST NOT be used or exposed beyond its role in this computation. Moreover,
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}},
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
+
+In systems where signature computations are expensive, G'(n) may be precomputed and pooled.
+This is possible since the construction depends solely upon the CSPRNG output and private key.
 
 # Tag Generation {#tag-gen}
 
