@@ -37,10 +37,10 @@ notions, ff, primitives, mm]{cryptocode}
 
 \author{
   Cas Cremers\\
-  \texttt{cas@cremers@cs.ox.ac.uk}
+  \texttt{cremers@cispa.saarland}
   \and
   Luke Garratt\\
-  \texttt{luke.garratt@cs.ox.ac.uk}
+  \texttt{lgarratt@cisco.com}
 }
 \title{Security Analysis}
 
@@ -49,8 +49,6 @@ notions, ff, primitives, mm]{cryptocode}
   \maketitle
 
 %\pagenumbering{arabic}
-
-\todo[inline]{Luke: Cas, shall we update emails? Both of ours are invalid now but this work was when we were in Oxford, so do we change emails and associate this work with places where we didn't do it?}
 
 \section{Introduction}
 All key exchange protocols (e.g., SSL/TLS, SSH, IKE, etc.) depend on the generation of secure random numbers. At the core of all of these protocols is a Diffie--Hellman key exchange of the following basic form: Alice chooses random number $x$, computes $g^x$ and sends it to Bob. Bob similarly chooses random number $y$, computes $g^y$ and sends it to Alice. Of course, each particular protocol has other essential details such as certificates, signatures, key derivation, comparing of transcripts and so on, but at the heart of all these protocols is the shared secret $g^{xy}$. Therefore, it is essential that $x$ and $y$ are generated as securely as possible. 
@@ -298,21 +296,26 @@ $$
 \noindent \textbf{Game 3.} This is the same as Game 4 from the other case.
 \end{proof}
 
-\section{Notes} \label{sec:notes}
+\section{Real-world considerations} \label{sec:notes}
 
-\subsection{Repeating tags}
-Note the security analysis is about one instance of $\texttt{tag}_1$ and (essentially a predictable counter) for $\texttt{tag}_2$. This therefore means that if the tags were to repeat (for instance identical VMs in identical conditions) and the adversary already queried $\sk$, then the adversary will be able to win the game on the second attempt as the outputs will be the same, except possibly on the test query. This means that it is essential for $\texttt{tag}_1$ to be different on every instance. In such situations as identical VMs, generating $\texttt{tag}_1$ probabilistically with an external randomness source may be helpful.
+\subsection{Design choices}
+Which of our primitives are chosen for real-world reasons and which are useful for the security proof? Our security proof could be done even more easily by using directly $\sk$ instead of $\sig(\sk, \texttt{tag}_1)$. However, in the real-world it is preferable to keep the secret key in an HSM and only perform certain operations on it such as making signatures. There is no guarantee that the signature is uniformly distributed as a key, so this is why we hash it and chose $\texttt{H}\sig(\sk, \texttt{tag}_1)$ over $\sk$. Consequently, this also is why one of the security assumptions of our theorem is the difficulty of the ``hash-signature game''. The practical interpretation we are asking of the challenger is merely that the signature is a secret the adversary cannot guess, just like $\sk$.
 
-Our construction offers benefits as long as $\sig (\sk, \texttt{tag}_1)$ never appears elsewhere in
-the protocol so that the adversary has no hope of seeing it and using
-it. Otherwise, security degrades to the normal case of generating
-pseudorandom numbers. Of course, in practice actually
-forcing $$\sig (\sk, \texttt{tag}_1)$$ to appear may still be difficult. However,
-in no case can our construction be worse. Note furthermore that these
+The $\texttt{KDF}$ and $\texttt{PRF}$ constructions are useful in practice because they are easily available, and they help in the security proof. In fact, the security assumptions we require of them for the proof are very minimal indeed. The security argument is extremely trivial if they are instantiated as random oracles, as is common in many security proofs.
+
+The tags are assumed to be known in our security model. In practice they may not be, which only adds an extra layer of protection in practice.
+
+In no case can our wrapper construction be worse than not having it all. In the usual case, we merely depend on $y_i$ being secret. With our wrapper construction, we essentially use $\texttt{KDF}(y_i \concat x)$ for an $x$ which may or may not be known. One may wonder how the signature is generated: probabilistic or deterministic? Could this be a chicken and egg problem, noting that in many signature schemes, if random numbers are bad and the signature is leaked, then the secret key is leaked? Thus, if random numbers are bad in the first place, the signature will be bad, and thus the construction will not be of any use. This is why we require that the signature scheme is deterministic.
+
+\subsection{Practical interpretations}
+The security model and consequent proof refers heavily to the concept of ``freshness'', which intuitively encodes the adversary not winning the game trivially by making the obvious reveal queries. The practical interpretation of our security theorem is as follows. If the adversary learns only one of the signature or the usual randomness generated on one particular instance, then under the security assumptions on our primitives, the wrapper construction should output randomness that is indistinguishable from a random string.
+
+Our security model also explicitly assumes that $\sig (\sk, \texttt{tag}_1)$ never appears externally elsewhere in
+the protocol so that the adversary has no hope of seeing it and using it. Otherwise, security degrades to the normal case of generating pseudorandom numbers. Of course, in practice actually
+forcing $\sig (\sk, \texttt{tag}_1)$ to appear may still be difficult.  Note furthermore that these
 signatures are agent-specific, which improves containment. Thus, leaking
 or forging $\sig (\sk_{\hat A}, \texttt{tag}_1)$ for a specific agent $\hat A$ only affects $\hat A$, and
-has no consequences for other agents.
-
+has no consequences for other agents.  The fact that in reality $\texttt{tag}_1$ is separate for each application and $\texttt{tag}_2$ changes also helps to prevent repeated random numbers when there is a poor entropy source. 
 
 \bibliographystyle{plain}
 \bibliography{masterbib}
