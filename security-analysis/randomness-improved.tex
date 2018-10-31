@@ -346,7 +346,8 @@ It is clearly impossible for the adversary to have any advantage in guessing the
 
 In this case, the adversary is not allowed to reveal $y_i$ or to choose $y_i$ by itself, otherwise the test output query would not be fresh. Thus, $y_i$ is chosen uniformly randomly.  
 
-\todo[inline]{Luke: Did we need an intermediate game hop to guess the test $\texttt{tag}_1$ here? If so, it is in both cases so we should put it before the case distinction. And we mean to replace only the KDF output with the test $\texttt{tag}_1$ right?}
+%%% CC: Commented out for now since we don't need to.
+%\todo[inline]{Luke: Did we need an intermediate game hop to guess the test $\texttt{tag}_1$ here? If so, it is in both cases so we should put it before the case distinction. And we mean to replace only the KDF output with the test $\texttt{tag}_1$ right?}
 
 \noindent \textbf{Game 2.} This game is identical to Game 1 except $\texttt{KDF}(y_i, \texttt{H}(\sig (\sk, \texttt{tag}_1)))$ is replaced with a value $k$ sampled uniformly at random. 
 
