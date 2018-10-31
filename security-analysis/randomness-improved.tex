@@ -35,7 +35,11 @@ notions, ff, primitives, mm]{cryptocode}
 \newcommand{\newconsgen}[1]{\prf(#1 \myconcat \botsig, \mathrm{tag} )}
 \newcommand{\newconspi}{\newconsgen{\pi(x)}}
 
+% We're doing alphabetical by default
 \author{
+  Liliya Akhmetzyanova\\
+  \texttt{lah@cryptopro.ru}
+  \and
   Cas Cremers\\
   \texttt{cremers@cispa.saarland}
   \and
@@ -44,7 +48,7 @@ notions, ff, primitives, mm]{cryptocode}
 }
 \title{Security Analysis}
 
-\date{DRAFT v0.1 -- October 11, 2017}
+\date{DRAFT v0.2 -- October 30, 2018}
 \begin{document}
   \maketitle
 
@@ -103,8 +107,10 @@ party's signing algorithm. Let $y$ be the output of the pseudorandom
 number generator. As in the main document, we define the wrapper to be:
 
 $$
-\prf(\texttt{KDF}(y \myconcat \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1}))), \texttt{tag}_2, n)
+\prf(\texttt{KDF}(y, \texttt{H}(\sig (\sk, \texttt{tag}_1))), \texttt{tag}_2, n),
 $$
+where $\texttt{tag}_1$ and $\texttt{tag}_2$ are public and are chosen
+from some fixed sets $\mathcal{T}_1$ and $\mathcal{T}_2$ correspondingly.
 
 \noindent Please see the main document for full details.
 
@@ -150,47 +156,57 @@ $$
 Here we will precisely define the security properties we need of our primitives for our construction to be proven secure in our security model.
 
 \subsection{Pseudorandom function} \label{PRFdef}
-A pseudorandom function is an algorithm $\prf$. This algorithm implements a deterministic function $z=\prf(k, x)$, taking as input a key $k$ and some bit string $x$, and returning a string $z \in \{0, 1 \}^{\mu}$. 
+
+
+\todo[inline]{In order to prove the security with multiple tag1 I need
+to use a multi-user security definition for PRF. I believe that the
+reduction to the standard one-key security can be easily done using the
+hybrid argument. CC: Looks good to me.}
+
+
+A pseudorandom function is an algorithm $\prf$. This algorithm implements a deterministic function $z=\prf(k, x, n)$, taking as input a key $k$ and some bit string $x$, and returning a string $z \in \{0, 1 \}^{n}$. For brevity we will omit the parameter $n$ assuming that the $\prf$ algorithm returns the values of the maximum permitted size.
 
 We define a security game between an adversary and challenger as follows.
 
 \begin{enumerate}
-\item The challenger uniformly randomly samples a secret key $k$.
+\item The challenger uniformly randomly samples $t$ secret keys $k_1,\ldots,k_t$ independently from each other.
 
-\item The adversary is allowed to query the challenger with adaptively chosen values $x_i$. The challenger replies with $\prf(k, x_i)$.
+\item The adversary is allowed to query the challenger with adaptively chosen values $(i,x)$, $i \in [1,\ldots,t]$. The challenger replies with $\prf(k_i, x)$.
 
-\item Eventually the adversary queries a special symbol $T$ to indicate the so-called test query. At this point, the challenger computes $z_0 \coloneqq \prf(k, \texttt{tag}_2, n)$ and samples $z_1$ uniformly randomly. The challenger then flips a coin $b \sample \{0, 1\}$ and responds with ($z_b, \texttt{tag}_2, n$). 
+\item Eventually the adversary queries a special symbol $T$ to indicate the so-called test query with value $(i,x)$ that was not queried before. At this point, the challenger computes $z_0 \coloneqq \prf(k_i, x)$ and samples $z_1$ uniformly randomly. The challenger then flips a coin $b \sample \{0, 1\}$ and responds with $z_b$. Note that after the test query the adversary is not allowed to query $(i,x)$.
 
 \item The adversary then outputs a guess $b'$ for $b$ and wins the game if $b = b'$ and loses otherwise.
 \end{enumerate}
 
-The advantage of any probabilistic polynomial time adversary winning the above security game should be negligible in the security parameter. In other words,
+The advantage of any probabilistic polynomial time adversary winning the above security game with polynomial number of keys should be negligible in the security parameter. In other words,
 
 $$
 \left \vert \Pr(b = b') - \frac{1}{2} \right \vert \le \epsilon_{\prf}
 $$
 
 \subsection{Key derivation function} \label{KDFdef}
-The security property we require of $\texttt{KDF}$ is very similar. Intuitively, we require $\texttt{KDF}(x \concat y)$ to be indistinguishable from random if at least one of $x$ or $y$ in unknown.
+The security property we require of $\texttt{KDF}$ is as follows. Intuitively, we require $\texttt{KDF}(y,x)$ to be indistinguishable from uniform random if at least one of $x$ or $y$ in unknown. In other words we assume that the $\texttt{KDF}(\cdot,x)$ and $\texttt{KDF}(y,\cdot)$ functions, where $x$ and $y$ are chosen uniformly independently at random from the corresponding sets, are computationally indistinguishable from two "ideal" functions chosen uniformly independently at random from the  sets of all functions with corresponding domains and ranges.  
 
-\begin{enumerate}
-\item The challenger samples $x$ and $y$ uniformly randomly.
+\todo[inline]{I believe that the game definition is redundant here. CC:
+Agreed.}
+\todo[inline]{Instead, here we can provide several words on HKDF-extract}
 
-\item The adversary is allowed to ask for one of $x$ or $y$.
+%\begin{enumerate}
+%\item Initially the adversary chooses on which of the argument the adversary wants to attack and send the decision to the challenger makes the initial query containing the string $\texttt{x}$ or $\texttt{y}$. The challenger samples either $y$ or $x$ respectively uniformly randomly, computes and returns the value $\texttt{KDF}(y, x)$.
 
-\item Next, the challenger computes $z_0 \coloneqq \texttt{KDF}(x, y)$ and samples $z_1$ uniformly randomly. It flips a coin $b \sample \{0, 1 \}$ and gives $z_b$ to the adversary.
+%\item Next, the challenger computes $z_0 \coloneqq \texttt{KDF}(y, x)$ and samples $z_1$ uniformly randomly. It flips a coin $b \sample \{0, 1 \}$ and gives $z_b$ to the adversary.
 
-\item The adversary outputs a guess $b'$ for $b$. The adversary wins if $b' = b$ and loses otherwise.
-\end{enumerate}
+%\item The adversary outputs a guess $b'$ for $b$. The adversary wins if $b' = b$ and loses otherwise.
+%\end{enumerate}
 
-The advantage of any probabilistic polynomial time adversary winning the above security game should be negligible in the security parameter. In other words,
+%The advantage of any probabilistic polynomial time adversary winning the above security game should be negligible in the security parameter. In other words,
 
-$$
-\left \vert \Pr(b = b') - \frac{1}{2} \right \vert \le \epsilon_{\texttt{KDF}}
-$$
+%$$
+%\left \vert \Pr(b = b') - \frac{1}{2} \right \vert \le \epsilon_{\texttt{KDF}}
+%$$
 
 \subsection{Hash function and signature scheme}
-A signature scheme is a triple $(\kgen, \sig, \verify)$. $\kgen$ is a probabilistic algorithm which takes as input the security parameter $1^k$ and outputs a public signature verification key $\pk$ and secret signing key $\sk$. $\sig$ is a signing algorithm which generates a signature $\sigma$ for message $m$ using secret key $\sk$. $\verify$ is a deterministic signature verification algorithm which, given input $(\pk, \sigma, m)$, outputs $1$ if $\sigma$ is a valid signature of $m$ under key $\pk$, and $0$ otherwise. It is required that for every $k$, every $(\sk, \pk)$ output by $\kgen (1^k)$, and every message $m$, it holds that
+A signature scheme is a triple $(\kgen, \sig, \verify)$. $\kgen$ is a probabilistic algorithm which takes as input the security parameter $1^k$ and outputs a public signature verification key $\pk$ and secret signing key $\sk$. $\sig$ is a signing algorithm which generates a signature $\sigma$ for message $m$ using secret key $\sk$. In the current paper we consider only deterministic $\sig$ algorithms. $\verify$ is a deterministic signature verification algorithm which, given input $(\pk, \sigma, m)$, outputs $1$ if $\sigma$ is a valid signature of $m$ under key $\pk$, and $0$ otherwise. It is required that for every $k$, every $(\sk, \pk)$ output by $\kgen (1^k)$, and every message $m$, it holds that
 
 $$\verify (m , \sig ({\sk, m})) = 1$$
 
@@ -199,7 +215,7 @@ In our construction, we will not want to use the long-term key $\sk$ directly. W
 Consider the following game between a challenger and a polynomial time adversary:
 
 \begin{enumerate}
-\item The challenger generates a public/private key pair $(\pk, \sk)$ using $\kgen$ and gives the adversary the public key $\pk$. The challenger also generates tag $\texttt{tag}_1$ and gives it to the adversary.
+\item The challenger generates a public/private key pair $(\pk, \sk)$ using $\kgen$ and gives the adversary the public key $\pk$. Then the adversary sends the $\mathrm{\texttt{tag}_1}$ value to the challenger.
 
 \item The adversary is allowed to query adaptively chosen messages $m_1,
 	\dots , m_q$ for some $q \in \mathbb{N}$ to the challenger so long as none of the queries $m_i$ are $\texttt{tag}_1$. The
@@ -220,24 +236,56 @@ This security property can be instantiated with routine cryptographic assumption
 \section{Security model} \label{sec:model}
 Here we define the security property we expect from our wrapper in terms of a game between a challenger and an adversary.
 
-We run a game between the challenger and the adversary as follows. The challenger uniformly randomly chooses a secret key $\sk$. The adversary is allowed to make the following queries to the challenger.
+We run a game between the challenger and the adversary as follows. At the beginning of the game the challenger uniformly randomly chooses a secret key $\sk$ and returns a public key $\pk$ to the adversary. Receiving the public key the adversary chooses a set $T \subseteq \mathcal{T}_1$ consisting of $l$ pairwise different values $t_1,\ldots,t_l$ and sends it to the challenger.  We assume that the maximum size $n$ of the $\prf$ output and the size $l$ of the set $T$ are polynomial. 
+
+\todo[inline]{There will be some problems with the proof if we allow the
+adversary to choose tag1 values adaptively. Namely, in Case1, Game2. The
+HSig adversary does not know what tag1 will be test and cannot trivially provide the correct responses for non-test output queries with same tag1 that were made before test query. If you will solve this problem we can extend the model. } 
+
+The adversary is allowed to make the following queries to the challenger.
+
 
 \begin{itemize}
-
-\item The adversary can make at most $M$ \texttt{output} queries to the challenger. On the $i$th \texttt{output} query, the challenger chooses a $y_i$ uniformly randomly and produces $$
-\prf(\texttt{KDF}(y_i \myconcat \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1}))), \texttt{tag}_2, n )
-$$
-\noindent The challenger then returns this value as a response to the $i$th \texttt{output} query along with $\texttt{tag}_2$ value. The values of $\texttt{tag}_1$ and $n$ are fixed and public. 
-
-\item The adversary is also allowed to adaptively query for signatures with $\sk$ of messages $m_i$, so long as $m_i \neq \texttt{tag}_1$.
-
-\item The adversary is also allowed to simply query the challenger for $\sk$ at any time. The challenger must respond with $\sk$ to this query.
-
-\item The adversary is also allowed to make a query for the $y_i$ value used in the $i$th \texttt{output} query at any time. The challenger must respond with the $y_i$ value used in generating the response to the $i$th \texttt{output} query.
-
-\item We say that the $i$th \texttt{output} query is fresh if the adversary has not queried both $y_i$ and $\sk$. At some point in time, the adversary must make a so-called test \texttt{output} query. This is the same as a normal \texttt{output} query except the challenger flips an unbiased coin and either responds with the genuine output using the wrapper, or a uniformly randomly chosen string of the same length. The adversary is allowed to query for the $y$ value used in the test if it wants to, as well as to continue making \texttt{output} queries or signature queries. The adversary may also query for the long-term key $\sk$ if it has not already done so. But the test output query must remain fresh at all times during the game.
-
-\item At some point in time after the test query, the adversary must output a single bit as a guess. The adversary wins the game if it is able to guess the coin flip with non-negligible advantage over $\frac{1}{2}$.
+	
+	\item The adversary can make \texttt{output} queries of two types:
+	\begin{itemize}
+		\item $\texttt{tag}_1, \texttt{tag}_2$ (in this case the challenger chooses the $y$ value uniformly randomly by itself);
+		\item $\texttt{tag}_1, \texttt{tag}_2,y$ (in this case the $y$ value is chosen by the adversary).
+	\end{itemize}
+	
+	Note that the adversary is allowed to make queries where $\texttt{tag}_1 \in T$. 
+	
+	The challenger produces $$
+	\prf(\texttt{KDF}(y, \texttt{H}(\sig (\sk,\texttt{tag}_1)), \texttt{tag}_2 )
+	$$
+	and returns this value as a response to the corresponding \texttt{output} query.
+	
+	The challenger indexes queries and locally saves the corresponding inputs to the wrapper for each query, i.e. the challenger saves records of the form $(i,\texttt{tag}_1^i,\texttt{tag}_2^i,y_i)$. 
+	
+	\item The adversary can make \texttt{sign} queries for signatures with $\sk$ of messages $m$. The challenger produces and returns the value $\sig (\sk, m)$.
+	
+	\item The adversary can make \texttt{corrupt} query for $\sk$ at any time. The challenger must respond with $\sk$ to this query.
+	
+	\item The adversary is also allowed to make \texttt{reveal} queries for the $y_i$ value used in the $i$th \texttt{output} query at any time (the adversary makes query with the index of the target \texttt{output} query). The challenger must respond with the $y_i$ value used in generating the response to the $i$th \texttt{output} query.
+	
+	\item We say that the $i$th \texttt{output} query is "fresh" if one of the values $y_i$ and $\mathrm{\texttt{signature}}$ stay secret. That is hold if one of the following conditions is satisfied:
+	\begin{itemize}
+		\item the adversary has not made the \texttt{corrupt} query or the \texttt{sign} query for $m = \texttt{tag}_1^i$. 
+		\item this query contains only $\texttt{tag}_1, \texttt{tag}_2$ and the adversary has not made the \texttt{reveal} query for  $y_i$.
+	\end{itemize}
+	
+	Also we say that the \texttt{output} query is "non-trivial" if one of the following conditions is satisfied
+	
+	\begin{itemize}
+		\item this query is of the type $\texttt{tag}_1, \texttt{tag}_2, y$ and this query has not been made before. 
+		
+		\item this query is of the type $\texttt{tag}_1, \texttt{tag}_2$.  
+	\end{itemize}
+	
+	
+	At some point in time, the adversary must make a so-called test \texttt{output} query. This is the same as a normal non-trivial \texttt{output} query except the challenger flips an unbiased coin and either responds with the genuine output using the wrapper, or a uniformly randomly chosen string of the same length. The adversary is allowed to query for the $y$ used in the test if it wants to, as well as to continue making other queries. The adversary may also query for the $\sk$ value or for the signature of $\texttt{tag}_1$ if it has not already done so. However, the test output query must remain fresh at all times during the game.
+	
+	\item At some point in time after the test query, the adversary must output a single bit as a guess. The adversary wins the game if it is able to guess the coin flip with non-negligible advantage over $\frac{1}{2}$.
 \end{itemize}
 
 \section{Proof of security} \label{proof}
@@ -249,7 +297,7 @@ If $\prf$, $\texttt{KDF}$, $\sig$ and $\texttt{H}$ satisfy the security definiti
 \begin{proof}
 Let Game 0 denote the original security game as defined in our security model definition. Let $S_i$ denote the event of the adversary winning Game $i$. Our goal in this proof is to bound $\Pr(S_0)$ to show that it is only at most negligibly above $\frac{1}{2}$. Although the security argument is very intuitive (``the adversary must surely need both $y$ and $\sk$ to guess the secret'') we will formally prove it in a game hopping proof.
 
-At some point in time, the adversary must issue a \texttt{test} query. Let $y_i$ denote the uniformly randomly chosen value the challenger generated for this query. We prove this theorem in a case partition on whether the adversary has queried for $\sk$ or $y_i$. (If the adversary has queried for neither, then it is clearly in an even worse position to win the game.) 
+At some point in time, the adversary must issue a \texttt{test} query. Let $\texttt{tag}_1^i, \texttt{tag}_2^i, y_i$ denote the values used by the challenger for this query. We prove this theorem in a case partition on whether the adversary has revealed $\sig(\sk,\texttt{tag}_1^i)$ or $y_i$. (If the adversary has queried for neither, then it is clearly in an even worse position to win the game.) 
 
 Let Game 1 be identical to Game 0 except the challenger guesses in advance an integer $i^{\star} \in [1, \dots, M]$ and aborts (and the adversary loses) unless $i^{\star} = i$. In other words, the challenger needs to guess in advance which of the possible \texttt{output} queries will be the test. This is a large failure event game hop and it is easy to see that
 
@@ -259,41 +307,59 @@ $$
 
 \noindent We now proceed with our case partition.
 
-\subsubsection*{Case 1: The adversary has revealed $y_i$.} In this case, the adversary is not allowed to query for $\sk$, otherwise the test output query would not be fresh.
+\subsubsection*{Case 1: The adversary has revealed $y_i$ or has chosen $y_i$ by itself.} In this case, the adversary is not allowed to query for $\sk$ or for the signature of $\texttt{tag}_1^i$, otherwise the test output query would not be fresh.
 
-\noindent \textbf{Game 2.} Define Game 2 to be identical to Game 1 except $\texttt{H}(\sig(\sk, \texttt{tag}_1))$ is replaced with a value $x_1$ sampled uniformly at random. Here we claim that
-$$\Pr(S_1) \le  \Pr(S_2) + \epsilon_{\texttt{H}, \sig}$$
-
-In particular, no probabalistic polynomial time distinguisher algorithm can distinguish between Game 1 and Game 2, since this would imply a way to beat the hash-signature game with better than $\epsilon_{\texttt{H}, \sig}$ advantage. Precisely, an adversary in the hash-signature game could beat it with better than $\epsilon_{\texttt{H}, \sig}$ advantage as follows. It acts as a challenger in the hybrid game and inserts the values of  $\texttt{tag}_1$ and $\pk$ from the hash-signature game. The adversary asks a test query straight away, receiving either $ \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1})$ or a uniformly randomly chosen value as per the rules of the hash-signature game. It inserts this value as the value for $ \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1})$ in the hybrid game. The adversary can now simulate \texttt{output} and test queries as normal using this value. Finally, it can simulate signature queries by merely forwarding them along into the hash-signature game. This perfectly simualtes the hybrid game: it is literally Game 1 if the test returns $ \texttt{H}(\sig (\sk, \mathrm{\texttt{tag}_1})$, and it is literally Game 2 if it is a uniformly randomly chosen value. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the hash-signature game. By assumption of the hardness of the hash-signature game, all adversaries can only win with at most advantage $\epsilon_{\texttt{H}, \sig}$. Therefore, the difference in advantages of adversaries across Game 1 and Game 2 can also only be separated by at most $\epsilon_{\texttt{H}, \sig}$. Thus the claim above is proven.
-
-\noindent \textbf{Game 3.} Define Game 3 to be identical to Game 2 except 
-$\texttt{KDF}(y_i \myconcat x_1)$ is replaced with a value $k$ sampled uniformly randomly. Here we claim that
+\noindent \textbf{Game 2.} Let Game 2 be identical to Game 1 except the challenger guesses in advance an integer $j \in [1, \dots, l]$ and aborts (and the adversary loses) unless $\texttt{tag}_1^i = t_j$.  This is a large failure event game hop and it is easy to see that
 
 $$
-\Pr(S_2) \le \Pr(S_3) + \epsilon_{\texttt{KDF}}
+\Pr(S_1) \le l \Pr(S_2)
 $$
 
-Here the simulation argument is similar to above, but for the KDF game. The KDF adversary asks for $x$ and inserts it in the place of $y_i$ (it knows when to do this from Game 1) so that it can answer the reveal query in this case. It inserts the response $z_b$ from the test query in the KDF game for the value of $\texttt{KDF}(y_i \concat x)$ in the hybrid game. All other queries are simulated in the normal way.
 
-\noindent \textbf{Game 4.} Define Game 4 to be identical to Game 3 except $\prf(k, \texttt{tag}_2, n)$ is replaced with a value chosen uniformly randomly.
+\noindent \textbf{Game 3.} Define Game 3 to be identical to Game 2 except $\texttt{H}(\sig(\sk, \texttt{tag}_1^i))$ is replaced with a value $x_i$ sampled uniformly at random for each  \texttt{output} query with $\texttt{tag}_1 = \texttt{tag}_1^i$. Here we claim that
+$$\Pr(S_2) \le  \Pr(S_3) + \epsilon_{\texttt{H}, \sig}$$
 
-In the same way as before, it is easy to see that 
+In particular, no probabilistic polynomial time distinguisher algorithm can distinguish between Game 2 and Game 3, since this would imply a way to beat the hash-signature game with better than $\epsilon_{\texttt{H}, \sig}$ advantage. Precisely, an adversary in the hash-signature game could beat it with better than $\epsilon_{\texttt{H}, \sig}$ advantage as follows. 
+
+It acts as a challenger in the hybrid game and inserts the value of $\pk$ from the hash-signature game. The adversary asks a test query straight away, receiving either $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i)$ or a uniformly randomly chosen value as per the rules of the hash-signature game. It inserts this value as the value for $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i)$ in the hybrid game. Because of Game 1, the adversary knows where to make this swap in the game. The \texttt{output} queries with $\texttt{tag}_1 \neq t_j$ are processed by the adversary using queries for signature to its challenger.  The adversary can now simulate \texttt{output} and test queries as normal using this value.  Finally, it can simulate signature queries by merely forwarding them along into the hash-signature game. This perfectly simulates the hybrid game: it is literally Game 2 if the test returns $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$, and it is literally Game 3 if it is a uniformly randomly chosen value. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the hash-signature game. By assumption of the hardness of the hash-signature game, all adversaries can only win with at most advantage $\epsilon_{\texttt{H}, \sig}$. Therefore, the difference in advantages of adversaries across Game 2 and Game 3 can also only be separated by at most $\epsilon_{\texttt{H}, \sig}$. Thus the claim above is proven.
+
+\noindent \textbf{Game 4.} Define Game 4 to be identical to Game 3 except 
+$\texttt{KDF}(\cdot, x_i)$ is replaced with ideal random function $\rho(\cdot)$ for each \texttt{output} query with $\texttt{tag}_1 =t_j$. Here we claim that
 
 $$
-\Pr(S_3) \le \Pr(S_4) + \epsilon_{\prf}
+\Pr(S_3) \le \Pr(S_4) + \epsilon_{\texttt{KDF}}
 $$
 
-It is clearly impossible for the adversary to have any advantage in guessing the secret bit in Game 4 (in either case, the wrapper generates a uniformly randomly chosen string). As such, $\Pr(S_4) = \frac{1}{2}$. Thus in this case $\Pr(S_0) \le \frac{1}{2} + M( \epsilon_{(\texttt{H}, \sig)} + \epsilon_{\texttt{KDF}} + \epsilon_{\prf})$ which is negligibly close to $\frac{1}{2}$.
+Here we present the simulation argument for the KDF game. Because of Game 1, the adversary knows where to make this swap in the game precisely for \texttt{output} queries with  $\texttt{tag}_1 =t_j$. The KDF adversary chooses to attack \texttt{KDF} for the second argument $\texttt{x}$ and makes queries $y$ to compute $\texttt{KDF}(y, x_i)$ for required $y$.  If the adversary has made the $(\texttt{tag}_1,\texttt{tag}_2)$ query, then the KDF adversary chooses $y$ value uniformly randomly by itself and locally saves it. Note that it can answer the reveal query in this case. All other queries are simulated in the normal way. 
 
-\subsubsection*{Case 2: The adversary has revealed $\sk$.}
+\noindent \textbf{Game 5.} Define Game 5 to be identical to Game 4 except $\prf(\rho(y_i), \texttt{tag}^i_2)$ is replaced with a value chosen uniformly randomly for the test query.
 
-\noindent \textbf{Game 2.} This game is identical to Game 1 except $\texttt{KDF}(y_i, \texttt{H}(\sig (\sk, \texttt{tag}_1)))$ is replaced with a value $k$ sampled uniformly at random. Because of Game 1, the challenger knows where to make this swap in the game. Similarly to the previous case (Game 3), we have
+Here we claim that
+$$
+\Pr(S_4) \le \Pr(S_5) + \epsilon_{\prf}
+$$
+
+Here we present the simulation argument for the PRF game with at most $M$ keys. The output queries with $\texttt{tag}_1 =t_j$ and different $y$ are processed with the different keys by asking the PRF challenger with the suitable indexes in queries. Since the test query should be non-trivial, $y_i$ or $\texttt{tag}_2^i$ should be new (we neglect the probability that for the \texttt{output} query of the type $(\texttt{tag}_1,\texttt{tag}_2)$ the $y_i$ value chosen by the challenger itself collides with the previous values). Therefore, the PRF adversary can use its test query to swap the $\prf(\rho(y_i), \texttt{tag}^i_2)$ with the value obtained as a response on the test query in the PRF game. All other queries are simulated in the normal way.
+
+ 
+It is clearly impossible for the adversary to have any advantage in guessing the secret bit in Game 5 (in either case, the wrapper generates a uniformly randomly chosen string). As such, $\Pr(S_5) = \frac{1}{2}$. Thus in this case $\Pr(S_0) \le \frac{1}{2} + Ml( \epsilon_{(\texttt{H}, \sig)} + \epsilon_{\texttt{KDF}} + \epsilon_{\prf})$ which is negligibly close to $\frac{1}{2}$.
+
+\subsubsection*{Case 2: The adversary has revealed $\sk$ or $\sig(\sk, \texttt{tag}_1^i)$.}
+
+In this case, the adversary is not allowed to reveal $y_i$ or to choose $y_i$ by itself, otherwise the test output query would not be fresh. Thus, $y_i$ is chosen uniformly randomly.  
+
+
+\noindent \textbf{Game 2.} This game is identical to Game 1 except $\texttt{KDF}(y_i, \texttt{H}(\sig (\sk, \texttt{tag}_1)))$ is replaced with a value $k$ sampled uniformly at random. 
+
+We claim that 
 
 $$
 \Pr(S_1) \le \Pr(S_2) + \epsilon_{\texttt{KDF}}
 $$
 
-\noindent \textbf{Game 3.} This is the same as Game 4 from the other case.
+In the simulation the adversary chooses to attack \texttt{KDF} for the first argument $\texttt{y}$ and makes query  $\texttt{H}(\sig (\sk, \texttt{tag}^i_1))$ to compute $\texttt{KDF}(y_i, \texttt{H}(\sig (\sk, \texttt{tag}^i_1)))$. All other queries are simulated in the normal way.
+
+\noindent \textbf{Game 3.} This is the same as Game 5 from the other case but here is enough to make queries only for one key in the PRF game.
 \end{proof}
 
 \section{Real-world considerations} \label{sec:notes}
