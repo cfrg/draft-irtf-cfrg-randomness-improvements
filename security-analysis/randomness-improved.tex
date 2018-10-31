@@ -1,4 +1,7 @@
-\documentclass[12pt]{article}
+\documentclass{article}
+
+%%%%%% More sensible page sizes %%%%%%%
+\usepackage[a4paper]{geometry}
 
 %%%%%% MATH MACROS %%%%%%%
 \usepackage{amssymb}
@@ -45,8 +48,11 @@ notions, ff, primitives, mm]{cryptocode}
   \and
   Luke Garratt\\
   \texttt{lgarratt@cisco.com}
+  \and
+  Stanislav V. Smyshlyaev\\
+  \texttt{smyshsv@gmail.com}
 }
-\title{Security Analysis}
+\title{Security Analysis for an Improved Randomness Wrapper}
 
 \date{DRAFT v0.2 -- October 30, 2018}
 \begin{document}
@@ -110,7 +116,12 @@ $$
 \prf(\texttt{KDF}(y, \texttt{H}(\sig (\sk, \texttt{tag}_1))), \texttt{tag}_2, n),
 $$
 where $\texttt{tag}_1$ and $\texttt{tag}_2$ are public and are chosen
-from some fixed sets $\mathcal{T}_1$ and $\mathcal{T}_2$ correspondingly and where \texttt{PRF} and \texttt{KDF} and instantiated with HKDF-expand and HKDF-extract respectively. We encourage the reader to see the main document for full details.
+from some fixed sets $\mathcal{T}_1$ and $\mathcal{T}_2$ correspondingly
+and where \texttt{PRF} and \texttt{KDF} and instantiated with
+HKDF-expand and HKDF-extract respectively. We assume that the size of
+$\mathcal{T}_1$ and $\mathcal{T}_2$ is negligible in the size of the
+security parameter.
+We encourage the reader to see the main document for full details.
 
 \subsection*{Overview}
 In Section \ref{CSPRNG} we recall the standard properties of a CSPRNG. In Section \ref{sec:def} we define the security properties we will need for our primitives in our wrapper construction. In Section \ref{sec:model} we define our security model for our wrapper construction. In Section \ref{proof} we give a security theorem and formal game hopping security proof it fulfils the security properties we claim. We make additional notes on the real-world security of our wrapper construction in Section \ref{sec:notes}.
@@ -229,11 +240,11 @@ Here we define the security property we expect from our wrapper in terms of a ga
 
 We run a game between the challenger and the adversary as follows. At the beginning of the game the challenger uniformly randomly chooses a secret key $\sk$ and returns a public key $\pk$ to the adversary. Receiving the public key the adversary chooses a set $T \subseteq \mathcal{T}_1$ consisting of $l$ pairwise different values $t_1,\ldots,t_l$ and sends it to the challenger.  We assume that the maximum size $n$ of the $\prf$ output and the size $l$ of the set $T$ are polynomial. 
 
-\todo[inline]{There will be some problems with the proof if we allow the
-adversary to choose tag1 values adaptively. Namely, in Case1, Game2. The
-HSig adversary does not know what tag1 will be test and cannot trivially provide the correct responses for non-test output queries with same tag1 that were made before test query. If you will solve this problem we can extend the model. } 
-
-\todo[inline]{Luke: it seems the best we can do is guess it in advance as it belongs to some small set, or restrict it as per the rules of the game. Currently it is the former.}
+% \todo[inline]{There will be some problems with the proof if we allow the
+% adversary to choose tag1 values adaptively. Namely, in Case1, Game2. The
+% HSig adversary does not know what tag1 will be test and cannot trivially provide the correct responses for non-test output queries with same tag1 that were made before test query. If you will solve this problem we can extend the model. } 
+% 
+% \todo[inline]{Luke: it seems the best we can do is guess it in advance as it belongs to some small set, or restrict it as per the rules of the game. Currently it is the former.}
 
 The adversary is allowed to make the following queries to the challenger.
 
@@ -253,7 +264,7 @@ The adversary is allowed to make the following queries to the challenger.
 	$$
 	and returns this value as a response to the corresponding \texttt{output} query.
 	
-	The challenger indexes queries and locally saves the corresponding inputs to the wrapper for each query, i.e. the challenger saves records of the form $(i,\texttt{tag}_1^i,\texttt{tag}_2^i,y_i)$.  We assume that $i ]\le M$ for some M that is also polynomial.
+	The challenger indexes queries and locally saves the corresponding inputs to the wrapper for each query, i.e. the challenger saves records of the form $(i,\texttt{tag}_1^i,\texttt{tag}_2^i,y_i)$.  We assume that $i \le M$ for some M that is also polynomial.
 	
 	\item The adversary can make \texttt{sign} queries for signatures with $\sk$ of messages $m$. The challenger produces and returns the value $\sig (\sk, m)$.
 	
@@ -314,7 +325,7 @@ $$\Pr(S_2) \le  \Pr(S_3) + \epsilon_{\texttt{H}, \sig}$$
 
 In particular, no probabilistic polynomial time distinguisher algorithm can distinguish between Game 2 and Game 3, since this would imply a way to beat the hash-signature game with better than $\epsilon_{\texttt{H}, \sig}$ advantage. Precisely, an adversary in the hash-signature game could beat it with better than $\epsilon_{\texttt{H}, \sig}$ advantage as follows. 
 
-It acts as a challenger in the hybrid game and inserts the value of $\pk$ from the hash-signature game. As an adversary in the hash-signature game, it inserts the known $\texttt{tag}_1$ value from the previous game and asks a test query straight away, receiving either $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i)$ or a uniformly randomly chosen value as per the rules of the hash-signature game. It inserts this value as the value for $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i)$ in the hybrid game. Because of Game 1, the adversary knows where to make this swap in the game. The \texttt{output} queries with $\texttt{tag}_1 \neq t_j$ are processed by the adversary using queries for signature to its challenger.  The adversary can now simulate \texttt{output} and test queries as normal using this value. The adversary does not have to worry about simulating a \texttt{corrupt} query because we are in case 1. Finally, it can simulate signature queries by merely forwarding them along into the hash-signature game. This perfectly simulates the hybrid game: it is literally Game 2 if the test returns $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$, and it is literally Game 3 if it is a uniformly randomly chosen value. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the hash-signature game. By assumption of the hardness of the hash-signature game, all adversaries can only win with at most advantage $\epsilon_{\texttt{H}, \sig}$. Therefore, the difference in advantages of adversaries across Game 2 and Game 3 can also only be separated by at most $\epsilon_{\texttt{H}, \sig}$. Thus the claim above is proven.
+It acts as a challenger in the hybrid game and inserts the value of $\pk$ from the hash-signature game. As an adversary in the hash-signature game, it inserts the known $\texttt{tag}_1$ value from the previous game and asks a test query straight away, receiving either $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i)$ or a uniformly randomly chosen value as per the rules of the hash-signature game. It inserts this value as the value for $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i)$ in the hybrid game. Because of Game 2, the adversary knows where to make this swap in the game. The \texttt{output} queries with $\texttt{tag}_1 \neq t_j$ are processed by the adversary using queries for signature to its challenger.  The adversary can now simulate \texttt{output} and test queries as normal using this value. The adversary does not have to worry about simulating a \texttt{corrupt} query because we are in case 1. Finally, it can simulate signature queries by merely forwarding them along into the hash-signature game. This perfectly simulates the hybrid game: it is literally Game 2 if the test returns $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$, and it is literally Game 3 if it is a uniformly randomly chosen value. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the hash-signature game. By assumption of the hardness of the hash-signature game, all adversaries can only win with at most advantage $\epsilon_{\texttt{H}, \sig}$. Therefore, the difference in advantages of adversaries across Game 2 and Game 3 can also only be separated by at most $\epsilon_{\texttt{H}, \sig}$. Thus the claim above is proven.
 
 \noindent \textbf{Game 4.} Define Game 4 to be identical to Game 3 except 
 $\texttt{KDF}(\cdot, x_i)$ is replaced with an ideal random function $\rho(\cdot)$ for each \texttt{output} query with $\texttt{tag}_1 =t_j$. Here we claim that
@@ -340,7 +351,8 @@ It is clearly impossible for the adversary to have any advantage in guessing the
 
 In this case, the adversary is not allowed to reveal $y_i$ or to choose $y_i$ by itself, otherwise the test output query would not be fresh. Thus, $y_i$ is chosen uniformly randomly.  
 
-\todo[inline]{Luke: Did we need an intermediate game hop to guess the test $\texttt{tag}_1$ here? If so, it is in both cases so we should put it before the case distinction. And we mean to replace only the KDF output with the test $\texttt{tag}_1$ right?}
+%%% CC: Commented out for now since we don't need to.
+%\todo[inline]{Luke: Did we need an intermediate game hop to guess the test $\texttt{tag}_1$ here? If so, it is in both cases so we should put it before the case distinction. And we mean to replace only the KDF output with the test $\texttt{tag}_1$ right?}
 
 \noindent \textbf{Game 2.} This game is identical to Game 1 except $\texttt{KDF}(y_i, \texttt{H}(\sig (\sk, \texttt{tag}_1)))$ is replaced with a value $k$ sampled uniformly at random. 
 
