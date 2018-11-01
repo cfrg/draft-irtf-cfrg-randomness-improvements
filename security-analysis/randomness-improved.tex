@@ -52,13 +52,29 @@ notions, ff, primitives, mm]{cryptocode}
   Stanislav V. Smyshlyaev\\
   \texttt{smyshsv@gmail.com}
 }
-\title{Security Analysis for an Improved Randomness Wrapper}
+\title{Security Analysis for Randomness Improvements for Security
+Protocols}
 
-\date{DRAFT v0.2 -- October 30, 2018}
+\date{v1.0 -- November 1st, 2018}
 \begin{document}
   \maketitle
 
 %\pagenumbering{arabic}
+
+\begin{abstract}
+Many cryptographic mechanisms depend on the availability of secure
+	random numbers. In practice, the sources of random numbers can
+	be unreliable for many reasons. There exist ways to improve the
+	reliability of randomness, but these often do not work well with
+	practical constraints.
+	One proposal to reduce the impact of untrusted randomness is the
+	proposal by Cremers et al.~\cite{randomnessirtf}, which aims to
+	be effective in existing deployments.
+
+	In this document, we provide a security analysis of the
+	construction in~\cite{randomnessirtf} (Revision 3) and elaborate
+	on design choices and practical interpretations.
+\end{abstract}
 
 \section{Introduction}
 All key exchange protocols (e.g., SSL/TLS, SSH, IKE, etc.) depend on the generation of secure random numbers. At the core of all of these protocols is a Diffie--Hellman key exchange of the following basic form: Alice chooses random number $x$, computes $g^x$ and sends it to Bob. Bob similarly chooses random number $y$, computes $g^y$ and sends it to Alice. Of course, each particular protocol has other essential details such as certificates, signatures, key derivation, comparing of transcripts and so on, but at the heart of all these protocols is the shared secret $g^{xy}$. Therefore, it is essential that $x$ and $y$ are generated as securely as possible. 
@@ -110,7 +126,7 @@ protocols including SSL/TLS, SSH, IKE, etc. at negligible cost to efficiency.
 We propose a ``wrapper'' function around existing
 pseudorandom number generators, in contexts that have access to a
 party's signing algorithm. Let $y$ be the output of the pseudorandom
-number generator. As in the main document, we define the wrapper to be:
+number generator. As in the main document~\ref{randomnessirtf}, we define the wrapper to be:
 
 $$
 \prf(\texttt{KDF}(y, \texttt{H}(\sig (\sk, \texttt{tag}_1))), \texttt{tag}_2, n),
@@ -121,7 +137,7 @@ and where \texttt{PRF} and \texttt{KDF} and instantiated with
 HKDF-expand and HKDF-extract respectively. We assume that the size of
 $\mathcal{T}_1$ and $\mathcal{T}_2$ is negligible in the size of the
 security parameter.
-We encourage the reader to see the main document for full details.
+We encourage the reader to see the main document~\cite{randomnessirtf} for full details.
 
 \subsection*{Overview}
 In Section \ref{CSPRNG} we recall the standard properties of a CSPRNG. In Section \ref{sec:def} we define the security properties we will need for our primitives in our wrapper construction. In Section \ref{sec:model} we define our security model for our wrapper construction. In Section \ref{proof} we give a security theorem and formal game hopping security proof it fulfils the security properties we claim. We make additional notes on the real-world security of our wrapper construction in Section \ref{sec:notes}.
@@ -132,7 +148,9 @@ Forward secure cryptographically secure pseudorandom number generators (CSPRNG) 
 
 \subsubsection*{Property 1. Indistinguishable from random (CSPRNG)}
 
-A family of deterministic polynomial time computable functions $Rand_{k} \colon \{0, 1\}^{k} \rightarrow \{0, 1 \}^{p(k)}$ for some polynomial $p$ is a  CSPRG, if it stretches the length of its input ($p(k) > k$ for any $k$) and if its output is computationally indistinguishable from true randomness, i.e. for any probabilistic polynomial time algorithm $A$, which outputs 1 or 0 as a distinguisher,
+A family of deterministic polynomial time computable functions $Rand_{k}
+\colon \{0, 1\}^{k} \rightarrow \{0, 1 \}^{p(k)}$ for some polynomial
+$p$ is a  CSPRNG, if it stretches the length of its input ($p(k) > k$ for any $k$) and if its output is computationally indistinguishable from true randomness, i.e. for any probabilistic polynomial time algorithm $A$, which outputs 1 or 0 as a distinguisher,
 
 $$ |\Pr_{x\gets\{0,1\}^k}[A(Rand(x))=1] - \Pr_{r\gets\{0,1\}^{p(k)}}[A(r)=1]| < \mu(k) $$
 
