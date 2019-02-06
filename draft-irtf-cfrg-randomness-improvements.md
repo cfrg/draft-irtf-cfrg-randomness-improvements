@@ -164,7 +164,7 @@ Let Sig(sk, m) be a function that computes a signature of message
 m given private key sk. Let H be a cryptographic hash function that produces output 
 of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
-suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., 
+suitable for cryptographic use. Let Expand(k, info, n) be a variable-length output PRF, e.g., 
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
 and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string.
@@ -214,7 +214,7 @@ To provide security in the cases of usage of CSPRNGs in virtual environments,
 it is RECOMMENDED to incorporate all available information specific to the process that 
 would ensure the uniqueness of each tag1 value among different instances of virtual machines 
 (including ones that were cloned or recovered from snapshots). 
-It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}.
+It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}).
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
 
 - tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
