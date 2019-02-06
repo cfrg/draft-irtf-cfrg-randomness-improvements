@@ -86,6 +86,12 @@ normative:
             -
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
+    SecAnalysis:
+        title: Security Analysis for Randomness Improvements for Security Protocols
+        author:
+            -
+                ins: Akhmetzyanova, Cremers, Garratt, Smyshlyaev
+        target: https://eprint.iacr.org/2018/1057
     RY2010:
         title: When Good Randomness Goes Bad|:| Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
         author:
@@ -164,7 +170,7 @@ Let Sig(sk, m) be a function that computes a signature of message
 m given private key sk. Let H be a cryptographic hash function that produces output 
 of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
-suitable for cryptographic use. Let Expand(k, info, n) be a randomness extractor, e.g., 
+suitable for cryptographic use. Let Expand(k, info, n) be a variable-length output PRF, e.g., 
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
 and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string.
@@ -197,8 +203,13 @@ Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
 
-In systems where signature computations are expensive, G'(n) may be precomputed and pooled.
-This is possible since the construction depends solely upon the CSPRNG output and private key.
+In systems where signature computations are expensive, Sig(sk, tag1) may be cached --- in
+that case the relative cost of using G'(n) instead of G(n) tends to be negligible with respect 
+to cryptographic operations in protocols such as TLS.
+
+Moreover, the values of G'(n) may be precomputed and pooled. This is possible since the construction 
+depends solely upon the CSPRNG output and private key. 
+
 
 # Tag Generation {#tag-gen}
 
@@ -214,7 +225,7 @@ To provide security in the cases of usage of CSPRNGs in virtual environments,
 it is RECOMMENDED to incorporate all available information specific to the process that 
 would ensure the uniqueness of each tag1 value among different instances of virtual machines 
 (including ones that were cloned or recovered from snapshots). 
-It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}.
+It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}).
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
 
 - tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
@@ -242,15 +253,17 @@ This document makes no request to IANA.
 
 # Security Considerations
 
-A security analysis was performed by two authors of this document. Generally speaking,
-security depends on keeping the private key secret. If this secret is compromised, the
-scheme reduces to the scenario wherein the PRF provides only an outer wrapper on usual
-CSPRNG generation.
+A security analysis was performed in {{SecAnalysis}}. Generally speaking, the following security 
+theorem has been proven: if the adversary learns only one of the signature or the usual 
+randomness generated on one particular instance, then under the security assumptions on our 
+primitives, the wrapper construction should output randomness that is indistinguishable from 
+a random string.
 
 The main reason one might expect the signature to be exposed is via a side-channel attack.
 It is therefore prudent when implementing this construction to take into consideration the
 extra long-term key operation if equipment is used in a hostile environment when such
-considerations are necessary. 
+considerations are necessary. Hence, is recommended to generate a key specifically for
+the purposes of the defined construction and not to use it another way.
 
 The signature in the construction as well as in the protocol itself MUST NOT use randomness
 from entropy sources with dubious security guarantees. Thus, the signature scheme MUST either 
