@@ -86,7 +86,7 @@ normative:
             -
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
-	SecAnalysis:
+    SecAnalysis:
         title: Security Analysis for Randomness Improvements for Security Protocols
         author:
             -
