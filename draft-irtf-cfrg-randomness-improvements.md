@@ -203,9 +203,8 @@ Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
 
-In systems where signature computations are expensive, Sig(sk, tag1) may be cached. 
-Experimental results indicate that caching the signature output is critical for performance -- 
-if Sig(sk, tag1) is cached, the relative cost of using G'(n) instead of G(n) is negligible with respect 
+In systems where signature computations are expensive, Sig(sk, tag1) may be cached --- in
+that case the relative cost of using G'(n) instead of G(n) tends to be negligible with respect 
 to cryptographic operations in protocols such as TLS.
 
 Moreover, the values of G'(n) may be precomputed and pooled. This is possible since the construction 
