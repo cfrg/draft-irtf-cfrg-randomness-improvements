@@ -204,7 +204,11 @@ or use an independent (and completely reliable) entropy source, e.g., if Sig is 
 in an HSM with its own internal trusted entropy source for signature generation.
 
 In systems where signature computations are expensive, G'(n) may be precomputed and pooled.
-This is possible since the construction depends solely upon the CSPRNG output and private key.
+This is possible since the construction depends solely upon the CSPRNG output and private key. 
+Experimental results indicate that caching the signature output is critical for performance. 
+The signature computation cost is amortized in about 1000 calls, afterwards each call of G’(n) 
+instead of G(n) costs from nanoseconds to microseconds (depending on the required output size) 
+-- i.e., the relative cost is minor with respect to cryptographic operations in protocols such as TLS.
 
 # Tag Generation {#tag-gen}
 
