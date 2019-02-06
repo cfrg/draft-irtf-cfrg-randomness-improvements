@@ -262,7 +262,7 @@ a random string.
 The main reason one might expect the signature to be exposed is via a side-channel attack.
 It is therefore prudent when implementing this construction to take into consideration the
 extra long-term key operation if equipment is used in a hostile environment when such
-considerations are necessary. Hence, is recommended to generate a key specifically for
+considerations are necessary. Hence, it is recommended to generate a key specifically for
 the purposes of the defined construction and not to use it another way.
 
 The signature in the construction as well as in the protocol itself MUST NOT use randomness
