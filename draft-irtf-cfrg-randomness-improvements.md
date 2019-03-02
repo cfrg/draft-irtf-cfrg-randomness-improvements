@@ -214,7 +214,7 @@ the choice of a particular KDF does not significantly affect the performance. Th
 experiments and their results can be found in the appendix of {{SecAnalysis}}.
 
 Moreover, the values of G'(n) may be precomputed and pooled. This is possible since the construction 
-depends solely upon the CSPRNG output and private key.
+depends solely upon the CSPRNG output and private key. 
 
 
 # Tag Generation {#tag-gen}
