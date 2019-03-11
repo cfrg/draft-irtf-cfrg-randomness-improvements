@@ -248,6 +248,10 @@ G'(n) = HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
 Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
 TLS 1.3. Older variants use similarly constructed strings.
 
+# Acknowledgements
+
+We thank Liliya Akhmetzyanova for her deep involvement in the security assessment in {{SecAnalysis}}.
+
 # IANA Considerations
 
 This document makes no request to IANA.
