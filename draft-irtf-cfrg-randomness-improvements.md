@@ -205,13 +205,8 @@ in an HSM with its own internal trusted entropy source for signature generation.
 
 In systems where signature computations are expensive, Sig(sk, tag1) may be cached. In
 that case the relative cost of using G'(n) instead of G(n) tends to be negligible with respect 
-to cryptographic operations in protocols such as TLS. A number of experiments were conducted 
-(in a certain environment) to evaluate the relative overhead of the wrapper primitives used 
-in the described construction G'(n): after computing the value of Sig(sk, tag1) once, G'(n) and G(n)
-were calculated in a loop, to measure the rate at which continued use amortizes the signature 
-computation cost. Results indicate that caching the signature output is critical for performance, while
-the choice of a particular KDF does not significantly affect the performance. The description of the 
-experiments and their results can be found in the appendix of {{SecAnalysis}}.
+to cryptographic operations in protocols such as TLS. A description of the performance experiments 
+and their results can be found in the appendix of {{SecAnalysis}}.
 
 Moreover, the values of G'(n) may be precomputed and pooled. This is possible since the construction 
 depends solely upon the CSPRNG output and private key. 
