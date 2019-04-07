@@ -1,6 +1,10 @@
 # Randomness Improvements for Security Protocols
 
-This is the working area for individual Internet-Drafts.
+This is the working area for the individual Internet-Draft, "Randomness Improvements for Security Protocols".
+
+* [Editor's Copy](https://chris-wood.github.io/draft-irtf-cfrg-randomness-improvements/#go.draft-irtf-cfrg-randomness-improvements.html)
+* [Individual Draft](https://tools.ietf.org/html/draft-irtf-cfrg-randomness-improvements)
+* [Compare Editor's Copy to Individual Draft](https://chris-wood.github.io/draft-irtf-cfrg-randomness-improvements/#go.draft-irtf-cfrg-randomness-improvements.diff)
 
 ## Building the Draft
 
@@ -17,4 +21,4 @@ This requires that you have the necessary software installed.  See
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/taps-api/drafts/blob/master/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/chris-wood/draft-irtf-cfrg-randomness-improvements/blob/master/CONTRIBUTING.md).
