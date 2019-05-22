@@ -179,7 +179,7 @@ The construction works as follows. Instead of using G(n) when randomness is need
 use G'(n), where
 
 ~~~
-       G'(n) = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
+       G'(n) = Expand(Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 ~~~
 
 Functionally, this expands n random bytes from a key derived from the CSPRNG output and 
@@ -242,7 +242,7 @@ apply this construction to TLS, one simply replaces the "private" CSPRNG G(n), i
 that generates private values, such as key shares, with:
 
 ~~~
-G'(n) = HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
+G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 ~~~
 
 Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
