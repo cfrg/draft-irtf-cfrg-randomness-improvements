@@ -179,16 +179,16 @@ The construction works as follows. Instead of using G(n) when randomness is need
 use G'(n), where
 
 ~~~
-       G'(n) = Expand(Extract(G(L), H(Sig(sk, tag1))), tag2, n)
+       G'(n) = Expand(Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 ~~~
 
 Functionally, this expands n random bytes from a key derived from the CSPRNG output and 
 signature over a fixed string (tag1). See {{tag-gen}} for details about how "tag1" and "tag2" 
 should be generated and used per invocation of the randomness wrapper. Expand() generates
 a string that is computationally indistinguishable from a truly random string of n bytes.
-Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(n). 
+Thus, the security of this construction depends upon the secrecy of H(Sig(sk, tag1)) and G(L). 
 If the signature is leaked, then security of G'(n) reduces to the scenario wherein randomness is expanded
-directly from G(n).
+directly from G(L).
 
 If a private key sk is stored and used inside an HSM, then the signature calculation is 
 implemented inside it, while all other operations (including calculation of a hash function, 
@@ -242,7 +242,7 @@ apply this construction to TLS, one simply replaces the "private" CSPRNG G(n), i
 that generates private values, such as key shares, with:
 
 ~~~
-G'(n) = HKDF-Expand(HKDF-Extract(G(L), H(Sig(sk, tag1))), tag2, n)
+G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 ~~~
 
 Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
