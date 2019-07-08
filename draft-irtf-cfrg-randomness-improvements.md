@@ -158,11 +158,11 @@ remains indistinguishable from random provided the private key remains unknown t
 
 # Randomness Wrapper
 
-Let x be the output of a CSPRNG. When properly instantiated, x should be
-indistinguishable from a random string of x bytes. However, as previously discussed,
-this is not always true. To mitigate this problem, we propose an approach for wrapping
-the CSPRNG output with a construction that mixes secret data into
-a value that may be lacking randomness.
+The output of a properly instantiated CSPRNG should be indistinguishable from a
+random string of the same length. However, as previously discussed, this is not
+always true. To mitigate this problem, we propose an approach for wrapping the
+CSPRNG output with a construction that mixes secret data into a value that may
+be lacking randomness.
 
 Let G(n) be an algorithm that generates n random bytes, i.e.,
 the output of a CSPRNG. Define an augmented CSPRNG G' as follows.
@@ -194,7 +194,7 @@ If a private key sk is stored and used inside an HSM, then the signature calcula
 implemented inside it, while all other operations (including calculation of a hash function, 
 Extract and Expand functions) can be implemented either inside or outside the HSM.
 
-Sig(sk, tag1) should only be computed once for the lifetime of the randomness wrapper,
+Sig(sk, tag1) need only be computed once for the lifetime of the randomness wrapper,
 and MUST NOT be used or exposed beyond its role in this computation. To achieve this, 
 tag1 may have the format that is not supported (or explicitly forbidden) by other applications 
 using sk.
@@ -203,10 +203,10 @@ Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
 
-In systems where signature computations are expensive, Sig(sk, tag1) may be cached. In
-that case the relative cost of using G'(n) instead of G(n) tends to be negligible with respect 
-to cryptographic operations in protocols such as TLS. A description of the performance experiments 
-and their results can be found in the appendix of {{SecAnalysis}}.
+Because Sig(sk, tag1) can be cached, the relative cost of using G'(n) instead of G(n) 
+tends to be negligible with respect to cryptographic operations in protocols such as TLS. 
+A description of the performance experiments and their results can be found in the appendix of 
+{{SecAnalysis}}.
 
 Moreover, the values of G'(n) may be precomputed and pooled. This is possible since the construction 
 depends solely upon the CSPRNG output and private key. 
@@ -226,7 +226,7 @@ To provide security in the cases of usage of CSPRNGs in virtual environments,
 it is RECOMMENDED to incorporate all available information specific to the process that 
 would ensure the uniqueness of each tag1 value among different instances of virtual machines 
 (including ones that were cloned or recovered from snapshots). 
-It is needed to address the problem of CSPRNG state cloning (see {{RY2010}}).
+This is needed to address the problem of CSPRNG state cloning (see {{RY2010}}).
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
 
 - tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
