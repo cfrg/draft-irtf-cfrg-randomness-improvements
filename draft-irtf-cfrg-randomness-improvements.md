@@ -55,8 +55,10 @@ author:
 
 normative:
     RFC2104:
+    RFC2119:
     RFC5869:
     RFC6979:
+    RFC8174:
     X9.62:
         title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI X9.62-2005, November 2005.
         author:
@@ -128,8 +130,7 @@ CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}.
 Initial entropy sources can also be weak or broken, and that would lead to insecurity 
 of all CSPRNG instances seeded with them.
 In such cases where CSPRNGs are poorly implemented or insecure, an adversary may be
-able to predict its output and recover secret Diffie-Hellman key shares that protect
-the connection.
+able to predict its output and recover secret key material used to protect the connection.
 
 This document proposes an improvement to randomness generation in security protocols
 inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw randomness
@@ -156,6 +157,13 @@ advantage in leaking the private key, modulo side channel attacks.
 3. If the CSPRNG is broken or controlled by adversary Adv, the output of the proposed construction 
 remains indistinguishable from random provided the private key remains unknown to Adv.
 
+# Conventions Used in This Document
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+"RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted
+as described in BCP 14 {{RFC2119}}, {{RFC8174}} when, and only when, they appear in all capitals,
+as shown here.
+
 # Randomness Wrapper
 
 The output of a properly instantiated CSPRNG should be indistinguishable from a
@@ -170,7 +178,7 @@ Let Sig(sk, m) be a function that computes a signature of message
 m given private key sk. Let H be a cryptographic hash function that produces output 
 of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
-suitable for cryptographic use. Let Expand(k, info, n) be a variable-length output PRF, e.g., 
+suitable for cryptographic use. It must be a secure PRF (for salt as a key) and preserve uniformness of IKM (for details see {{SecAnalysis}}). Let Expand(k, info, n) be a variable-length output PRF, e.g., 
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
 and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string.
@@ -195,22 +203,21 @@ implemented inside it, while all other operations (including calculation of a ha
 Extract and Expand functions) can be implemented either inside or outside the HSM.
 
 Sig(sk, tag1) need only be computed once for the lifetime of the randomness wrapper,
-and MUST NOT be used or exposed beyond its role in this computation. To achieve this, 
-tag1 may have the format that is not supported (or explicitly forbidden) by other applications 
-using sk.
+and MUST NOT be used or exposed beyond its role in this computation. Additional recommendations 
+for tag1 are given in the following section.
 
 Sig MUST be a deterministic signature function, e.g., deterministic ECDSA {{RFC6979}},
 or use an independent (and completely reliable) entropy source, e.g., if Sig is implemented 
 in an HSM with its own internal trusted entropy source for signature generation.
 
 Because Sig(sk, tag1) can be cached, the relative cost of using G'(n) instead of G(n) 
-tends to be negligible with respect to cryptographic operations in protocols such as TLS. 
+tends to be negligible with respect to cryptographic operations in protocols such as TLS 
+(the relatively inexpensive computational cost of HKDF dominates when comparing G' to G). 
 A description of the performance experiments and their results can be found in the appendix of 
 {{SecAnalysis}}.
 
 Moreover, the values of G'(n) may be precomputed and pooled. This is possible since the construction 
 depends solely upon the CSPRNG output and private key. 
-
 
 # Tag Generation {#tag-gen}
 
@@ -218,7 +225,7 @@ Both tags SHOULD be generated such that they never collide with another contende
 of the private key. This can happen if, for example, one HSM with a private key is
 used from several servers, or if virtual machines are cloned.
 
-To mitigate collisions, tag strings SHOULD be constructed as follows:
+Tag strings SHOULD be constructed as follows:
 
 - tag1: Constant string bound to a specific device and protocol in use. This allows 
 caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address. 
@@ -228,11 +235,12 @@ would ensure the uniqueness of each tag1 value among different instances of virt
 (including ones that were cloned or recovered from snapshots). 
 This is needed to address the problem of CSPRNG state cloning (see {{RY2010}}).
 See {{sec:tls13}} for example protocol information that can be used in the context of TLS 1.3. 
+If sk could be used for other purposes, then selecting a value for tag1 that is different than
+the form allowed by those other uses ensures that the signature is not exposed.
 
-- tag2: Non-constant string that includes a timestamp or counter. This ensures change over time
-even if outputs of G(L) were to repeat. It MUST be implemented such that its values never repeat. 
-This means, in particular, that timestamp is guaranteed to change between two requests to CSPRNG 
-(otherwise counters should be used).
+- tag2: A nonce. That is, a value that is unique for each use of the same combination of G(n), 
+tag1, and sk values.  The tag2 value can be implemented using a counter, or a timer, provided 
+that the timer is guaranteed to be different for each invocation of G'(n).
 
 # Application to TLS {#sec:tls13}
 
@@ -245,12 +253,11 @@ that generates private values, such as key shares, with:
 G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 ~~~
 
-Moreover, we fix tag1 to protocol-specific information such as "TLS 1.3 Additional Entropy" for
-TLS 1.3. Older variants use similarly constructed strings.
 
 # Acknowledgements
 
 We thank Liliya Akhmetzyanova for her deep involvement in the security assessment in {{SecAnalysis}}.
+We thank Martin Thomson and Rich Salz for their careful readings and useful comments. 
 
 # IANA Considerations
 
