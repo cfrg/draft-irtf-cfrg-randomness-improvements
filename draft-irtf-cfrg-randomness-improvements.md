@@ -238,8 +238,8 @@ See {{sec:tls13}} for example protocol information that can be used in the conte
 If sk could be used for other purposes, then selecting a value for tag1 that is different than
 the form allowed by those other uses ensures that the signature is not exposed.
 
-- tag2: A nonce. That is, a value that is unique for each use of the same combination of G(n), 
-tag1, and sk values.  The tag2 value can be implemented using a counter, or a timer, provided 
+- tag2: A nonce. That is, a value that is unique for each use of the same combination of G(L), 
+tag1, and sk values. The tag2 value can be implemented using a counter, or a timer, provided 
 that the timer is guaranteed to be different for each invocation of G'(n).
 
 # Application to TLS {#sec:tls13}
