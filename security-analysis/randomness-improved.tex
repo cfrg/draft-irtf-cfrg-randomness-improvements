@@ -310,7 +310,8 @@ This security property can be instantiated with standard cryptographic assumptio
 
 
 \section{Security model} \label{sec:model}
-Here we define the security property we expect from our wrapper in terms of a game between a challenger and an adversary.
+
+Here we define the security property we expect from our wrapper in terms of a game between a challenger and an adversary. Intuitively, we aim to prove that the wrapper does not degrade security and offers additionaly security in cases where the current randomness is insecure.
 
 We run a game between the challenger and the adversary as follows. At the beginning of the game the challenger uniformly randomly chooses a secret key $\sk$ and returns a public key $\pk$ to the adversary. Receiving the public key the adversary chooses a set $T \subseteq \mathcal{T}_1$ consisting of $l$ pairwise different values $t_1,\ldots,t_l$ and sends it to the challenger.  We assume that the size $l$ of the set $T$ are polynomial. 
 
@@ -342,17 +343,17 @@ The adversary is allowed to make the following queries to the challenger.
 	
 	\item The adversary can make \texttt{sign} queries for signatures with $\sk$ of messages $m$. The challenger produces and returns the value $\sig (\sk, m)$.
 	
-	\item The adversary can make \texttt{corrupt} query for $\sk$ at any time. The challenger must respond with $\sk$ to this query.
+	\item The adversary can make \texttt{corrupt} queries for $\sk$ at any time. The challenger responds to this query $\sk$.
 	
 	\item The adversary is also allowed to make \texttt{reveal} queries for the $y_i$ value used in the $i$th \texttt{output} query at any time (the adversary makes the query with the index of the target \texttt{output} query). The challenger must respond with the $y_i$ value used in generating the response to the $i$th \texttt{output} query.
 	
-	\item We say that the $i$th \texttt{output} query is "fresh" if one of the values $y_i$ and $\mathrm{\texttt{signature}}$ stay secret. That is, if one of the following conditions is satisfied:
+	\item We say that the $i$th \texttt{output} query is ``fresh'' if one of the values $y_i$ and $\mathrm{\texttt{signature}}$ remains secret. That is, if one of the following conditions is satisfied:
 	\begin{itemize}
 		\item the adversary has not made the \texttt{corrupt} query or the \texttt{sign} query for $m = \texttt{tag}_1^i$. 
 		\item this query fixes only $\texttt{tag}_1, \texttt{tag}_2 , n$ and the adversary has not made the \texttt{reveal} query for  $y_i$.
 	\end{itemize}
 	
-	We also say that an \texttt{output} query is "non-trivial" if one of the following conditions is satisfied
+	We also say that an \texttt{output} query is ``non-trivial'' if one of the following conditions is satisfied
 	
 	\begin{itemize}
 		\item this query is of the first type $\texttt{tag}_1, \texttt{tag}_2, y, n$ where query with $\texttt{tag}_1, \texttt{tag}_2, y$ has not been made before. 
