@@ -187,14 +187,15 @@ $$
 
 \section{Security definitions} \label{sec:def}
 
-Here we will precisely define the security properties we need of our primitives for our construction to be proven secure in our security model.
+We define the security properties we need of our primitives for our construction to be proven secure in our security model. We will address the key derivation, the pseudorandom function, and the signature scheme in turn below.
 
 \subsection{Key derivation function} \label{KDFdef}
-A key derivation function is an algorithm $\texttt{KDF}$ that implements a deterministic function $k=\texttt{KDF}(x, y)$, taking as input some bit strings $x$ and $y$, and returning a key $k \in \{0,1\}^h$. We require $\texttt{KDF}$ to fulfill two following security properties. 
+A key derivation function is an algorithm $\texttt{KDF}$ that implements a deterministic function $k=\texttt{KDF}(x, y)$, taking as input some bit strings $x$ and $y$, and returning a key $k \in \{0,1\}^h$. We require that $\texttt{KDF}$ fulfills the following two security properties:
 
-\textbf{KDF security.} Intuitively, this property means computational indistinguishability of the $\texttt{KDF}(x,\cdot)$ function for $x$ chosen uniformly at random from an ideal random function $\rho(\cdot)$. Namely, it is the standard PRF security property. Let $\epsilon_{\texttt{KDF}}$ denote the probability that any probabilistic polynomial time adversary is able to distinguish between these distributions.
+\textbf{1) KDF security.} Intuitively, this property means computational indistinguishability of the $\texttt{KDF}(x,\cdot)$ function for $x$ chosen uniformly at random from an ideal random function $\rho(\cdot)$. Namely, it is the standard PRF security property. 
+Let $\epsilon_{\texttt{KDF}}$ denote the probability that any probabilistic polynomial time adversary is able to distinguish between these distributions.
 
-\textbf{Uniformness preserving.} We require the $\texttt{KDF}$ algorithm to fulfill the uniformness preserving of the output for $y \sample \{0,1\}^h$ chosen uniformly at random and $x$ chosen arbitrarily. 
+\textbf{2) Uniformness preserving.} We require the $\texttt{KDF}$ algorithm to fulfill the uniformness preserving of the output for $y \sample \{0,1\}^h$ chosen uniformly at random and $x$ chosen arbitrarily. 
 We define a security game between an adversary $A$ and a challenger as follows.
 
 \begin{enumerate}
@@ -212,16 +213,19 @@ The  $\texttt{KDF}$ algorithm is said to be $\texttt{UP}$-secure if $\epsilon_{\
 
 \paragraph{HKDF-extract.}
 
-In our concrete construction, we instantiate \texttt{KDF} with HKDF-extract that is literally the HMAC function.  There are two ways to use  HKDF-extract: with direct order of arguments ($\texttt{KDF}(x,y) := \text{HKDF-extract}(x,y)$) and with reverse one ($\texttt{KDF}(x,y) := \text{HKDF-extract}(y,x)$). 
+In our concrete construction, we instantiate \texttt{KDF} with
+HKDF-extract~\cite{krawczyk2010cryptographic}, which is literally the HMAC
+function.
+  There are two ways to use  HKDF-extract: with direct order of arguments ($\texttt{KDF}(x,y) := \text{HKDF-extract}(x,y)$) and with reverse one ($\texttt{KDF}(x,y) := \text{HKDF-extract}(y,x)$). 
 
-Let start with reverse order of arguments where the hashed signature is used as a message input for HMAC. In the case when CSPRNG is broken and controlled by adversary, the required PRF property for $\texttt{KDF}$ is crucial. Therefore, we expect that the HMAC function with swapped inputs should remain prf-secure. Note that such a security property has not been investigated and if we do not model HMAC as a random oracle there is a necessity to analyze this property carefully.
+Let start with reverse order of arguments where the hashed signature is used as a message input for HMAC. In the case when CSPRNG is broken and controlled by adversary, the required PRF property for $\texttt{KDF}$ is crucial. Therefore, we expect that the HMAC function with swapped inputs remains prf-secure, and model HMAC as a random oracle. Note that such a security property has not been investigated in full detail --  if we do not model HMAC as a random oracle there is a necessity to analyze this property carefully.
 
-Consider the direct order of arguments. For this case the first KDF property is believed due to the prf-security of the HMAC construction (see{~\cite{BellareCK1996} for more detail). Moreover, for the wrapper the length of the HMAC key $x = \texttt{H}(\sig (\sk, \texttt{tag}_1))$ is equal to the hash output length that satisfies recommendations.    
+Consider the direct order of arguments. For this case the first KDF property follows from to the prf-security of the HMAC construction (see{~\cite{BellareCK1996} for more detail). Moreover, for the wrapper the length of the HMAC key $x = \texttt{H}(\sig (\sk, \texttt{tag}_1))$ is equal to the hash output length, thereby satisfying the recommendations.    
 	
-	Consider the uniformness preserving property for the HKDF-extract function basing on a hash function \texttt{H} with good combinatorial properties. Precisely, for this function the following balance property holds:	
+	Consider the uniformness preserving property for the HKDF-extract function based on a hash function \texttt{H} with good combinatorial properties. In particular, for this function the following balance property holds:	
 $$\Pr_{y \sample \{0,1\}^h}[ \texttt{H} (x\|y) = k ] = \frac{1}{2^h},\ \forall\ k \in \{0,1\}^h,\ x \in \{0,1\}^*.$$
 
-It easy to see that for HKDF-extract, that is purely $\texttt{HMAC} (x,y) = \texttt{H}(x_{opad}\|\texttt{H}(x_{ipad}\|y))$, the same property holds. Thus, the uniformness preserving property is fairly supposed to hold. The same can be shown for the reverse order of arguments.
+It easy to see that for HKDF-extract, which is defined as $\texttt{HMAC} (x,y) = \texttt{H}(x_{opad}\|\texttt{H}(x_{ipad}\|y))$, the same property holds. Thus, it is reasonable to assume the uniformness preserving property holds. The same can be shown for the reverse order of arguments.
 
 
 \subsection{Variable-length output pseudorandom function} \label{PRFdef}
@@ -233,7 +237,7 @@ A variable-length output pseudorandom function is an algorithm $\prf$ that imple
 We define a security game (for multi-user setting) between an adversary $A$ and a challenger as follows.
 
 \begin{enumerate}
-	\item The challenger uniformly randomly samples $t$ (polinomial) secret keys $k_1,\ldots,k_t \in \{0,1\}^h$ independently from each other.
+	\item The challenger uniformly randomly samples $t$ (polynomial) secret keys $k_1,\ldots,k_t \in \{0,1\}^h$ independently from each other.
 	
 	\item The adversary is allowed to query the challenger with adaptively chosen values $(i,c,n)$, $i \in [1,\ldots,t]$. The challenger replies with $\prf(k_i, c,n)$.
 	
@@ -269,12 +273,16 @@ The  $\prf$ algorithm is said to be $\texttt{mu-}\prf$-secure if $\epsilon_{\tex
 %$$
 
 \subsection{Hash function and signature scheme}
-A signature scheme is a triple $(\kgen, \sig, \verify)$. $\kgen$ is a probabilistic algorithm which takes as input the security parameter $1^\alpha$ and outputs a public signature verification key $\pk$ and secret signing key $\sk$. $\sig$ is a signing algorithm which generates a signature $\sigma$ for message $m$ using secret key $\sk$. In the current paper we consider only deterministic $\sig$ algorithms. $\verify$ is a deterministic signature verification algorithm which, given input $(\pk, \sigma, m)$, outputs $1$ if $\sigma$ is a valid signature of $m$ under key $\pk$, and $0$ otherwise. It is required that for every $k$, every $(\sk, \pk)$ output by $\kgen (1^\alpha)$, and every message $m$, it holds that
+
+A signature scheme is a triple $(\kgen, \sig, \verify)$. $\kgen$ is a probabilistic algorithm which takes as input the security parameter $1^\alpha$ and outputs a public signature verification key $\pk$ and secret signing key $\sk$. $\sig$ is a signing algorithm which generates a signature $\sigma$ for message $m$ using secret key $\sk$. 
+
+In this work we consider only deterministic $\sig$ algorithms. $\verify$ is a deterministic signature verification algorithm which, given input $(\pk, \sigma, m)$, outputs $1$ if $\sigma$ is a valid signature of $m$ under key $\pk$, and $0$ otherwise. It is required that for every $k$, every $(\sk, \pk)$ output by $\kgen (1^\alpha)$, and every message $m$, it holds that
 
 $$\verify (m , \sig ({\sk, m})) = 1$$
 
-In our construction, we will not want to use the long-term key $\sk$ directly. We will instead use the hash of a signature of $\texttt{tag}_1$, signed with $\sk$. For our security proof, we require the combined hash function and signature scheme to fulfil the following  security property.
+In our construction, we do not require the direct use of the long-term key $\sk$. We will instead use the hash a signature of $\texttt{tag}_1$, signed with $\sk$. For our security proof, we require that the combined hash function and signature scheme fulfills the following  security property.
 
+\begin{definition}[$\sig, \texttt{H}$-secure]Let $\sig$ be a dterministic signature scheme and $H$ a hash function.
 Consider the following game between a challenger and a polynomial time adversary $A$:
 
 \begin{enumerate}
@@ -293,8 +301,13 @@ Let $\epsilon_{\sig, \texttt{H}}$ denote the probability that any probabilistic 
 $$\left \vert \Pr(b = b') -\frac{1}{2} \right \vert \le \epsilon_{\sig, \texttt{H}}.$$
 
 The  ($\sig$, $\texttt{H}$) composition is said to be $\sig, \texttt{H}$-secure if $\epsilon_{\sig, \texttt{H}}$ is negligible in security parameter~$\alpha$.
+\end{definition}
 
-This security property can be instantiated with routine cryptographic assumptions such as a hash function behaving as a random oracle and an existentially unforgeable signature scheme.
+
+This security property can be instantiated with standard cryptographic assumptions such as a hash function behaving as a random oracle and an existentially unforgeable signature scheme.
+
+
+
 
 \section{Security model} \label{sec:model}
 Here we define the security property we expect from our wrapper in terms of a game between a challenger and an adversary.
