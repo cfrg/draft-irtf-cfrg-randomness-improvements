@@ -377,7 +377,7 @@ Then, any probabilistic polynomial time adversary has only negligible advantage 
 \end{theorem}
 
 \begin{proof}
-	Let Game 0 denote the original security game as defined in our security model definition. Let $S_j$ denote the event of the adversary winning Game $j$. Our goal in this proof is to bound $\Pr(S_0)$ to show that it is only at most negligibly above $\frac{1}{2}$. Although the security argument is very intuitive (``the adversary must surely need both $y$ and $\sk$ to guess the secret'') we will formally prove it in a game hopping proof.
+	Let Game~0 denote the original security game as defined in our security model definition. Let $S_j$ denote the event of the adversary winning Game~$j$. Our goal in this proof is to bound $\Pr(S_0)$ to show that it is only at most negligibly above $\frac{1}{2}$. Although the security argument is very intuitive (``the adversary must surely need both $y$ and $\sk$ to guess the secret'') we will formally prove it in a game hopping proof.
 
 At some point in time, the adversary must issue a \texttt{test} query. Let $\texttt{tag}_1^i, \texttt{tag}_2^i, y_i$ denote the values used by the challenger for this query. We prove this theorem in a case partition on whether the adversary has revealed $\sig(\sk,\texttt{tag}_1^i)$ or $y_i$. (If the adversary has queried for neither, then it is clearly in an even worse position to win the game.) 
 
@@ -385,39 +385,39 @@ At some point in time, the adversary must issue a \texttt{test} query. Let $\tex
 
 \subsubsection*{Case 1: The adversary has revealed $y_i$ or has chosen $y_i$ by itself.} In this case, the adversary is not allowed to query for $\sk$ or for the signature of $\texttt{tag}_1^i$, otherwise the test output query would not be fresh.
 
-\noindent \textbf{Game 1.} Let Game 1 be identical to Game 0 except the challenger guesses in advance an integer $j \in [1, \dots, l]$ and aborts (and the adversary loses) unless $\texttt{tag}_1^i = t_j$.  This is a large failure event game hop and it is easy to see that
+\noindent \textbf{Game~1.} Let Game~1 be identical to Game~0 except the challenger guesses in advance an integer $j \in [1, \dots, l]$ and aborts (and the adversary loses) unless $\texttt{tag}_1^i = t_j$.  This is a large failure event game hop and it is easy to see that
 
 $$
 \Pr(S_0) \le l \Pr(S_1)
 $$
 
 
-\noindent \textbf{Game 2.} Define Game 2 to be identical to Game 1 except $\texttt{H}(\sig(\sk, \texttt{tag}_1^i))$ is replaced with a value $x_i$ sampled uniformly at random for each  \texttt{output} query with $\texttt{tag}_1 = \texttt{tag}_1^i$. Here we claim that
+\noindent \textbf{Game~2.} Define Game~2 to be identical to Game~1 except $\texttt{H}(\sig(\sk, \texttt{tag}_1^i))$ is replaced with a value $x_i$ sampled uniformly at random for each  \texttt{output} query with $\texttt{tag}_1 = \texttt{tag}_1^i$. Here we claim that
 $$\Pr(S_1) \le  \Pr(S_2) + \epsilon_{\texttt{H}, \sig}$$
 
-In particular, no probabilistic polynomial time distinguisher algorithm can distinguish between Game 1 and Game 2, since this would imply a way to beat the hash-signature game with better than $\epsilon_{\texttt{H}, \sig}$ advantage. Precisely, an adversary in the hash-signature game could beat it with better than $\epsilon_{\texttt{H}, \sig}$ advantage as follows. 
+In particular, no probabilistic polynomial time distinguisher algorithm can distinguish between Game~1 and Game~2, since this would imply a way to beat the hash-signature game with better than $\epsilon_{\texttt{H}, \sig}$ advantage. Precisely, an adversary in the hash-signature game could beat it with better than $\epsilon_{\texttt{H}, \sig}$ advantage as follows. 
 
-It acts as a challenger in the hybrid game and inserts the value of $\pk$ from the hash-signature game. As an adversary in the hash-signature game, it inserts the known $\texttt{tag}_1$ value from the previous game and asks a test query straight away, receiving either $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$ or a uniformly randomly chosen value $x_i$ as per the rules of the hash-signature game. It inserts this value as the value for $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$ in the hybrid game. Because of Game 1, the adversary knows where to make this swap in the game. The \texttt{output} queries with $\texttt{tag}_1 \neq t_j$ are processed by the adversary using queries for signature to its challenger.  The adversary can now simulate \texttt{output} and test queries as normal using this value. The adversary does not have to worry about simulating a \texttt{corrupt} query because we are in case 1. Finally, it can simulate signature queries by merely forwarding them along into the hash-signature game. This perfectly simulates the hybrid game: it is literally Game 1 if the test returns $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$, and it is literally Game 2 if it returns a uniformly randomly chosen value $x_i$. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the hash-signature game. By assumption of the hardness of the hash-signature game, all adversaries can only win with at most advantage $\epsilon_{\texttt{H}, \sig}$. Therefore, the difference in advantages of adversaries across Game 1 and Game 2 can also only be separated by at most $\epsilon_{\texttt{H}, \sig}$. Thus the claim above is proven.
+It acts as a challenger in the hybrid game and inserts the value of $\pk$ from the hash-signature game. As an adversary in the hash-signature game, it inserts the known $\texttt{tag}_1$ value from the previous game and asks a test query straight away, receiving either $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$ or a uniformly randomly chosen value $x_i$ as per the rules of the hash-signature game. It inserts this value as the value for $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$ in the hybrid game. Because of Game~1, the adversary knows where to make this swap in the game. The \texttt{output} queries with $\texttt{tag}_1 \neq t_j$ are processed by the adversary using queries for signature to its challenger.  The adversary can now simulate \texttt{output} and test queries as normal using this value. The adversary does not have to worry about simulating a \texttt{corrupt} query because we are in case~1. Finally, it can simulate signature queries by merely forwarding them along into the hash-signature game. This perfectly simulates the hybrid game: it is literally Game~1 if the test returns $ \texttt{H}(\sig (\sk, \texttt{tag}_1^i))$, and it is literally Game~2 if it returns a uniformly randomly chosen value $x_i$. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the hash-signature game. By assumption of the hardness of the hash-signature game, all adversaries can only win with at most advantage $\epsilon_{\texttt{H}, \sig}$. Therefore, the difference in advantages of adversaries across Game~1 and Game~2 can also only be separated by at most $\epsilon_{\texttt{H}, \sig}$. Thus the claim above is proven.
 
-\noindent \textbf{Game 3.} Define Game 3 to be identical to Game 2 except 
+\noindent \textbf{Game~3.} Define Game~3 to be identical to Game~2 except 
 $\texttt{KDF}(x_i,\cdot)$ is replaced with an ideal random function $\rho(\cdot)$ for \texttt{output} query with $\texttt{tag}_1 =t_j$. Here we claim that
 
 $$
 \Pr(S_2) \le \Pr(S_3) + \epsilon_{\texttt{KDF}}
 $$
 
-Here we present the simulation argument for the KDF game. Because of Game 1, the adversary knows where to make this swap in the game precisely for \texttt{output} queries with  $\texttt{tag}_1 =t_j$. The KDF adversary makes queries $y$ to compute $\texttt{KDF}(x_i,y)$ for required $y$ for the key $x_i$ chosen by the challenger uniformly at random.  If the adversary has made the $(\texttt{tag}_1,\texttt{tag}_2,n)$ query (without $y$), then the KDF adversary chooses $y$ value uniformly randomly by itself and locally saves it. Note that it can answer the reveal query in this case. All other queries are simulated in the normal way. This perfectly simulates the hybrid game: it is literally Game 2 if the KDF challenger provides outputs of the $\texttt{KDF}$ function, and it is literally Game 3 if the challenger provides outputs of the ideal random function $\rho$. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the KDF game. By assumption of the hardness of the KDF game, all adversaries can only win with at most advantage $\epsilon_{\texttt{KDF}}$. Therefore, the difference in advantages of adversaries across Game 2 and Game 3 can also only be separated by at most $\epsilon_{\texttt{KDF}}$. Thus the claim above is proven.
+Here we present the simulation argument for the KDF game. Because of Game~1, the adversary knows where to make this swap in the game precisely for \texttt{output} queries with  $\texttt{tag}_1 =t_j$. The KDF adversary makes queries $y$ to compute $\texttt{KDF}(x_i,y)$ for required $y$ for the key $x_i$ chosen by the challenger uniformly at random.  If the adversary has made the $(\texttt{tag}_1,\texttt{tag}_2,n)$ query (without $y$), then the KDF adversary chooses $y$ value uniformly randomly by itself and locally saves it. Note that it can answer the reveal query in this case. All other queries are simulated in the normal way. This perfectly simulates the hybrid game: it is identical to Game~2 if the KDF challenger provides outputs of the $\texttt{KDF}$ function, and it is identical to Game~3 if the challenger provides outputs of the ideal random function $\rho$. The adversary follows the coin flip choice in the simulated hybrid game as its guess for the KDF game. By assumption of the hardness of the KDF game, all adversaries can only win with at most advantage $\epsilon_{\texttt{KDF}}$. Therefore, the difference in advantages of adversaries across Game~2 and Game~3 can also only be separated by at most $\epsilon_{\texttt{KDF}}$. Thus the claim above is proven.
 
-\noindent \textbf{Game 4.} Define Game 4 to be identical to Game 3 except the response to the test \texttt{output} query is replaced with a value chosen uniformly randomly.
+\noindent \textbf{Game 4.} Define Game~4 to be identical to Game~3 except the response to the test \texttt{output} query is replaced with a value chosen uniformly randomly.
 
 Here we claim that
 $$
 \Pr(S_3) \le \Pr(S_4) + \epsilon_{\texttt{mu-}\prf}
 $$
 
-Here we present the simulation argument for the multi-user PRF game with at most $M$ keys.  Because of Game 1, the PRF adversary knows what \texttt{output} queries should be processed with the usage of its challenger. The \texttt{output} queries with $\texttt{tag}_1 =t_j$ and different $y$ are processed with the different keys by asking the mu-PRF challenger with the suitable indexes in queries. Since the test query should be non-trivial, $y_i$ or $\texttt{tag}_2^i$ should be new (we neglect the probability that for the \texttt{output} query of the type $(\texttt{tag}_1,\texttt{tag}_2,n)$ the $y_i$ value chosen by the challenger itself collides with the previous values). Therefore, the mu-PRF adversary can use its test query to swap the $\prf(\rho(y_i), \texttt{tag}^i_2, n)$ with the value obtained as a response on the test query in the mu-PRF game. All other queries are simulated in the normal way. This perfectly simulates the hybrid game. Therefore, the difference in advantages of adversaries across Game 2 and Game 3 can also only be separated by at most $\epsilon_{\texttt{PRF}}$. Thus the claim above is proven.
+Here we present the simulation argument for the multi-user PRF game with at most $M$ keys.  Because of Game~1, the PRF adversary knows what \texttt{output} queries should be processed with the usage of its challenger. The \texttt{output} queries with $\texttt{tag}_1 =t_j$ and different $y$ are processed with the different keys by asking the mu-PRF challenger with the suitable indexes in queries. Since the test query should be non-trivial, $y_i$ or $\texttt{tag}_2^i$ should be new (we neglect the probability that for the \texttt{output} query of the type $(\texttt{tag}_1,\texttt{tag}_2,n)$ the $y_i$ value chosen by the challenger itself collides with the previous values). Therefore, the mu-PRF adversary can use its test query to swap the $\prf(\rho(y_i), \texttt{tag}^i_2, n)$ with the value obtained as a response on the test query in the mu-PRF game. All other queries are simulated in the normal way. This perfectly simulates the hybrid game. Therefore, the difference in advantages of adversaries across Game~2 and Game~3 can also only be separated by at most $\epsilon_{\texttt{PRF}}$. Thus the claim above is proven.
 
-It is clearly impossible for the adversary to have any advantage in guessing the secret bit in Game 4 (in either case, the wrapper generates a uniformly randomly chosen string). As such, $\Pr(S_4) = \frac{1}{2}$. Thus in this case $\Pr(S_0) \le \frac{1}{2} + l( \epsilon_{(\texttt{H}, \sig)} + \epsilon_{\texttt{KDF}} + \epsilon_{\texttt{mu-}\prf})$ which is negligibly close to~$\frac{1}{2}$.
+It is clearly impossible for the adversary to have any advantage in guessing the secret bit in Game~4 (in either case, the wrapper generates a uniformly randomly chosen string). As such, $\Pr(S_4) = \frac{1}{2}$. Thus in this case $\Pr(S_0) \le \frac{1}{2} + l( \epsilon_{(\texttt{H}, \sig)} + \epsilon_{\texttt{KDF}} + \epsilon_{\texttt{mu-}\prf})$ which is negligibly close to~$\frac{1}{2}$.
 
 \subsubsection*{Case 2: The adversary has revealed $\sk$ or $\sig(\sk, \texttt{tag}_1^i)$.}
 
@@ -426,25 +426,25 @@ In this case, the adversary is not allowed to reveal $y_i$ or to choose $y_i$ by
 %%% CC: Commented out for now since we don't need to.
 %\todo[inline]{Luke: Did we need an intermediate game hop to guess the test $\texttt{tag}_1$ here? If so, it is in both cases so we should put it before the case distinction. And we mean to replace only the KDF output with the test $\texttt{tag}_1$ right?}
 
-\noindent \textbf{Game 1.} This game is identical to Game 0 except $\texttt{KDF}(\texttt{H}(\sig (\sk, \texttt{tag}^i_1)), y_i)$ for test \texttt{output} query is replaced with a value $k$ sampled uniformly at random. 
+\noindent \textbf{Game 1.} This game is identical to Game~0 except $\texttt{KDF}(\texttt{H}(\sig (\sk, \texttt{tag}^i_1)), y_i)$ for test \texttt{output} query is replaced with a value $k$ sampled uniformly at random. 
 
 We claim that 		
 $$
 \Pr(S_0) \le \Pr(S_1) + \epsilon_{\texttt{UP}}
 $$
 
-In the simulation the UP adversary for $\texttt{KDF}$ chooses private key $\sk$ by itself and simulates all queries except for the test \texttt{output} query in the normal way. To simulate the test \texttt{output} query $(\texttt{tag}^i_1, \texttt{tag}^i_2, n)$ the UP adversary makes a query with  $\texttt{H}(\sig (\sk, \texttt{tag}^i_1))$ to its UP challenger. The challenger chooses $y_i \sample \{0,1\}^h$ and returns a value $k_b$. Then the UP adversary computes and returns the value $\prf(k_b,\texttt{tag}^i_2, n)$.  This perfectly simulates the hybrid game. Therefore, the difference in advantages of adversaries across Game 0 and Game 1 can also only be separated by at most $\epsilon_{\texttt{UP}}$. Thus the claim above is proven.
+In the simulation the UP adversary for $\texttt{KDF}$ chooses private key $\sk$ by itself and simulates all queries except for the test \texttt{output} query in the normal way. To simulate the test \texttt{output} query $(\texttt{tag}^i_1, \texttt{tag}^i_2, n)$ the UP adversary makes a query with  $\texttt{H}(\sig (\sk, \texttt{tag}^i_1))$ to its UP challenger. The challenger chooses $y_i \sample \{0,1\}^h$ and returns a value $k_b$. Then the UP adversary computes and returns the value $\prf(k_b,\texttt{tag}^i_2, n)$.  This perfectly simulates the hybrid game. Therefore, the difference in advantages of adversaries across Game~0 and Game~1 can also only be separated by at most $\epsilon_{\texttt{UP}}$. Thus the claim above is proven.
 
-\noindent \textbf{Game 2.} Define Game 2 to be identical to Game 1 except the response to the test \texttt{output} query is replaced with a value chosen uniformly randomly.
+\noindent \textbf{Game 2.} Define Game~2 to be identical to Game~1 except the response to the test \texttt{output} query is replaced with a value chosen uniformly randomly.
 
 Here we claim that
 $$
 \Pr(S_1) \le \Pr(S_2) + \epsilon_{\texttt{mu-}\prf}
 $$
 
-The simulation is the same as for Game 4 from the other case but here is enough to make one test query for one key in the multi-user PRF game since the key $k$ is used once for the test \texttt{output} query only.
+The simulation is the same as for Game~4 from the other case but here is enough to make one test query for one key in the multi-user PRF game since the key $k$ is used once for the test \texttt{output} query only.
 
-It is clearly impossible for the adversary to have any advantage in guessing the secret bit in Game 2 (in either case, the wrapper generates a uniformly randomly chosen string). As such, $\Pr(S_2) = \frac{1}{2}$. Thus in this case $\Pr(S_0) \le \frac{1}{2} + \epsilon_{\texttt{UP}} + \epsilon_{\texttt{mu-}\prf}$ which is negligibly close to~$\frac{1}{2}$.
+It is clearly impossible for the adversary to have any advantage in guessing the secret bit in Game~2 (in either case, the wrapper generates a uniformly randomly chosen string). As such, $\Pr(S_2) = \frac{1}{2}$. Thus in this case $\Pr(S_0) \le \frac{1}{2} + \epsilon_{\texttt{UP}} + \epsilon_{\texttt{mu-}\prf}$ which is negligibly close to~$\frac{1}{2}$.
 \end{proof}
 
 \section{Real-world considerations} \label{sec:notes}
