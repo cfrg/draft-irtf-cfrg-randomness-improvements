@@ -82,12 +82,13 @@ Many cryptographic mechanisms depend on the availability of secure
 \end{abstract}
 
 \section{Introduction}
-All key exchange protocols (e.g., SSL/TLS, SSH, IKE, etc.) depend on the generation of secure random numbers. At the core of all of these protocols is a Diffie--Hellman key exchange of the following basic form: Alice chooses random number $x$, computes $g^x$ and sends it to Bob. Bob similarly chooses random number $y$, computes $g^y$ and sends it to Alice. Of course, each particular protocol has other essential details such as certificates, signatures, key derivation, comparing of transcripts and so on, but at the heart of all these protocols is the shared secret $g^{xy}$. Therefore, it is essential that $x$ and $y$ are generated as securely as possible. 
+All key exchange protocols (e.g., SSL/TLS, SSH, IKE, etc.) depend on the generation of secure random numbers. At the core of many of these protocols is a Diffie--Hellman key exchange of the following basic form: Alice chooses random number $x$, computes $g^x$ and sends it to Bob. Bob similarly chooses random number $y$, computes $g^y$ and sends it to Alice, deriving a key based on $g^{xy}$. Of course, each particular protocol has other essential details such as certificates, signatures, key derivation, comparing of transcripts and so on, but at the heart of all these protocols is a shared secret based on random values. Therefore, it is essential that these random values are generated as securely as possible. 
 
-In many operating systems, raw entropy comes in the form of events such as mouse movements or keystrokes. As large amounts of raw entropy is difficult to accumulate, Alice and Bob do not generate truly random numbers $x$ and $y$ for their key exchanges. Instead, they use the primitive of a cryptographically secure pseudorandom number generator (CSPRNG), which takes as input a seed, continually harvests more raw entropy and  produces arbitrary many pseudorandom numbers as required. Since CSPRNGs are used to provide the essential secret $g^{xy}$, they clearly need to be as secure as possible. 
+In many operating systems, raw entropy comes in the form of events such as mouse movements or keystrokes. As large amounts of raw entropy is difficult to accumulate, Alice and Bob do not generate truly random numbers for their key exchange or key transport protocols. Instead, they use the primitive of a cryptographically secure pseudorandom number generator (CSPRNG), which takes as input a seed, continually harvests more raw entropy and  produces arbitrary many pseudorandom numbers as required. 
+However, the current problem we face is that all CSPRNGs depend on raw entropy in some form or another. Therefore, if the underlying randomness is not good, the security of agreed or transported keys therefore cannot be guaranteed.
 
-However, the current problem we face is that all CSPRNGs depend on raw entropy in some form or another. Therefore, if the underlying randomness is not good, the secret $g^{xy}$ is not secure. Real-world examples of poor random number generation include:
-
+It may be tempting to think that random number generation is well-understood by now. Unfortunately, this is not the case. There are many 
+real-world examples of poor random number generation. We mention a few examples:
 \begin{itemize}
 \item The Debian OpenSSL random number generator vulnerability \cite{DebianRNGflaw, DebianRNGflawTLSDHE};
 
@@ -100,23 +101,25 @@ However, the current problem we face is that all CSPRNGs depend on raw entropy i
 \item Servers that are deployed in settings where good randomness generation cannot be guaranteed;
 
 \item Internet of Things (IoT) devices with good (factory) keys but no good randomness generation after deployment.
+
+\item Side channel attacks on random number generators to infer future states~\cite{cryptoeprint:2019:996}.
 \end{itemize}
 
 We propose a solution to this problem. Our solution is inspired by the
-so-called ``NAXOS trick'' for key exchange protocols. In contrast to the
-NAXOS trick, our design is more generic and applies outside of the AKE
-domain, and we follow a much more conservative approach that enables the
-re-use of existing infrastructure and improved graceful degradation if
-it turns out the hash function's output may reveal partial information
-from the output.
+so-called ``NAXOS trick'' for key exchange protocols
+from~\cite{LaMacchiaeCK2007}. In contrast to the NAXOS trick however,
+compatible with existing infrastructure (such as HSMs) based on a more
+conservative approach, is more generic and applies outside of the AKE domain,
+and offers improved graceful degradation if it turns out the hash function's
+output may reveal partial information from the input.
 
-From the academic literature on authenticated key exchange protocols, the NAXOS protocol \cite{LaMacchiaeCK2007} does not just compute pseudorandom numbers $x$ and $y$ from raw entropy and send $g^{x}$ and $g^{y}$, but instead sends $g^{H(x, \sk_{\hat A})}$ and $g^{H(y, \sk_{\hat B})}$ where $H$ is a random oracle, and $\sk_{A}$ and $\sk_{B}$ are the long-term secret keys of Alice and Bob respectively. Intuitively we can see that securely in this case should now depend on the pairs ($x$, $\sk_{\hat A})$ and ($y$, $\sk_{\hat B})$ being secure, as opposed to just $x$ and $y$ being secure. What is more, a protocol that uses $g^{H(x, \sk_{\hat A})}$ can behave in exactly the same way as one that uses $g^x$. The only essential difference is that $H(x, \sk_{\hat A})$ is a safer secret than $x$.
+The NAXOS key exchange protocol~\cite{LaMacchiaeCK2007} does not just compute pseudorandom numbers $x$ and $y$ from raw entropy and send $g^{x}$ and $g^{y}$, but instead sends $g^{H(x, \sk_{\hat A})}$ and $g^{H(y, \sk_{\hat B})}$ where $H$ is a random oracle, and $\sk_{A}$ and $\sk_{B}$ are the long-term secret keys of Alice and Bob respectively. Intuitively we can see that securely in this case should now depend on the pairs ($x$, $\sk_{\hat A})$ and ($y$, $\sk_{\hat B})$ being secure, as opposed to just $x$ and $y$ being secure. What is more, a protocol that uses $g^{H(x, \sk_{\hat A})}$ can behave in exactly the same way as one that uses $g^x$. The only essential difference is that $H(x, \sk_{\hat A})$ is a safer secret than $x$.
 
-In this note, we take an alternative approach for real-world protocols.
-In particular, often the long-term term $\sk$ is in trusted hardware so
-it is impossible to have direct access to it to compute $H(x, \sk)$.
-For many HSM deployments, this prevents the application of the NAXOS
-trick.
+One important drawback from the NAXOS approach is that it uses a long-term secret directly as input to the hashfunction, which it also reuses as exponents in  Diffie-Hellman exponentiations.
+We take an alternative approach that is more suitable real-world deployments. 
+In particular, in security-sensitive contexts, the long-term term $\sk$ is often in trusted hardware. In most deployments, the HSM prevents direct access to the signing key to compute $H(x, \sk)$,
+which prevents the application of the NAXOS
+trick. Furthermore, it is generally undesirable to re-use signing keys as input to a hash function from a sane cryptographic design perspective.\footnote{One could imagine deploying a secondary secret, but this is even less compatible with existing deployments, as it would require globally distributing a secondary secret to existing devices.}
 Moreover, a choice needs to be made as to what function implements the
 random oracle $H$. We will also need to know precisely what security
 guarantees our construction provides.  We will answer these questions
@@ -131,8 +134,7 @@ protocols including SSL/TLS, SSH, IKE, etc. at negligible cost to efficiency.
 We propose a ``wrapper'' function around existing
 pseudorandom number generators, in contexts that have access to a
 party's signing algorithm. Let $y$ be the output of the pseudorandom
-number generator which length is equal to the KDF output length. As in the main document~\cite{randomnessirtf}, we define the wrapper to be:
-
+number generator whose length is equal to the KDF output length. As in the main document~\cite{randomnessirtf}, we define the wrapper to be:
 $$
 \prf(\texttt{KDF}( \texttt{H}(\sig (\sk, \texttt{tag}_1)),y), \texttt{tag}_2, n),
 $$
@@ -140,10 +142,10 @@ where $\texttt{tag}_1$ and $\texttt{tag}_2$ are public and are chosen
 from some fixed sets $\mathcal{T}_1$ and $\mathcal{T}_2$ correspondingly
 and where \texttt{PRF} and \texttt{KDF} and instantiated with
 HKDF-expand and HKDF-extract respectively.
-We encourage the reader to see the main document~\cite{randomnessirtf} for full details.
+Further details and considerations of the construction can be found in~\cite{randomnessirtf}.
 
 \subsection*{Overview}
-In Section \ref{CSPRNG} we recall the standard properties of a CSPRNG. In Section \ref{sec:def} we define the security properties we will need for our primitives in our wrapper construction. In Section \ref{sec:model} we define our security model for our wrapper construction. In Section \ref{proof} we give a security theorem and formal game hopping security proof it fulfils the security properties we claim. We make additional notes on the real-world security of our wrapper construction in Section \ref{sec:notes}.
+In Section~\ref{CSPRNG} we recall the standard properties of a CSPRNG. In Section~\ref{sec:def} we define the security properties we will need for our primitives in our wrapper construction. In Section~\ref{sec:model} we define our security model for our wrapper construction. In Section~\ref{proof} we give a security theorem and formal game hopping security proof it fulfils the security properties we claim. We make additional notes on the real-world security of our wrapper construction in Section~\ref{sec:notes}.
 In Appendix~\ref{experiments} we provide the results of experiments aimed to investigate the effect of the wrapper implementing on performance.
 
 \section{Background on CSPRNGs} \label{CSPRNG}
