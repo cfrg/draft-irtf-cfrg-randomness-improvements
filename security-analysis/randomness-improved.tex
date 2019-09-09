@@ -149,27 +149,29 @@ In Section~\ref{CSPRNG} we recall the standard properties of a CSPRNG. In Sectio
 In Appendix~\ref{experiments} we provide the results of experiments aimed to investigate the effect of the wrapper implementing on performance.
 
 \section{Background on CSPRNGs} \label{CSPRNG}
-Forward secure cryptographically secure pseudorandom number generators (CSPRNG) are already used as primitives in TLS and other protocols. Let Rand be a forward secure CSPRNG. By this we mean Rand satisfies the following two properties:
+Forward secure cryptographically secure pseudorandom number generators (CSPRNG) are already used as primitives in TLS and other protocols. 
+We say that $\mathit{Rand}$ is a forward secure CSPRNG if and only if it satisfies the following two properties.
 
 \subsubsection*{Property 1. Indistinguishable from random (CSPRNG)}
 
 A family of deterministic polynomial time computable functions $Rand_{\lambda}
 \colon \{0, 1\}^{\lambda} \rightarrow \{0, 1 \}^{p(\lambda)}$ for some polynomial
-$p$ is a  CSPRNG, if it stretches the length of its input ($p(\lambda) > \lambda$ for any $\lambda$) and if its output is computationally indistinguishable from true randomness, i.e. for any probabilistic polynomial time algorithm $A$, which outputs 1 or 0 as a distinguisher,
+$p$ is a CSPRNG, if it stretches the length of its input ($p(\lambda) > \lambda$ for any $\lambda$) and if its output is computationally indistinguishable from true randomness, i.e. for any probabilistic polynomial time algorithm $A$, which outputs 1 or 0 as a distinguisher,
 
 $$ \left \vert \Pr_{x\gets\{0,1\}^\lambda}[A(Rand(x))=1] - \Pr_{r\gets\{0,1\}^{p(\lambda)}}[A(r)=1] \right \vert < \mu(k) $$
 
 \noindent for some negligible function $\mu$.
 
-All this is saying is that, no efficient algorithm (with knowledge of how Rand works) can distinguish the output of Rand from randomness, when the initial seed is unknown and uniformly random. Note that achieving this property is non-trivial: many pseudorandom number generators may achieve output that looks statistically random, but does not satisfy this property. For instance, the function that hashes the initial seed to produce $x$. Then hashes $x$. Then hashes again, and so on, could produce statistically random output, but an efficient adversary that knows how this algorithm works can clearly distinguish this from purely random behaviour after seeing the first two blocks of output (the second being the hash of the first).
+Intuitively speaking, the above states that no efficient algorithm (with knowledge of how $\mathit{Rand}$ works) can distinguish the output of $\mathit{Rand}$ from randomness, when the initial seed is unknown and uniformly random. Note that achieving this property is non-trivial: many pseudorandom number generators may achieve output that looks statistically random, but does not satisfy this property. For instance, consider a function that hashes the initial seed to produce $x$, then hashes $x$, andsoforth. Such a function could produce statistically random output, but an efficient adversary that knows how this algorithm works can clearly distinguish this from purely random behaviour after seeing the first two blocks of output, because the second is the hash of the first.
 
+In~\cite{Yao1982TheoryAA},
 Andrew Yao showed that this definition is equivalent to the next-bit test (below).
 
 \subsubsection*{Property 2. Resistance to state compromise extensions (forward secure)}
-Another property we want is for the CSPRNG to be forward secure. A forward-secure CSPRNG with block length $t(\lambda)$ is a $Rand_{\lambda} \colon \{0,1\}^\lambda \to \{0,1\}^\lambda \times \{0,1\}^{t(\lambda)}$, where the input string $s_i$ with length $\lambda$ is the current state at period $i$, and the output $s_{i+1}$, $y_i$ consists of the next state $s_{i+1}$ and the pseudorandom output block $y_i$ of period $i$, such that it withstands state compromise extensions in the following sense. If the initial state $s_1$ is chosen uniformly at random from $\{0,1\}^\lambda$, then for any $i$, the sequence $(y_1, y_2,\dots, y_i,s_{i+1})$ must be computationally indistinguishable from $(r_1,r_2,\dots,r_i,s_{i+1})$, in which the $r_i$ are chosen uniformly at random from $\{0,1\}^{t(\lambda)}$.
+Another property we require is that the CSPRNG is forward secure. A forward-secure CSPRNG with block length $t(\lambda)$ is a $Rand_{\lambda} \colon \{0,1\}^\lambda \to \{0,1\}^\lambda \times \{0,1\}^{t(\lambda)}$, where the input string $s_i$ with length $\lambda$ is the current state at period $i$, and the output $s_{i+1}$, $y_i$ consists of the next state $s_{i+1}$ and the pseudorandom output block $y_i$ of period $i$, such that it withstands state compromise extensions in the following sense. If the initial state $s_1$ is chosen uniformly at random from $\{0,1\}^\lambda$, then for any $i$, the sequence $(y_1, y_2,\dots, y_i,s_{i+1})$ must be computationally indistinguishable from $(r_1,r_2,\dots,r_i,s_{i+1})$, in which the $r_i$ are chosen uniformly at random from $\{0,1\}^{t(\lambda)}$.
 
 \subsubsection*{The next-bit test (equivalent definition of CSPRNG)}
-By satisfying the next-bit test, we mean that given the first $\lambda$ bits of outputs from $Rand$ sequence, there is no polynomial-time algorithm that can predict the $(\lambda+1)$th bit with probability of success better than 50\% (without knowing the seed). Andrew Yao proved in 1982 that a generator passing the next-bit test will pass all other polynomial-time statistical tests for randomness.
+By satisfying the next-bit test, we mean that given the first $\lambda$ bits of outputs from $Rand$ sequence, there is no polynomial-time algorithm that can predict the $(\lambda+1)$th bit with probability of success better than 50\% (without knowing the seed). Yao proved in 1982 that a generator passing the next-bit test will pass all other polynomial-time statistical tests for randomness~\cite{Yao1982TheoryAA}.
 
 Let $P$ be a polynomial, and $S=\{S_\lambda\}$ be a collection of sets such that $S_\lambda$ contains $(\lambda)$-bit long sequences. Moreover, let $\mu_\lambda$ be the probability distribution of the strings in $S_\lambda$.
 
