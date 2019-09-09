@@ -450,24 +450,25 @@ It is clearly impossible for the adversary to have any advantage in guessing the
 \section{Real-world considerations} \label{sec:notes}
 
 \subsection{Design choices}
-Which of our primitives are chosen for real-world reasons and which are useful for the security proof? Our security proof could be done even more easily by using directly $\sk$ instead of $\sig(\sk, \texttt{tag}_1)$. However, in the real-world it is preferable to keep the secret key in an HSM and only perform certain operations on it such as making signatures. There is no guarantee that the signature is uniformly distributed as a key, so this is why we hash it and chose $\texttt{H}(\sig(\sk, \texttt{tag}_1))$ over $\sk$. Consequently, this also is why one of the security assumptions of our theorem is the difficulty of the ``hash-signature game''. The practical interpretation we are asking of the challenger is merely that the signature is a secret the adversary cannot guess, just like $\sk$.
+Which of our primitives are chosen for real-world reasons and which are useful for the security proof? Our security proof could have been simplified if the wrapper used $\sk$ directly instead of $\sig(\sk, \texttt{tag}_1)$. However, in the real-world it is preferable to keep the secret key in an HSM and only perform certain operations on it such as making signatures. There is no guarantee that the signature is uniformly distributed as a key, so this is why we hash it and chose $\texttt{H}(\sig(\sk, \texttt{tag}_1))$ over $\sk$. Consequently, this also is why one of the security assumptions of our theorem is the difficulty of the ``hash-signature game''. The practical interpretation we are asking of the challenger is merely that the signature is a secret the adversary cannot guess, just like $\sk$.
 
-The $\texttt{KDF}$ and $\texttt{PRF}$ constructions are useful in practice because they are easily available, and they help in the security proof. In fact, the security assumptions we require of them for the proof are very minimal indeed. 
-In our concrete construction, we recommend to implement them as HKDF-extract and HKDF-expand respectively. As mentioned in Section \ref{KDFdef}, in the case of reverse order of arguments one should be aware of our assumption regarding the prf-security of the HMAC scheme with swapped inputs.
+The $\texttt{KDF}$ and $\texttt{PRF}$ constructions are useful in practice because they are readily available in existing deployments, and they help in the security proof. In fact, the security assumptions we require of them for the proof are very minimal indeed. 
+In our concrete construction, we recommend to implement them as HKDF-extract and HKDF-expand respectively. As mentioned in Section~\ref{KDFdef}, in the case of reverse order of arguments one should be aware of our assumption regarding the prf-security of the HMAC scheme with swapped inputs.
 
-The tags are assumed to be known in our security model. In practice they may not be, which only adds an extra layer of protection in practice.
+Note that in our design and analysis, we do not assume that the tags are secret. In practice we expect them to be reused across deployments and therefore to be public. In some cases they may not be public, which would add an extra layer of protection.
 
-In no case can our wrapper construction be worse than not having it all. In the usual case, we merely depend on $y_i$ being secret. With our wrapper construction, we essentially use $\texttt{KDF}(y_i \concat x)$ for an $x$ which may or may not be known. One may wonder how the signature is generated: probabilistic or deterministic? Could this be a chicken and egg problem, noting that in many signature schemes, if random numbers are bad and the signature is leaked, then the secret key is leaked? Thus, if random numbers are bad in the first place, the signature will be bad, and thus the construction will not be of any use. This is why we require that the signature scheme is deterministic.
+Crucially, our wrapper strictly improves security.
+In the usual case, we merely depend on $y_i$ being secret. With our wrapper construction, we essentially use $\texttt{KDF}(y_i \concat x)$ for an $x$ which may or may not be known. One may wonder how the signature is generated: probabilistic or deterministic? Could this be a chicken and egg problem, noting that in many signature schemes, if random numbers are bad and the signature is leaked, then the secret key is leaked? Thus, if random numbers are bad in the first place, the signature will be bad, and thus the construction will not add any security. This is why we require that the signature scheme is deterministic.
 
 \subsection{Practical interpretations}
 The security model and consequent proof refers heavily to the concept of ``freshness'', which intuitively encodes the adversary not winning the game trivially by making the obvious reveal queries. The practical interpretation of our security theorem is as follows. If the adversary learns only one of the signature or the usual randomness generated on one particular instance, then under the security assumptions on our primitives, the wrapper construction should output randomness that is indistinguishable from a random string.
 
 Our security model also explicitly assumes that $\sig (\sk, \texttt{tag}_1)$ never appears externally elsewhere in
-the protocol so that the adversary has no hope of seeing it and using it. Otherwise, security degrades to the normal case of generating pseudorandom numbers. Of course, in practice actually
-forcing $\sig (\sk, \texttt{tag}_1)$ to appear may still be difficult.  Note furthermore that these
+the protocol so that the adversary has no hope of seeing it and using it. If this dedicated signature becomes public, security degrades to the normal case of generating pseudorandom numbers without the wrapper. Of course, in practice actually
+forcing $\sig (\sk, \texttt{tag}_1)$ to appear may still be difficult or impossible for an adversary.  Note also that these
 signatures are agent-specific, which improves containment. Thus, leaking
 or forging $\sig (\sk_{\hat A}, \texttt{tag}_1)$ for a specific agent $\hat A$ only affects $\hat A$, and
-has no consequences for other agents.  The fact that in reality $\texttt{tag}_1$ is separate for each application and $\texttt{tag}_2$ changes also helps to prevent repeated random numbers when there is a poor entropy source. 
+has no consequences for other agents.  The fact that in reality $\texttt{tag}_1$ is separate for each application and $\texttt{tag}_2$ changes also helps to prevent the use of repeated random numbers when there is a poor entropy source. 
 
 \vspace{10pt}
 
@@ -533,7 +534,7 @@ Results indicate that caching the signature output is critical for performance. 
 all block sizes, the cost levels out towards an asymptote at approximately $1,000$ loops.
 At this point, both KDF variants perform nearly equally well (with the exception of $B = 1024$,
 where CKDF performs favorably to HKDF), and cost approximately three orders of magnitude
-more than the baseline algorithm ($\mathsf{G}$), i.e., from nanoseconds to microsecondss.
+more than the baseline algorithm ($\mathsf{G}$), i.e., from nanoseconds to microseconds.
 However, the relative cost is minor with respect to cryptographic operations in protocols
 such as TLS.
 
