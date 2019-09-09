@@ -372,7 +372,8 @@ The adversary is allowed to make the following queries to the challenger.
 \section{Proof of security} \label{proof}
 
 \begin{theorem}
-If $\prf$, $\texttt{KDF}$, $\sig$ and $\texttt{H}$ satisfy the security definitions above, then any probabilistic polynomial time adversary has only negligible advantage in winning the security game.	
+Let $\prf$ be a forward-secure CSPRNG, and $\texttt{KDF}$ be a KDF that is KDF secure and uniformness preserving. Let $\sig$ and $H$ be a deterministic signature scheme and a hash function that are $\sig, \texttt{H}$-secure.
+Then, any probabilistic polynomial time adversary has only negligible advantage in winning the above security game.	
 \end{theorem}
 
 \begin{proof}
