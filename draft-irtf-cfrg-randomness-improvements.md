@@ -182,7 +182,7 @@ bytes suitable for cryptographic use. It must be a secure PRF (for salt as a key
 HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of L bytes, info string, 
 and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
 context-dependent string, and let tag2 be a dynamically changing string
-(i.e., a counter) of L' bytes. We require that L >= n - L'. 
+(e.g., a counter) of L' bytes. We require that L >= n - L'. 
 
 The construction works as follows. Instead of using G(n) when randomness is needed,
 use G'(n), where
