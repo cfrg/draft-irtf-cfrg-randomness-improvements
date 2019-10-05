@@ -177,11 +177,12 @@ the output of a CSPRNG. Define an augmented CSPRNG G' as follows.
 Let Sig(sk, m) be a function that computes a signature of message 
 m given private key sk. Let H be a cryptographic hash function that produces output 
 of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which 
-accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of length L
-suitable for cryptographic use. It must be a secure PRF (for salt as a key) and preserve uniformness of IKM (for details see {{SecAnalysis}}). Let Expand(k, info, n) be a variable-length output PRF, e.g., 
-HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of length L, info string, 
+accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of L
+bytes suitable for cryptographic use. It must be a secure PRF (for salt as a key) and preserve uniformness of IKM (for details see {{SecAnalysis}}). Let Expand(k, info, n) be a variable-length output PRF, e.g., 
+HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of L bytes, info string, 
 and output length n, and produces output of n bytes. Finally, let tag1 be a fixed, 
-context-dependent string, and let tag2 be a dynamically changing string.
+context-dependent string, and let tag2 be a dynamically changing string
+(e.g., a counter) of L' bytes. We require that L >= n - L'. 
 
 The construction works as follows. Instead of using G(n) when randomness is needed,
 use G'(n), where
