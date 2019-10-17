@@ -89,10 +89,10 @@ normative:
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
     SecAnalysis:
-        title: Security Analysis for Randomness Improvements for Security Protocols
+        title: Limiting the impact of unreliable randomness in deployed security protocols
         author:
             -
-                ins: Akhmetzyanova, Cremers, Garratt, Smyshlyaev
+                ins: Akhmetzyanova, Cremers, Garratt, Smyshlyaev, Sullivan
         target: https://eprint.iacr.org/2018/1057
     RY2010:
         title: When Good Randomness Goes Bad|:| Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
