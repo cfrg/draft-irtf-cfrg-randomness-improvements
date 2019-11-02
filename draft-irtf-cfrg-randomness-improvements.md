@@ -23,11 +23,10 @@ author:
     -
         ins: L. Garratt
         name: Luke Garratt
-        org: University of Oxford
-        street: Wolfson Building, Parks Road
-        city: Oxford
-        country: England
-        email: luke.garratt@cs.ox.ac.uk
+        org: Cisco Meraki
+        city: San Francisco
+        country: United States of America
+        email: lgarratt@cisco.com
     -
         ins: S. Smyshlyaev
         name: Stanislav Smyshlyaev
