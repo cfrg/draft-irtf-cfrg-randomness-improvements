@@ -260,7 +260,7 @@ G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 
 Recall that the wrapper defined in {{wrapper}} requires L >= n - L', where L is the Extract output
 length and n is the desired amount of randomness. Some applications may require n to exceed this bound.
-Wrapper implementations SHOULD support this use case by invoking G'(L) multiple times and concatenating
+Wrapper implementations SHOULD support this use case by invoking G' multiple times and concatenating
 the results.
 
 # Acknowledgements
