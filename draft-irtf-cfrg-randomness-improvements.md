@@ -266,7 +266,7 @@ the results.
 # Acknowledgements
 
 We thank Liliya Akhmetzyanova for her deep involvement in the security assessment in {{SecAnalysis}}.
-We thank John Mattson, Martin Thomson, Rich Salz for their careful readings and useful comments.
+We thank John Mattsson, Martin Thomson, Rich Salz for their careful readings and useful comments.
 
 # IANA Considerations
 
