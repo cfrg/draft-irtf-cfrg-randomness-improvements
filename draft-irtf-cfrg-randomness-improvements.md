@@ -164,7 +164,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 as described in BCP 14 {{RFC2119}}, {{RFC8174}} when, and only when, they appear in all capitals,
 as shown here.
 
-# Randomness Wrapper
+# Randomness Wrapper {#wrapper}
 
 The output of a properly instantiated CSPRNG should be indistinguishable from a
 random string of the same length. However, as previously discussed, this is not
@@ -178,11 +178,13 @@ Let Sig(sk, m) be a function that computes a signature of message
 m given private key sk. Let H be a cryptographic hash function that produces output
 of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of L
-bytes suitable for cryptographic use. It must be a secure PRF (for salt as a key) and preserve uniformness of IKM (for details see {{SecAnalysis}}). Let Expand(k, info, n) be a variable-length output PRF, e.g.,
-HKDF-Expand {{RFC5869}}, that takes as input a pseudorandom key k of L bytes, info string,
+bytes suitable for cryptographic use. It must be a secure PRF (for salt as a key) and preserve
+uniformness of IKM (for details see {{SecAnalysis}}). L SHOULD be a fixed length.
+Let Expand(k, info, n) be a variable-length output PRF, e.g., HKDF-Expand {{RFC5869}},
+that takes as input a pseudorandom key k of L bytes, info string,
 and output length n, and produces output of n bytes. Finally, let tag1 be a fixed,
 context-dependent string, and let tag2 be a dynamically changing string
-(e.g., a counter) of L' bytes. We require that L >= n - L'.
+(e.g., a counter) of L' bytes. We require that L >= n - L' for each value of tag2.
 
 The construction works as follows. Instead of using G(n) when randomness is needed,
 use G'(n), where
@@ -254,11 +256,17 @@ that generates private values, such as key shares, with:
 G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 ~~~
 
+# Implementation Guidance
+
+Recall that the wrapper defined in {{wrapper}} requires L >= n - L', where L is the Extract output
+length and n is the desired amount of randomness. Some applications may require n to exceed this bound.
+Wrapper implementations SHOULD support this use case by invoking G' multiple times and concatenating
+the results.
 
 # Acknowledgements
 
 We thank Liliya Akhmetzyanova for her deep involvement in the security assessment in {{SecAnalysis}}.
-We thank Martin Thomson and Rich Salz for their careful readings and useful comments.
+We thank John Mattsson, Martin Thomson, Rich Salz for their careful readings and useful comments.
 
 # IANA Considerations
 
