@@ -89,10 +89,10 @@ normative:
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
     SecAnalysis:
-        title: Security Analysis for Randomness Improvements for Security Protocols
+        title: Limiting the impact of unreliable randomness in deployed security protocols
         author:
             -
-                ins: Akhmetzyanova, Cremers, Garratt, Smyshlyaev
+                ins: Akhmetzyanova, Cremers, Garratt, Smyshlyaev, Sullivan
         target: https://eprint.iacr.org/2018/1057
     RY2010:
         title: When Good Randomness Goes Bad|:| Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
@@ -260,13 +260,13 @@ G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 
 Recall that the wrapper defined in {{wrapper}} requires L >= n - L', where L is the Extract output
 length and n is the desired amount of randomness. Some applications may require n to exceed this bound.
-Wrapper implementations SHOULD support this use case by invoking G'(L) multiple times and concatenating
+Wrapper implementations SHOULD support this use case by invoking G' multiple times and concatenating
 the results.
 
 # Acknowledgements
 
 We thank Liliya Akhmetzyanova for her deep involvement in the security assessment in {{SecAnalysis}}.
-We thank John Mattson, Martin Thomson, Rich Salz for their careful readings and useful comments.
+We thank John Mattsson, Martin Thomson, Rich Salz for their careful readings and useful comments.
 
 # IANA Considerations
 
