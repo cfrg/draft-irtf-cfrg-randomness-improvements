@@ -2,7 +2,6 @@
 title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements
 docname: draft-irtf-cfrg-randomness-improvements-latest
-date:
 category: info
 
 ipr: trust200902
@@ -60,51 +59,60 @@ normative:
     RFC6979:
     RFC8174:
     X9.62:
-        title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI X9.62-2005, November 2005.
+        title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI X9.62-2005
+        date: November 2005
         author:
             -
                 ins: American National Standards Institute
     DebianBug:
         title: When private keys are public - Results from the 2008 Debian OpenSSL vulnerability
+        date: 2009
         author:
             -
                 ins: Yilek, Scott, et al.
         target: https://pdfs.semanticscholar.org/fcf9/fe0946c20e936b507c023bbf89160cc995b9.pdf
     DualEC:
         title: Dual EC - A standardized back door
+        date: 2016
         author:
             -
                 ins: Bernstein, Daniel et al.
         target: https://projectbullrun.org/dual-ec/documents/dual-ec-20150731.pdf
     MAFS2017:
         title: PRNG Failures and TLS Vulnerabilities in the Wild
+        date: 2017
         author:
             -
                 ins: McGrew, Anderson, Fluhrer, Shenefeil
         target: https://rwc.iacr.org/2017/Slides/david.mcgrew.pptx
     NAXOS:
         title: Stronger Security of Authenticated Key Exchange
+        date: 2007
         author:
             -
                 ins: LaMacchia, Brian et al.
         target: https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/strongake-submitted.pdf
     SecAnalysis:
         title: Limiting the impact of unreliable randomness in deployed security protocols
+        date: 2019
         author:
             -
                 ins: Akhmetzyanova, Cremers, Garratt, Smyshlyaev, Sullivan
         target: https://eprint.iacr.org/2018/1057
     RY2010:
         title: When Good Randomness Goes Bad|:| Virtual Machine Reset Vulnerabilities and Hedging Deployed Cryptography
+        date: 2010
         author:
             -
                 ins: Ristenpart, Yilek
         target: https://rist.tech.cornell.edu/papers/sslhedge.pdf
     SP80090A:
-        title: Recommendation for Random Number Generation Using Deterministic Random Bit Generators (Revised), NIST Special Publication 800-90A, January 2012.
+        title: Recommendation for Random Number Generation Using Deterministic Random Bit Generators (Revised), NIST Special Publication 800-90A.
+        date: January, 2012
         target: National Institute of Standards and Technology
     X962:
-        title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA), ANSI X9.62-2005, November 2005.
+        title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA), ANSI X9.62-2005
+        date: November 2005
         target: American National Standards Institute
 
 --- abstract
