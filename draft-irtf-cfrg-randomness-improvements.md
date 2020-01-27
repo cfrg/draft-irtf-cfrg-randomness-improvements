@@ -137,9 +137,10 @@ inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw rand
 where needed, e.g., in generating ephemeral key shares, a party's long-term private key
 is mixed into the entropy pool. In the NAXOS key exchange protocol, raw random
 value x is replaced by H(x, sk), where sk is the sender's private key.
-Unfortunately, as private keys are often isolated in HSMs,
-direct access to compute H(x, sk) is impossible. An alternate yet functionally
-equivalent construction is needed.
+Unfortunately, as private keys are often isolated in HSMs, direct access to compute
+H(x, sk) is impossible. Moreover, some HSM APIs may only offer the option to sign messages
+using a private key, yet offer no other operations involving that key. An alternate yet
+functionally equivalent construction is needed.
 
 The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom
 function (PRF), where the key is derived from a raw random value and a private key signature.
