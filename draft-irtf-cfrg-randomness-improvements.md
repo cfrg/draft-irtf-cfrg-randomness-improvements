@@ -3,6 +3,7 @@ title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements
 docname: draft-irtf-cfrg-randomness-improvements-latest
 category: info
+workgroup: Internet Research Task Force (IRTF)  
 
 ipr: trust200902
 keyword: Internet-Draft
@@ -122,9 +123,10 @@ Weak or predictable "cryptographically-strong" pseudorandom number generators (C
 can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs
 are relevant examples of this problem.
 An initial entropy source that seeds a CSPRNG might be weak or broken as well, which can also lead to critical and systemic security problems.
-This document describes a way for
-security protocol participants to augment their CSPRNGs using long-term private keys.
+This document describes a way for security protocol participants to augment their CSPRNGs using long-term private keys.
 This improves randomness from broken or otherwise subverted CSPRNGs.
+
+This document is a product of the Crypto Forum Research Group (CFRG) in the IRTF.
 
 --- middle
 
@@ -165,6 +167,8 @@ observe all outputs of the proposed construction, does not obtain any non-neglig
 advantage in leaking the private key, modulo side channel attacks.
 3. If the CSPRNG is broken or controlled by adversary Adv, the output of the proposed construction
 remains indistinguishable from random provided the private key remains unknown to Adv.
+
+This document represents the consensus of the Crypto Forum Research Group (CFRG).
 
 # Conventions Used in This Document
 
