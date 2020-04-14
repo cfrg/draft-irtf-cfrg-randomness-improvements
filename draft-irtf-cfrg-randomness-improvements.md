@@ -54,17 +54,10 @@ author:
         email: cawood@apple.com
 
 normative:
-    RFC2104:
     RFC2119:
     RFC5869:
     RFC6979:
     RFC8174:
-    X9.62:
-        title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA). ANSI X9.62-2005
-        date: November 2005
-        author:
-            -
-                ins: American National Standards Institute
     DebianBug:
         title: When private keys are public - Results from the 2008 Debian OpenSSL vulnerability
         date: 2009
