@@ -116,7 +116,7 @@ normative:
 
 Randomness is a crucial ingredient for Transport Layer Security (TLS) and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
-can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs
+can be abused or exploited for malicious purposes. The Dual_EC_DRBG random number backdoor and Debian bugs
 are relevant examples of this problem.
 An initial entropy source that seeds a CSPRNG might be weak or broken as well, which can also lead to critical and systemic security problems.
 This document describes a way for security protocol participants to augment their CSPRNGs using long-term private keys.
@@ -224,7 +224,7 @@ in an HSM with its own internal trusted entropy source for signature generation.
 
 Because Sig(sk, tag1) can be cached, the relative cost of using G'(n) instead of G(n)
 tends to be negligible with respect to cryptographic operations in protocols such as TLS
-(the relatively inexpensive computational cost of HKDF dominates when comparing G' to G).
+(the relatively inexpensive computational cost of HKDF-Extract and HKDF-Expand dominates when comparing G' to G).
 A description of the performance experiments and their results can be found in the appendix of
 {{SecAnalysis}}.
 
