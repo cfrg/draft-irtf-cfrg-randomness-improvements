@@ -106,8 +106,11 @@ normative:
         target: National Institute of Standards and Technology
     X962:
         title: Public Key Cryptography for the Financial Services Industry -- The Elliptic Curve Digital Signature Algorithm (ECDSA), ANSI X9.62-2005
+        author:
+            -
+                ins: American National Standards Institute
         date: November 2005
-        target: American National Standards Institute
+        target: https://www.techstreet.com/standards/x9-x9-62-2005?product_id=1327225
 
 --- abstract
 
