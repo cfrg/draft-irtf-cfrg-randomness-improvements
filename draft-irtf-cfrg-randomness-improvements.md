@@ -114,7 +114,7 @@ normative:
 
 --- abstract
 
-Randomness is a crucial ingredient for TLS and related security protocols.
+Randomness is a crucial ingredient for Transport Layer Security (TLS) and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
 can be abused or exploited for malicious purposes. The Dual EC random number backdoor and Debian bugs
 are relevant examples of this problem.
@@ -143,7 +143,7 @@ inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw rand
 where needed, e.g., in generating ephemeral key shares, a party's long-term private key
 is mixed into the entropy pool. In the NAXOS key exchange protocol, raw random
 value x is replaced by H(x, sk), where sk is the sender's private key.
-Unfortunately, as private keys are often isolated in HSMs, direct access to compute
+Unfortunately, as private keys are often isolated in Hardware Security Modules (HSMs), direct access to compute
 H(x, sk) is impossible. Moreover, some HSM APIs may only offer the option to sign messages
 using a private key, yet offer no other operations involving that key. An alternate yet
 functionally equivalent construction is needed.
@@ -316,8 +316,8 @@ all available information about the environment, such as process attributes, vir
 # Comparison to RFC 6979
 
 The construction proposed herein has similarities with that of RFC 6979 {{RFC6979}}:
-both of them use private keys to seed a DRBG. Section 3.3 of RFC 6979 recommends deterministically
-instantiating an instance of the HMAC DRBG pseudorandom number generator, described in {{SP80090A}}
+both of them use private keys to seed a deterministic random number generator. Section 3.3 of RFC 6979 recommends deterministically
+instantiating an instance of the HMAC_DRBG pseudorandom number generator, described in {{SP80090A}}
 and Annex D of {{X962}}, using the private key sk as the entropy_input parameter and H(m)
 as the nonce. The construction G'(n) provided herein is similar, with such
 difference that a key derived from G(n) and H(Sig(sk, tag1)) is used as the
@@ -330,7 +330,6 @@ completely broken. Using a signature scheme which requires entropy sources
 according to RFC 6979 is intended for different purposes and does not assume
 possession of any entropy source -- even an unstable one.
 For example, if in a certain system all private key operations are
-performed within an HSM, then the differences will manifest as follows: the HMAC
-DRBG construction of RFC 6979 may be implemented inside the HSM for the sake of
+performed within an HSM, then the differences will manifest as follows: the HMAC_DRBG construction of RFC 6979 may be implemented inside the HSM for the sake of
 signature generation, while the proposed construction would assume calling
 the signature implemented in the HSM.
