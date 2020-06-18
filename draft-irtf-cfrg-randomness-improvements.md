@@ -3,7 +3,7 @@ title: Randomness Improvements for Security Protocols
 abbrev: Randomness Improvements
 docname: draft-irtf-cfrg-randomness-improvements-latest
 category: info
-workgroup: Internet Research Task Force (IRTF)  
+workgroup: Internet Research Task Force (IRTF)
 
 ipr: trust200902
 keyword: Internet-Draft
@@ -58,6 +58,8 @@ normative:
     RFC5869:
     RFC6979:
     RFC8174:
+
+informative:
     DebianBug:
         title: When private keys are public - Results from the 2008 Debian OpenSSL vulnerability
         date: 2009
@@ -116,11 +118,10 @@ normative:
 
 Randomness is a crucial ingredient for Transport Layer Security (TLS) and related security protocols.
 Weak or predictable "cryptographically-strong" pseudorandom number generators (CSPRNGs)
-can be abused or exploited for malicious purposes. The Dual_EC_DRBG random number backdoor and Debian bugs
-are relevant examples of this problem.
-An initial entropy source that seeds a CSPRNG might be weak or broken as well, which can also lead to critical and systemic security problems.
-This document describes a way for security protocol participants to augment their CSPRNGs using long-term private keys.
-This improves randomness from broken or otherwise subverted CSPRNGs.
+can be abused or exploited for malicious purposes. An initial entropy source that seeds a
+CSPRNG might be weak or broken as well, which can also lead to critical and systemic security
+problems. This document describes a way for security protocol implementations to augment their
+CSPRNGs using long-term private keys. This improves randomness from broken or otherwise subverted CSPRNGs.
 
 This document is a product of the Crypto Forum Research Group (CFRG) in the IRTF.
 
@@ -128,25 +129,28 @@ This document is a product of the Crypto Forum Research Group (CFRG) in the IRTF
 
 # Introduction
 
-Randomness is a crucial ingredient for TLS and related transport security protocols.
-TLS in particular uses random number generators (generally speaking, CSPRNGs) to generate several values: session IDs,
+Secure and properly implemented random number generators, or "cryptographically-strong"
+pseudorandom number generators (CSPRNGs),
+should produce output that is indistinguishable from a random string of the same length.
+CSPRNGs are critical building blocks for TLS and related transport security protocols.
+TLS in particular uses CSPRNGs to generate several values: session IDs,
 ephemeral key shares, and ClientHello and ServerHello random values. CSPRNG failures
 such as the Debian bug described in {{DebianBug}} can lead to insecure TLS connections.
 CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}.
 Initial entropy sources can also be weak or broken, and that would lead to insecurity
-of all CSPRNG instances seeded with them.
-In such cases where CSPRNGs are poorly implemented or insecure, an adversary may be
-able to predict its output and recover secret key material used to protect the connection.
+of all CSPRNG instances seeded with them. In such cases where CSPRNGs are poorly
+implemented or insecure, an adversary Adv may be distinguish its output from a random
+string or predict its output and recover secret key material used to protect the connection.
 
 This document proposes an improvement to randomness generation in security protocols
 inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw randomness
-where needed, e.g., in generating ephemeral key shares, a party's long-term private key
-is mixed into the entropy pool. In the NAXOS key exchange protocol, raw random
-value x is replaced by H(x, sk), where sk is the sender's private key.
-Unfortunately, as private keys are often isolated in Hardware Security Modules (HSMs), direct access to compute
-H(x, sk) is impossible. Moreover, some HSM APIs may only offer the option to sign messages
-using a private key, yet offer no other operations involving that key. An alternate yet
-functionally equivalent construction is needed.
+where needed, e.g., in generating ephemeral key shares, a function of a party's
+long-term private key is mixed into the entropy pool. In the NAXOS key exchange protocol,
+raw random value x is replaced by H(x, sk), where sk is the sender's private key.
+Unfortunately, as private keys are often isolated in Hardware Security Modules (HSMs),
+direct access to compute H(x, sk) is impossible. Moreover, some HSM APIs may only offer
+the option to sign messages using a private key, yet offer no other operations involving that
+key. An alternate yet functionally equivalent construction is needed.
 
 The approach described herein replaces the NAXOS hash with a keyed hash, or pseudorandom
 function (PRF), where the key is derived from a raw random value and a private key signature.
@@ -155,13 +159,13 @@ is available and CSPRNG randomness guarantees are dubious, or to provide stronge
 about possible future issues with the randomness. Roughly, the security properties provided
 by the proposed construction are as follows:
 
-1. If the CSPRNG works fine, that is, in a certain adversary model the CSPRNG output is
+1. If the CSPRNG works fine, that is, in a certain adversarial model the CSPRNG output is
 indistinguishable from a truly random sequence, then the output of the proposed construction
-is also indistinguishable from a truly random sequence in that adversary model.
-2. An adversary Adv with full control of a (potentially broken) CSPRNG and able to
-observe all outputs of the proposed construction, does not obtain any non-negligible
-advantage in leaking the private key, modulo side channel attacks.
-3. If the CSPRNG is broken or controlled by adversary Adv, the output of the proposed construction
+is also indistinguishable from a truly random sequence in that adversarial model.
+2. Adv with full control of a (potentially broken) CSPRNG and ability to observe all outputs
+of the proposed construction does not obtain any non-negligible advantage in leaking the
+private key (in the absence of side channel attacks).
+3. If the CSPRNG is broken or controlled by Adv, the output of the proposed construction
 remains indistinguishable from random provided the private key remains unknown to Adv.
 
 This document represents the consensus of the Crypto Forum Research Group (CFRG).
@@ -233,11 +237,11 @@ depends solely upon the CSPRNG output and private key.
 
 # Tag Generation {#tag-gen}
 
-Both tags SHOULD be generated such that they never collide with another contender or owner
+Both tags MUST be generated such that they never collide with another contender or owner
 of the private key. This can happen if, for example, one HSM with a private key is
 used from several servers, or if virtual machines are cloned.
 
-Tag strings SHOULD be constructed as follows:
+The RECOMMENDED tag construction procedure is as follows:
 
 - tag1: Constant string bound to a specific device and protocol in use. This allows
 caching of Sig(sk, tag1). Device specific information may include, for example, a MAC address.
@@ -269,7 +273,7 @@ G'(n) = HKDF-Expand(HKDF-Extract(H(Sig(sk, tag1)), G(L)), tag2, n)
 
 Recall that the wrapper defined in {{wrapper}} requires L >= n - L', where L is the Extract output
 length and n is the desired amount of randomness. Some applications may require n to exceed this bound.
-Wrapper implementations SHOULD support this use case by invoking G' multiple times and concatenating
+Wrapper implementations can support this use case by invoking G' multiple times and concatenating
 the results.
 
 # Acknowledgements
@@ -284,7 +288,7 @@ This document makes no request to IANA.
 # Security Considerations
 
 A security analysis was performed in {{SecAnalysis}}. Generally speaking, the following security
-theorem has been proven: if the adversary learns only one of the signature or the usual
+theorem has been proven: if Adv learns only one of the signature or the usual
 randomness generated on one particular instance, then under the security assumptions on our
 primitives, the wrapper construction should output randomness that is indistinguishable from
 a random string.
@@ -300,7 +304,7 @@ from entropy sources with dubious security guarantees. Thus, the signature schem
 use a reliable entropy source (independent from the CSPRNG that is being improved with the
 proposed construction) or be deterministic: if the signatures are probabilistic and use weak entropy,
 our construction does not help and the signatures are still vulnerable due to repeat randomness
-attacks. In such an attack, the adversary might be able to recover the long-term key used in
+attacks. In such an attack, Adv might be able to recover the long-term key used in
 the signature.
 
 Under these conditions, applying this construction should never yield worse security
@@ -310,13 +314,15 @@ construction is generic so the analyses of many protocols will still hold even i
 proposed construction is incorporated.
 
 The proposed construction cannot provide any guarantees of security if the CSPRNG state is cloned
-due to the virtual machine snapshots or process forking (see {{MAFS2017}}). Thus tag1 SHOULD incorporate
-all available information about the environment, such as process attributes, virtual machine user information, etc.
+due to the virtual machine snapshots or process forking (see {{MAFS2017}}). It is RECOMMENDED
+that tag1 incorporate all available information about the environment, such as process attributes,
+virtual machine user information, etc.
 
 # Comparison to RFC 6979
 
 The construction proposed herein has similarities with that of RFC 6979 {{RFC6979}}:
-both of them use private keys to seed a deterministic random number generator. Section 3.3 of RFC 6979 recommends deterministically
+both of them use private keys to seed a deterministic random number generator.
+Section 3.3 of RFC 6979 recommends deterministically
 instantiating an instance of the HMAC_DRBG pseudorandom number generator, described in {{SP80090A}}
 and Annex D of {{X962}}, using the private key sk as the entropy_input parameter and H(m)
 as the nonce. The construction G'(n) provided herein is similar, with such
