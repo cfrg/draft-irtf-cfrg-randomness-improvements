@@ -139,8 +139,9 @@ such as the Debian bug described in {{DebianBug}} can lead to insecure TLS conne
 CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}.
 Initial entropy sources can also be weak or broken, and that would lead to insecurity
 of all CSPRNG instances seeded with them. In such cases where CSPRNGs are poorly
-implemented or insecure, an adversary Adv may be distinguish its output from a random
-string or predict its output and recover secret key material used to protect the connection.
+implemented or insecure, an adversary Adv may be able to distinguish its output from a
+random string or predict its output and recover secret key material used to protect the
+connection.
 
 This document proposes an improvement to randomness generation in security protocols
 inspired by the "NAXOS trick" {{NAXOS}}. Specifically, instead of using raw randomness
@@ -159,9 +160,9 @@ is available and CSPRNG randomness guarantees are dubious, or to provide stronge
 about possible future issues with the randomness. Roughly, the security properties provided
 by the proposed construction are as follows:
 
-1. If the CSPRNG works fine, that is, in a certain adversarial model the CSPRNG output is
+1. If the CSPRNG works fine, that is, in a certain adversary model the CSPRNG output is
 indistinguishable from a truly random sequence, then the output of the proposed construction
-is also indistinguishable from a truly random sequence in that adversarial model.
+is also indistinguishable from a truly random sequence in that adversary model.
 2. Adv with full control of a (potentially broken) CSPRNG and ability to observe all outputs
 of the proposed construction does not obtain any non-negligible advantage in leaking the
 private key (in the absence of side channel attacks).
