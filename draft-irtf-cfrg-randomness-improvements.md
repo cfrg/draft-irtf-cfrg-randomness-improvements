@@ -192,7 +192,7 @@ Let Sig(sk, m) be a function that computes a signature of message
 m given private key sk. Let H be a cryptographic hash function that produces output
 of length M. Let Extract(salt, IKM) be a randomness extraction function, e.g., HKDF-Extract {{RFC5869}}, which
 accepts a salt and input keying material (IKM) parameter and produces a pseudorandom key of L
-bytes suitable for cryptographic use. It must be a secure PRF (for salt as a key) and preserve
+bytes suitable for cryptographic use. It must be a secure PRF (for salt as a key of length M) and preserve
 uniformness of IKM (for details see {{SecAnalysis}}). L SHOULD be a fixed length.
 Let Expand(k, info, n) be a variable-length output PRF, e.g., HKDF-Expand {{RFC5869}},
 that takes as input a pseudorandom key k of L bytes, info string,
