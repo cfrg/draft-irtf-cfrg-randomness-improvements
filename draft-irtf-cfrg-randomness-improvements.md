@@ -133,8 +133,7 @@ Secure and properly implemented random number generators, or "cryptographically-
 pseudorandom number generators (CSPRNGs),
 should produce output that is indistinguishable from a random string of the same length.
 CSPRNGs are critical building blocks for TLS and related transport security protocols.
-TLS in particular uses CSPRNGs to generate several values: session IDs,
-ephemeral key shares, and ClientHello and ServerHello random values. CSPRNG failures
+TLS in particular uses CSPRNGs to generate several values: ephemeral key shares, and ClientHello and ServerHello random values. CSPRNG failures
 such as the Debian bug described in {{DebianBug}} can lead to insecure TLS connections.
 CSPRNGs may also be intentionally weakened to cause harm {{DualEC}}.
 Initial entropy sources can also be weak or broken, and that would lead to insecurity
